@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp", "src\NanopassSharp\NanopassSharp.csproj", "{0BE57320-A330-47A0-AAD8-69A6CCB510E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp.Cli", "src\NanopassSharp.Cli\NanopassSharp.Cli.csproj", "{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0BE57320-A330-47A0-AAD8-69A6CCB510E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BE57320-A330-47A0-AAD8-69A6CCB510E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BE57320-A330-47A0-AAD8-69A6CCB510E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BE57320-A330-47A0-AAD8-69A6CCB510E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0BE57320-A330-47A0-AAD8-69A6CCB510E8} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
+		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
+	EndGlobalSection
+EndGlobal
