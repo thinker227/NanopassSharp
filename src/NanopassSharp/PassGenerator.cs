@@ -107,28 +107,6 @@ public sealed class PassGenerator {
 		return "Not implemented";
 	}
 
-	private static async Task<Result<INamedTypeSymbol?>> TryGetPreexistingPassTypeAsync(Project project, string passName) {
-		var passAttributeResult = await GetPassAttributeAsync(project);
-		if (!passAttributeResult.IsSuccess) return new(passAttributeResult.Error);
-		var passAttribute = passAttributeResult.Value;
-
-		var compilationResult = await passAttribute.Project.GetCompilationResultAsync();
-		if (!compilationResult.IsSuccess) return new(compilationResult.Error);
-
-		var types = compilationResult.Value.SourceModule.GlobalNamespace
-			.GetAllTypes()
-			.Select(t => (
-				type: t,
-				name: GetPassName(t, passAttribute.Type)
-			))
-			.Where(t => t.name.Switch(
-				n => n == passName,
-				_ => false
-			))
-			.Select(t => t.type)
-			.FirstOrDefault();
-		return Result.Success(types);
-	}
 	/// <summary>
 	/// Checks whether a pass type is up-to-date with a modification pass.
 	/// </summary>
@@ -154,6 +132,28 @@ public sealed class PassGenerator {
 		return project;
 	}
 
+	private static async Task<Result<INamedTypeSymbol?>> TryGetPreexistingPassTypeAsync(Project project, string passName) {
+		var passAttributeResult = await GetPassAttributeAsync(project);
+		if (!passAttributeResult.IsSuccess) return new(passAttributeResult.Error);
+		var passAttribute = passAttributeResult.Value;
+
+		var compilationResult = await passAttribute.Project.GetCompilationResultAsync();
+		if (!compilationResult.IsSuccess) return new(compilationResult.Error);
+
+		var types = compilationResult.Value.SourceModule.GlobalNamespace
+			.GetAllTypes()
+			.Select(t => (
+				type: t,
+				name: GetPassName(t, passAttribute.Type)
+			))
+			.Where(t => t.name.Switch(
+				n => n == passName,
+				_ => false
+			))
+			.Select(t => t.type)
+			.FirstOrDefault();
+		return Result.Success(types);
+	}
 	private readonly record struct GetPassAttributeResult(Project Project, INamedTypeSymbol Type);
 	private static async Task<Result<GetPassAttributeResult>> GetPassAttributeAsync(Project project) =>
 		await project.GetCompilationResultAsync()
