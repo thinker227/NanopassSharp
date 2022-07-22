@@ -29,4 +29,8 @@ public static class RoslynExtensions {
 		return builder;
 	}
 
+	public static IEnumerable<INamedTypeSymbol> GetAllNestedTypes(this INamedTypeSymbol source) =>
+		source.GetTypeMembers()
+			.SelectMany(t => t.GetAllNestedTypes());
+
 }
