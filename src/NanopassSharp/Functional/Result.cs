@@ -11,6 +11,7 @@ namespace NanopassSharp.Functional;
 /// <summary>
 /// Represents either a result value or a string error.
 /// </summary>
+/// <typeparam name="T">The type of the success value.</typeparam>
 public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T> {
 
 	/// <summary>
@@ -167,13 +168,13 @@ public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T> {
 	/// <summary>
 	/// Implicitly converts a <typeparamref name="T"/> value to a <see cref="Result{T}"/>.
 	/// </summary>
-	/// <param name="value">The value to convert.</param>
+	/// <param name="value">The success value.</param>
 	public static implicit operator Result<T>(T value) =>
 		new(value);
 	/// <summary>
 	/// Implicitly converts an error value to a <see cref="Result{T}"/>.
 	/// </summary>
-	/// <param name="error"></param>
+	/// <param name="error">The error value.</param>
 	public static implicit operator Result<T>(string error) =>
 		new(error);
 	/// <summary>
@@ -181,7 +182,7 @@ public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T> {
 	/// Throws a <see cref="NotImplementedException"/> if the result does
 	/// not contain an inner value.
 	/// </summary>
-	/// <param name="result"></param>
+	/// <param name="result">The result value.</param>
 	public static explicit operator T(Result<T> result) =>
 		result.IsSuccess
 			? result.Value
@@ -204,13 +205,20 @@ public static class Result {
 	/// Creates a <see cref="Result{T}"/> with a successful state.
 	/// </summary>
 	/// <param name="value">The success value.</param>
+	/// <typeparam name="T">The type of the success value.</typeparam>
 	public static Result<T> Success<T>(T value) =>
 		new(value);
 	/// <summary>
 	/// Creates a <see cref="Result{T}"/> with a failure state.
 	/// </summary>
+	/// <typeparam name="T">The type of the success value.</typeparam>
 	public static Result<T> Failure<T>(string error) =>
 		new(error);
+	/// <summary>
+	/// Creates a <see cref="Result{T}"/> with a failure state and an error message
+	/// stating the operation has not been implemented.
+	/// </summary>
+	/// <typeparam name="T">The type of the success value.</typeparam>
 	public static Result<T> NotImplemented<T>() =>
 		Failure<T>("Not implemented");
 	/// <summary>
@@ -218,6 +226,7 @@ public static class Result {
 	/// </summary>
 	/// <param name="value">The value of the result.</param>
 	/// <param name="error">The error message is <paramref name="error"/> is null.</param>
+	/// <typeparam name="T">The type of the success value.</typeparam>
 	public static Result<T> CreateNotNull<T>(T? value, string? error = null, [CallerArgumentExpression("value")] string callerExpression = "") where T : class =>
 		value is not null
 			? new(value)
@@ -227,6 +236,7 @@ public static class Result {
 	/// </summary>
 	/// <param name="value">The value of the result.</param>
 	/// <param name="error">The error message is <paramref name="error"/> is null.</param>
+	/// <typeparam name="T">The type of the success value.</typeparam>
 	public static Result<T> CreateNotNull<T>(T? value, string? error = null, [CallerArgumentExpression("value")] string callerExpression = "") where T : struct =>
 		value is not null
 			? new(value.Value)
