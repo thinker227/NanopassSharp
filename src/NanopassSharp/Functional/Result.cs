@@ -11,7 +11,7 @@ namespace NanopassSharp.Functional;
 /// <summary>
 /// Represents either a result value or a string error.
 /// </summary>
-public readonly struct Result<T> {
+public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T> {
 
 	/// <summary>
 	/// The result value.
@@ -142,12 +142,41 @@ public readonly struct Result<T> {
 			? await f(Value)
 			: new(Error);
 
+	public override string ToString() =>
+		IsSuccess
+			? Value?.ToString() ?? "<null>"
+			: Error;
+
+	public bool Equals(Result<T> other) {
+		if (IsSuccess && other.IsSuccess)
+			return Equals(other.Value);
+		return Error == other.Error;
+	}
+	public bool Equals(T? other) =>
+		IsSuccess && (Value?.Equals(other) ?? other is null);
+	public override bool Equals([NotNullWhen(true)] object? obj) =>
+		(obj is Result<T> result && Equals(result)) ||
+		(obj is T value && Equals(value));
+	public override int GetHashCode() => Switch(
+		value => value?.GetHashCode() ?? HashCode.Combine<T?>(default),
+		error => error.GetHashCode()
+	);
+
 
 
 	public static implicit operator Result<T>(T value) =>
 		new(value);
 	public static implicit operator Result<T>(string error) =>
 		new(error);
+
+	public static bool operator ==(Result<T> a, Result<T> b) =>
+		a.Equals(b);
+	public static bool operator !=(Result<T> a, Result<T> b) =>
+		!a.Equals(b);
+	public static bool operator ==(Result<T> result, T value) =>
+		result.Equals(value);
+	public static bool operator !=(Result<T> result, T value) =>
+		!result.Equals(value);
 
 }
 
@@ -164,6 +193,8 @@ public static class Result {
 	/// </summary>
 	public static Result<T> Failure<T>(string error) =>
 		new(error);
+	public static Result<T> NotImplemented<T>() =>
+		Failure<T>("Not implemented");
 	/// <summary>
 	/// Creates a <see cref="Result{T}"/> from a nullable value depending on the value is null.
 	/// </summary>
