@@ -164,10 +164,24 @@ public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T> {
 
 
 
+	/// <summary>
+	/// Implicitly converts a <typeparamref name="T"/> value to a <see cref="Result{T}"/>.
+	/// </summary>
+	/// <param name="value">The value to convert.</param>
 	public static implicit operator Result<T>(T value) =>
 		new(value);
+	/// <summary>
+	/// Implicitly converts an error value to a <see cref="Result{T}"/>.
+	/// </summary>
+	/// <param name="error"></param>
 	public static implicit operator Result<T>(string error) =>
 		new(error);
+	/// <summary>
+	/// Tries to retrieve the inner value from the <see cref="Result{T}"/>.
+	/// Throws a <see cref="NotImplementedException"/> if the result does
+	/// not contain an inner value.
+	/// </summary>
+	/// <param name="result"></param>
 	public static explicit operator T(Result<T> result) =>
 		result.IsSuccess
 			? result.Value
