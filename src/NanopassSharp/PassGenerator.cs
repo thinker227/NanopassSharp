@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using NanopassSharp.Models;
 using NanopassSharp.Functional;
@@ -102,9 +104,7 @@ public sealed class PassGenerator {
 			}
 		}
 
-		// Generate modified type
-
-		return "Not implemented";
+		return await GenerateModifiedTypeAsync(project, baseType, pass, mod);
 	}
 
 	/// <summary>
@@ -199,6 +199,56 @@ public sealed class PassAttribute : Attribute {
 			return Result.Failure<string>($"Type '{type.Name}' has more than one pass attribute");
 		
 		return Result.Success(applicable[0]);
+	}
+
+	private static async Task<Result<PassResult>> GenerateModifiedTypeAsync(Project project, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
+		var syntaxRefs = baseType.DeclaringSyntaxReferences;
+		
+		if (syntaxRefs.Length == 0) return $"Type '{baseType.Name}' has no syntax references and can therefore not be modified";
+		if (!baseType.IsRecord) return $"Type '{baseType.Name}' is not a record type - only modifications to record types are supported";
+		
+		var recordSyntaxes = syntaxRefs
+			.Select(s => s.GetSyntax())
+			.OfType<RecordDeclarationSyntax>()
+			.ToArray();
+		var syntax = recordSyntaxes.Length == 1
+			? recordSyntaxes[0]
+			: MergeRecordDeclarations(recordSyntaxes);
+
+		var modifiedTypeResult = PassSourceGenerator.GetModifiedTypeSource(syntax, baseType, pass, mod);
+		if (!modifiedTypeResult.IsSuccess) return new(modifiedTypeResult.Error);
+		var (source, typeName) = modifiedTypeResult.Value;
+
+		string fileName = $"{typeName.Name}.g.cs";
+		var newProject = project.AddDocument(fileName, source).Project;
+		var type = (await newProject.GetCompilationAsync())
+			?.GetTypeByMetadataName(typeName.FullName);
+
+		return new PassResult(type, newProject);
+	}
+
+	/// <summary>
+	/// Merges several <see cref="RecordDeclarationSyntax"/>es into a single syntax.
+	/// </summary>
+	private static RecordDeclarationSyntax MergeRecordDeclarations(IEnumerable<RecordDeclarationSyntax> records) {
+		// This method is incomplete, it does not handle partial methods nor nested partial types
+		var attributes = records
+			.SelectMany(r => r.AttributeLists);
+		var modifiers = records
+			.SelectMany(r => r.Modifiers)
+			.Where(r => !r.IsKind(SyntaxKind.PartialKeyword))
+			.DistinctBy(m => m.Kind())
+			.OrderBy(r => r.IsKind(SyntaxKind.RefKeyword) ? 1 : 0);
+		var parameterList = records
+			.FirstOrDefault(r => r.ParameterList is not null)
+			?.ParameterList;
+		var members = records
+			.SelectMany(r => r.Members);
+		return records.First()
+			.WithAttributeLists(new(attributes))
+			.WithModifiers(new(modifiers))
+			.WithParameterList(parameterList)
+			.WithMembers(new(members));
 	}
 
 }
