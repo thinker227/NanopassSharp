@@ -168,6 +168,10 @@ public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T> {
 		new(value);
 	public static implicit operator Result<T>(string error) =>
 		new(error);
+	public static explicit operator T(Result<T> result) =>
+		result.IsSuccess
+			? result.Value
+			: throw new InvalidOperationException("Result does not contain an inner value");
 
 	public static bool operator ==(Result<T> a, Result<T> b) =>
 		a.Equals(b);
