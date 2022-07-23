@@ -107,10 +107,7 @@ public sealed record {{ root.name }}(
 		string Target
 	);
 	private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol baseType) =>
-		// For some god-forsaken reason, MoreLinq defines its own Prepend method
-		// which conflicts with the Linq Prepend. Explicitly calling Enumerable.Prepend
-		// avoids any ambiguity.
-		Enumerable.Prepend(GetTargetPaths(baseType, ""), new(baseType, "this"));
+		GetTargetPaths(baseType, "").Prepend_(new(baseType, "this"));
 	private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol type, string currentPath) =>
 		type.GetTypeMembers()
 			.SelectMany(t => GetTargetPaths(t, currentPath == "" ? t.Name : $"{currentPath}.{t.Name}"));
@@ -134,10 +131,24 @@ public sealed record {{ root.name }}(
 		var mod = mods.TryGetValue(baseType, out var m) ? m : (TypeMod?)null;
 		var add = mod?.Add ?? ImmutableArray<ModificationModel>.Empty;
 		var remove = mod?.Remove ?? ImmutableArray<ModificationModel>.Empty;
+
+		var removeParams = remove
+			.Select(r => r.Parameter)
+			.NotNull()
+			.ToHashSet_();
+		var removeProps = remove
+			.Select(r => r.Property)
+			.NotNull()
+			.ToHashSet_();
+		var removeTypes = remove
+			.Select(r => r.Type)
+			.NotNull()
+			.ToHashSet_();
 		
 		var baseParams = baseSyntax.ParameterList is not null
 			? baseSyntax.ParameterList.Parameters
-				.Select(p => p.GetText().ToString())
+				.Where(p => !removeParams.Contains(p.Identifier.Text))
+				.Select(p => p.GetTextWithoutTrivia())
 			: Enumerable.Empty<string>();
 		var modParams = add
 			.Select(a => a.Parameter)
@@ -148,7 +159,8 @@ public sealed record {{ root.name }}(
 
 		var baseProperties = baseSyntax.Members
 			.OfType<PropertyDeclarationSyntax>()
-			.Select(p => p.GetText().ToString());
+			.Where(p => !removeProps.Contains(p.Identifier.Text))
+			.Select(p => p.GetTextWithoutTrivia());
 		var modProperties = add
 			.Select(a => a.Property)
 			.OfType<string>();
@@ -158,16 +170,15 @@ public sealed record {{ root.name }}(
 
 		var nested = baseType.GetTypeMembers()
 			.Where(t => t.IsRecord)
+			.Where(t => !removeTypes.Contains(t.Name))
 			.Select(t => GetPassRecord(
 				(RecordDeclarationSyntax)t.DeclaringSyntaxReferences[0].GetSyntax(),
 				t,
 				mods
 			));
-		// MoreEnumerable.ToHashSet conflicts with Enumerable.ToHashSet :/
-		var nestedHashSet = Enumerable.ToHashSet(nested);
+		var nestedHashSet = nested.ToHashSet_();
 
 		PassRecord record = new(name, parameters, properties, nestedHashSet);
-		//ApplyRemovals(record, remove);
 
 		return record;
 	}

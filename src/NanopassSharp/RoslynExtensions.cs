@@ -33,4 +33,7 @@ public static class RoslynExtensions {
 		source.GetTypeMembers()
 			.SelectMany(t => t.GetAllNestedTypes());
 
+	public static string GetTextWithoutTrivia(this SyntaxNode node) =>
+		node.WithoutTrivia().GetText().ToString();
+
 }
