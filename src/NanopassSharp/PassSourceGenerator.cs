@@ -1,12 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
 using NanopassSharp.Functional;
 using NanopassSharp.Models;
-using System;
-using System.Collections.Immutable;
 
 namespace NanopassSharp;
 
@@ -16,6 +16,8 @@ internal static class PassSourceGenerator {
 		string Source, NamespacedTypeName TypeName);
 	public static Result<ModifiedTypeResult> GetModifiedTypeSource(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
 		var typeName = GetNamespacedTypeName(pass, mod, baseType);
+
+		var record = GetRootPassRecord(baseSyntax, baseType, pass, mod);
 
 		var context = new {
 			Namespace = typeName.Namespace,
@@ -60,8 +62,9 @@ public sealed record {{ type_name }} {
 		ImmutableArray<ModificationModel> Add,
 		ImmutableArray<ModificationModel> Remove
 	);
-	private static IReadOnlyDictionary<INamedTypeSymbol, TypeMod> GetTypeMods(INamedTypeSymbol baseType, IEnumerable<TargetedTypeMod> mods) {
+	private static IReadOnlyDictionary<INamedTypeSymbol, TypeMod> GetTypeMods(INamedTypeSymbol baseType, ModificationPassModel mod) {
 		var paths = GetTargetPaths(baseType);
+		var mods = GetTargetedTypeMods(mod);
 		return mods
 			.Join(
 				paths,
@@ -75,15 +78,12 @@ public sealed record {{ type_name }} {
 		ImmutableArray<ModificationModel> Add,
 		ImmutableArray<ModificationModel> Remove
 	);
+	private enum ModType {
+		Add,
+		Remove
+	}
 	private static IEnumerable<TargetedTypeMod> GetTargetedTypeMods(ModificationPassModel modPass) {
-		var add = modPass.Add.GroupBy(m => m.Target);
-		var remove = modPass.Remove.GroupBy(m => m.Target);
-		return add.Join(
-			remove,
-			m => m.Key,
-			m => m.Key,
-			(a, r) => new TargetedTypeMod(a.Key, a.ToImmutableArray(), r.ToImmutableArray())
-		).ToArray();
+		
 	}
 
 	private readonly record struct TypeAndTargetPath(
@@ -97,23 +97,28 @@ public sealed record {{ type_name }} {
 		type.GetTypeMembers()
 			.SelectMany(t => GetTargetPaths(t, currentPath == "" ? t.Name : $"{currentPath}.{t.Name}"));
 
-	private sealed record PassRecord(
+	private sealed record class PassRecord(
 		string Name,
 		List<string> Parameters,
 		List<string> Properties,
 		HashSet<PassRecord> Nested
 	);
-	private static PassRecord GetRootPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
-		
-	}
-	private static PassRecord GetPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, ModificationPassModel mod) {
+	private static PassRecord GetRootPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) =>
+		GetPassRecord(baseSyntax, baseType, GetTypeMods(baseType, mod)) with {
+			Name = GetTypeName(pass, mod)
+		};
+	private static PassRecord GetPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, IReadOnlyDictionary<INamedTypeSymbol, TypeMod> mods) {
 		string name = baseType.Name;
+
+		var mod = mods.TryGetValue(baseType, out var m) ? m : (TypeMod?)null;
+		var add = mod?.Add ?? ImmutableArray<ModificationModel>.Empty;
+		var remove = mod?.Remove ?? ImmutableArray<ModificationModel>.Empty;
 		
 		var baseParams = baseSyntax.ParameterList is not null
 			? baseSyntax.ParameterList.Parameters
 				.Select(p => p.GetText().ToString())
 			: Enumerable.Empty<string>();
-		var modParams = mod.Add
+		var modParams = add
 			.Select(a => a.Parameter)
 			.OfType<string>();
 		var parameters = baseParams
@@ -123,7 +128,7 @@ public sealed record {{ type_name }} {
 		var baseProperties = baseSyntax.Members
 			.OfType<PropertyDeclarationSyntax>()
 			.Select(p => p.GetText().ToString());
-		var modProperties = mod.Add
+		var modProperties = add
 			.Select(a => a.Property)
 			.OfType<string>();
 		var properties = baseProperties
@@ -135,31 +140,14 @@ public sealed record {{ type_name }} {
 			.Select(t => GetPassRecord(
 				(RecordDeclarationSyntax)t.DeclaringSyntaxReferences[0].GetSyntax(),
 				t,
-				mod
+				mods
 			))
 			.ToHashSet();
 
 		PassRecord record = new(name, parameters, properties, nested);
-
-		var remove = mod.Remove
-			.Where(r => ParseNestedTypePath(r.Target, baseType).Equals(baseType, SymbolEqualityComparer.Default));
-		ApplyRemovals(record, mod.Remove);
+		//ApplyRemovals(record, remove);
 
 		return new(name, parameters, properties, nested);
 	}
-
-	private static INamedTypeSymbol? ParseNestedTypePath(string target, INamedTypeSymbol sourceType) {
-		string[] paths = target.Split('.');
-		return GetNestedType(paths, sourceType);
-	}
-	private static INamedTypeSymbol? GetNestedType(ReadOnlySpan<string> paths, INamedTypeSymbol source) {
-		if (paths.Length == 0) return source;
-
-		string path = paths[0];
-		var type = source.GetTypeMembers()
-			.FirstOrDefault(t => t.Name == path);
-		if (type is null) return null;
-		return GetNestedType(paths[1..], type);
-	}
-
+	
 }
