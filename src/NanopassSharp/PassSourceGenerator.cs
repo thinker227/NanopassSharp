@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MoreLinq;
 using Scriban;
 using NanopassSharp.Functional;
 using NanopassSharp.Models;
@@ -21,7 +22,7 @@ internal static class PassSourceGenerator {
 
 		var context = new {
 			Namespace = typeName.Namespace,
-			TypeName = typeName.Name,
+			Root = record,
 		};
 
 		var template = GetTemplate();
@@ -36,9 +37,17 @@ internal static class PassSourceGenerator {
 
 namespace {{ namespace }};
 
-public sealed record {{ type_name }} {
+public sealed record {{ root.name }}(
+{{- for param in root.parameters -}}
+{{ param }}{{ if !for.last }}, {{ end }}
+{{- end -}}
+) {
 	
-	// Members and nested types
+	{{~ for prop in root.properties ~}}
+	{{ prop }}
+	{{~ end ~}}
+
+	// Nested types
 	
 }
 
@@ -78,12 +87,19 @@ public sealed record {{ type_name }} {
 		ImmutableArray<ModificationModel> Add,
 		ImmutableArray<ModificationModel> Remove
 	);
-	private enum ModType {
-		Add,
-		Remove
-	}
 	private static IEnumerable<TargetedTypeMod> GetTargetedTypeMods(ModificationPassModel modPass) {
-		
+		var add = modPass.Add
+			.GroupBy(a => a.Target);
+		var remove = modPass.Remove
+			.GroupBy(r => r.Target);
+
+		return add.FullJoin(
+			remove,
+			m => m.Key,
+			a => new TargetedTypeMod(a.Key, a.ToImmutableArray(), ImmutableArray<ModificationModel>.Empty),
+			r => new TargetedTypeMod(r.Key, ImmutableArray<ModificationModel>.Empty, r.ToImmutableArray()),
+			(a, r) => new TargetedTypeMod(a.Key, a.ToImmutableArray(), r.ToImmutableArray())
+		).ToArray();
 	}
 
 	private readonly record struct TypeAndTargetPath(
@@ -91,8 +107,10 @@ public sealed record {{ type_name }} {
 		string Target
 	);
 	private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol baseType) =>
-		GetTargetPaths(baseType, "")
-			.Prepend(new(baseType, "this"));
+		// For some god-forsaken reason, MoreLinq defines its own Prepend method
+		// which conflicts with the Linq Prepend. Explicitly calling Enumerable.Prepend
+		// avoids any ambiguity.
+		Enumerable.Prepend(GetTargetPaths(baseType, ""), new(baseType, "this"));
 	private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol type, string currentPath) =>
 		type.GetTypeMembers()
 			.SelectMany(t => GetTargetPaths(t, currentPath == "" ? t.Name : $"{currentPath}.{t.Name}"));
@@ -103,10 +121,13 @@ public sealed record {{ type_name }} {
 		List<string> Properties,
 		HashSet<PassRecord> Nested
 	);
-	private static PassRecord GetRootPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) =>
-		GetPassRecord(baseSyntax, baseType, GetTypeMods(baseType, mod)) with {
+	private static PassRecord GetRootPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
+		var mods = GetTypeMods(baseType, mod);
+		var rootRecord = GetPassRecord(baseSyntax, baseType, mods);
+		return rootRecord with {
 			Name = GetTypeName(pass, mod)
 		};
+	}
 	private static PassRecord GetPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, IReadOnlyDictionary<INamedTypeSymbol, TypeMod> mods) {
 		string name = baseType.Name;
 
@@ -141,13 +162,14 @@ public sealed record {{ type_name }} {
 				(RecordDeclarationSyntax)t.DeclaringSyntaxReferences[0].GetSyntax(),
 				t,
 				mods
-			))
-			.ToHashSet();
+			));
+		// MoreEnumerable.ToHashSet conflicts with Enumerable.ToHashSet :/
+		var nestedHashSet = Enumerable.ToHashSet(nested);
 
-		PassRecord record = new(name, parameters, properties, nested);
+		PassRecord record = new(name, parameters, properties, nestedHashSet);
 		//ApplyRemovals(record, remove);
 
-		return new(name, parameters, properties, nested);
+		return record;
 	}
 	
 }
