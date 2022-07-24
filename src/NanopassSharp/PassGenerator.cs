@@ -83,7 +83,7 @@ public sealed class PassGenerator {
 		if (compilation is null) return "Failed to retrieve compilation";
 		var type = compilation.GetTypeByMetadataName(typeName);
 		if (type is null) return $"Type '{typeName}' does not exist";
-		return new(new PassResult(type, project));
+		return new PassResult(type, project);
 	}
 	/// <summary>
 	/// Generates a modification pass.
