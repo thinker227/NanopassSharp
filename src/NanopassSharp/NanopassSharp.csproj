@@ -19,4 +19,10 @@
     <PackageReference Include="Scriban" Version="5.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="template.sbncs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
