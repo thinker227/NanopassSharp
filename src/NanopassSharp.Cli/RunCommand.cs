@@ -64,7 +64,8 @@ internal sealed class RunCommand : AsyncCommand<RunCommand.Settings> {
 		if (models is null) return 1;
 
 		var generator = await PassGenerator.CreateAsync(models);
-		await generator.RunAsync(projectFile!.FullName);
+		string s = await generator.RunAsync(projectFile!.FullName);
+		Console.WriteLine(s);
 
 		return 0;
 	}
