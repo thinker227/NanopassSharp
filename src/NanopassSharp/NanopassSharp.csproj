@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -11,18 +11,16 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Locator" Version="1.4.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.2.0" />
-    <PackageReference Include="morelinq" Version="3.3.2" />
-    <PackageReference Include="Scriban" Version="5.5.0" />
+	<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+	<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.2.0" />
+	<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.2.0" />
+	<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.2.0" />
+	<PackageReference Include="morelinq" Version="3.3.2" />
+	<PackageReference Include="Scriban" Version="5.5.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="template.sbncs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="template.sbncs" />
   </ItemGroup>
 
 </Project>

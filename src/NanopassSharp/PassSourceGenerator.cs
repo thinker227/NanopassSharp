@@ -31,14 +31,14 @@ internal static class PassSourceGenerator {
 
 	private static Lazy<Result<Template>> TemplateResult { get; } = new(GetTemplate);
 	private static Result<Template> GetTemplate() {
-		const string templatePath = "./template.sbncs";
-		if (!File.Exists(templatePath)) return $"Could not find template file '{templatePath}'";
-		string templateSource;
-		try {
-			templateSource = File.ReadAllText(templatePath);
-		} catch (IOException e) {
-			return $"An exception occured while reading template file --> {e.Message}";
+		const string templateResourcePath = "NanopassSharp.template.sbncs";
+		var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+		var resourceStream = assembly.GetManifestResourceStream(templateResourcePath);
+		if (resourceStream is null) {
+			return $"Could not read resource stream of resource '{templateResourcePath}'";
 		}
+		StreamReader reader = new(resourceStream);
+		string templateSource = reader.ReadToEnd();
 
 		var template = Template.Parse(templateSource);
 		if (template.HasErrors) {
