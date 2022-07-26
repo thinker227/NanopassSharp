@@ -4,12 +4,12 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.IO;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MoreLinq;
 using Scriban;
 using NanopassSharp.Functional;
 using NanopassSharp.Models;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace NanopassSharp;
 
