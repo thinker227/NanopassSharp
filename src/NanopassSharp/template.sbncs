@@ -3,10 +3,16 @@
 namespace {{ namespace }};
 
 public sealed record {{ root.name }}(
-{{- for param in root.parameters -}}
+{{- for param in root.full_parameters -}}
 {{ param }}{{ if !for.last }}, {{ end }}
 {{- end -}}
-) {
+) {{ if root.parent != null ~}}
+: {{ root.parent.name }}(
+{{- for arg in root.base_constructor_arguments -}}
+{{ arg }}{{ if !for.last }}, {{ end }}
+{{- end -}}
+) {{ end ~}}
+{
 	
 	{{~ for prop in root.properties ~}}
 	{{ prop }}
