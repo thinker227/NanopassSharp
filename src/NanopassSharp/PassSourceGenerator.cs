@@ -116,19 +116,22 @@ internal static class PassSourceGenerator {
 			.SelectMany(t => GetTargetPaths(t, currentPath == "" ? t.Name : $"{currentPath}.{t.Name}"));
 
 	private sealed record class PassRecord(
+		PassRecord? Parent,
 		string Name,
 		List<string> Parameters,
 		List<string> Properties,
 		HashSet<PassRecord> Nested
-	);
+	) {
+		
+	}
 	private static PassRecord GetRootPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
 		var mods = GetTypeMods(baseType, mod);
-		var rootRecord = GetPassRecord(baseSyntax, baseType, mods);
+		var rootRecord = GetPassRecord(baseSyntax, baseType, mods, null);
 		return rootRecord with {
 			Name = GetTypeName(pass, mod)
 		};
 	}
-	private static PassRecord GetPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, IReadOnlyDictionary<INamedTypeSymbol, TypeMod> mods) {
+	private static PassRecord GetPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, IReadOnlyDictionary<INamedTypeSymbol, TypeMod> mods, PassRecord? parent) {
 		string name = baseType.Name;
 
 		var mod = mods.TryGetValue(baseType, out var m) ? m : (TypeMod?)null;
@@ -171,17 +174,18 @@ internal static class PassSourceGenerator {
 			.Concat(modProperties)
 			.ToList();
 
+		PassRecord record = new(parent, name, parameters, properties, new HashSet<PassRecord>());
+
 		var nested = baseType.GetTypeMembers()
 			.Where(t => t.IsRecord)
 			.Where(t => !removeTypes.Contains(t.Name))
 			.Select(t => GetPassRecord(
 				(RecordDeclarationSyntax)t.DeclaringSyntaxReferences[0].GetSyntax(),
 				t,
-				mods
+				mods,
+				record
 			));
-		var nestedHashSet = nested.ToHashSet_();
-
-		PassRecord record = new(name, parameters, properties, nestedHashSet);
+		foreach (var n in nested) record.Nested.Add(n);
 
 		return record;
 	}
