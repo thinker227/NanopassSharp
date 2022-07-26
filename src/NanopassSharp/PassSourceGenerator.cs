@@ -9,13 +9,16 @@ using MoreLinq;
 using Scriban;
 using NanopassSharp.Functional;
 using NanopassSharp.Models;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace NanopassSharp;
 
 internal static class PassSourceGenerator {
 
 	public readonly record struct ModifiedTypeResult(
-		string Source, NamespacedTypeName TypeName);
+		string Source,
+		NamespacedTypeName TypeName
+	);
 	public static Result<ModifiedTypeResult> GetModifiedTypeSource(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
 		var typeName = GetNamespacedTypeName(pass, mod, baseType);
 
@@ -26,14 +29,14 @@ internal static class PassSourceGenerator {
 
 		string source = RenderSource(template.Value, typeName.Namespace, root);
 
-		return new ModifiedTypeResult(source, GetNamespacedTypeName(pass, mod, baseType));
+		return new ModifiedTypeResult(source, typeName);
 	}
 
 	private static Lazy<Result<Template>> TemplateResult { get; } = new(GetTemplate);
 	private static Result<Template> GetTemplate() {
 		const string templateResourcePath = "NanopassSharp.template.sbncs";
 		var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-		var resourceStream = assembly.GetManifestResourceStream(templateResourcePath);
+		using var resourceStream = assembly.GetManifestResourceStream(templateResourcePath);
 		if (resourceStream is null) {
 			return $"Could not read resource stream of resource '{templateResourcePath}'";
 		}
@@ -122,7 +125,18 @@ internal static class PassSourceGenerator {
 		List<string> Properties,
 		HashSet<PassRecord> Nested
 	) {
-		
+
+		public IEnumerable<string> FullParameters =>
+			Parent?.FullParameters.Concat(Parameters) ?? Parameters;
+		public IEnumerable<string> BaseConstructorArguments {
+			get {
+				var parentArgs = Parent?.BaseConstructorArguments;
+				var args = ParseParameterList(Parameters).Parameters
+					.Select(p => p.Identifier.Text);
+				return parentArgs?.Concat(args) ?? Enumerable.Empty<string>();
+		}
+		}
+
 	}
 	private static PassRecord GetRootPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
 		var mods = GetTypeMods(baseType, mod);
@@ -188,6 +202,10 @@ internal static class PassSourceGenerator {
 		foreach (var n in nested) record.Nested.Add(n);
 
 		return record;
+	}
+	private static ParameterListSyntax ParseParameterList(IEnumerable<string> parameters) {
+		string source = $"({string.Join(", ", parameters)})";
+		return SyntaxFactory.ParseParameterList(source);
 	}
 	
 }
