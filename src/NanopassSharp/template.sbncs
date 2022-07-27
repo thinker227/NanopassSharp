@@ -16,7 +16,9 @@ public sealed record {{ record.name }}(
 	{{ prop }}
 	{{~ end ~}}
 
-	// Nested types
+	{{~ for nested in record.nested ~}}
+	{{ render_record nested }}
+	{{~ end ~}}
 	
 }
 {{- end -}}
