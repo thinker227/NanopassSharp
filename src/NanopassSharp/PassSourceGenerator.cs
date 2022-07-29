@@ -130,11 +130,13 @@ internal static class PassSourceGenerator {
 			Parent?.FullParameters.Concat(Parameters) ?? Parameters;
 		public IEnumerable<string> BaseConstructorArguments {
 			get {
-				var parentArgs = Parent?.BaseConstructorArguments;
-				var args = ParseParameterList(Parameters).Parameters
+				if (Parent is null) return Enumerable.Empty<string>();
+				var args = ParseParameterList(Parent.Parameters).Parameters
 					.Select(p => p.Identifier.Text);
-				return parentArgs?.Concat(args) ?? Enumerable.Empty<string>();
-		}
+				return Parent.BaseConstructorArguments?
+					.Concat(args)
+					?? Enumerable.Empty<string>();
+			}
 		}
 
 	}
@@ -152,22 +154,22 @@ internal static class PassSourceGenerator {
 		var add = mod?.Add ?? ImmutableArray<ModificationModel>.Empty;
 		var remove = mod?.Remove ?? ImmutableArray<ModificationModel>.Empty;
 
-		var removeParams = remove
+		string[] removeParams = remove
 			.Select(r => r.Parameter)
 			.NotNull()
-			.ToHashSet_();
-		var removeProps = remove
+			.ToArray();
+		string[] removeProps = remove
 			.Select(r => r.Property)
 			.NotNull()
-			.ToHashSet_();
-		var removeTypes = remove
+			.ToArray();
+		string[] removeTypes = remove
 			.Select(r => r.Type)
 			.NotNull()
-			.ToHashSet_();
+			.ToArray();
 		
 		var baseParams = baseSyntax.ParameterList is not null
 			? baseSyntax.ParameterList.Parameters
-				.Where(p => !removeParams.Contains(p.Identifier.Text))
+				.ExceptBy(removeParams, p => p.Identifier.Text)
 				.Select(p => p.GetTextWithoutTrivia())
 			: Enumerable.Empty<string>();
 		var modParams = add
@@ -179,7 +181,7 @@ internal static class PassSourceGenerator {
 
 		var baseProperties = baseSyntax.Members
 			.OfType<PropertyDeclarationSyntax>()
-			.Where(p => !removeProps.Contains(p.Identifier.Text))
+			.ExceptBy(removeProps, p => p.Identifier.Text)
 			.Select(p => p.GetTextWithoutTrivia());
 		var modProperties = add
 			.Select(a => a.Property)
@@ -192,7 +194,7 @@ internal static class PassSourceGenerator {
 
 		var nested = baseType.GetTypeMembers()
 			.Where(t => t.IsRecord)
-			.Where(t => !removeTypes.Contains(t.Name))
+			.ExceptBy(removeTypes, t => t.Name)
 			.Select(t => GetPassRecord(
 				(RecordDeclarationSyntax)t.DeclaringSyntaxReferences[0].GetSyntax(),
 				t,
