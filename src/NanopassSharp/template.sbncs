@@ -1,6 +1,6 @@
 ﻿{{- func render_record -}}
 {{- record = $0 -}}
-public sealed record {{ record.name }}(
+public record {{ record.name }}(
 {{- for param in record.parameters -}}
 {{ param }}{{ if !for.last }}, {{ end }}
 {{- end -}}
