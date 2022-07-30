@@ -113,31 +113,33 @@ internal static class PassSourceGenerator {
 		string Target
 	);
 	private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol baseType) =>
-		GetTargetPaths(baseType, "").Prepend_(new(baseType, "this"));
-	private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol type, string currentPath) =>
-		type.GetTypeMembers()
-			.SelectMany(t => GetTargetPaths(t, currentPath == "" ? t.Name : $"{currentPath}.{t.Name}"));
+		GetTargetPaths(baseType, null)
+			.Prepend_(new(baseType, "this"))
+			.ToArray();
+	private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol type, string? currentPath) {
+		var typeMembers = type.GetTypeMembers();
+		foreach (var member in typeMembers) {
+			string path = currentPath is null ? member.Name : $"{currentPath}.{member.Name}";
+			yield return new TypeAndTargetPath(member, path);
+
+			var subpaths = GetTargetPaths(member, path);
+			foreach (var subpath in subpaths) yield return subpath;
+		}
+	}
 
 	private sealed record class PassRecord(
 		PassRecord? Parent,
 		string Name,
 		List<string> Parameters,
 		List<string> Properties,
-		HashSet<PassRecord> Nested
+		HashSet<PassRecord> Nested,
+		TypeMod? Mod
 	) {
 
-		public IEnumerable<string> FullParameters =>
-			Parent?.FullParameters.Concat(Parameters) ?? Parameters;
-		public IEnumerable<string> BaseConstructorArguments {
-			get {
-				if (Parent is null) return Enumerable.Empty<string>();
-				var args = ParseParameterList(Parent.Parameters).Parameters
-					.Select(p => p.Identifier.Text);
-				return Parent.BaseConstructorArguments?
-					.Concat(args)
-					?? Enumerable.Empty<string>();
-			}
-		}
+		public IEnumerable<string> BaseConstructorArguments => Parent is not null
+			? ParseParameterList(Parent.Parameters).Parameters
+				.Select(p => p.Identifier.Text)
+			: Enumerable.Empty<string>();
 
 	}
 	private static PassRecord GetRootPassRecord(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
@@ -167,6 +169,9 @@ internal static class PassSourceGenerator {
 			.NotNull()
 			.ToArray();
 		
+		var parentModParams = parent is not null
+			? GetParentParameterMods(parent)
+			: Enumerable.Empty<string>();
 		var baseParams = baseSyntax.ParameterList is not null
 			? baseSyntax.ParameterList.Parameters
 				.ExceptBy(removeParams, p => p.Identifier.Text)
@@ -174,8 +179,10 @@ internal static class PassSourceGenerator {
 			: Enumerable.Empty<string>();
 		var modParams = add
 			.Select(a => a.Parameter)
-			.OfType<string>();
-		var parameters = baseParams
+			.NotNull();
+		var parameters =
+			parentModParams
+			.Concat(baseParams)
 			.Concat(modParams)
 			.ToList();
 
@@ -185,12 +192,19 @@ internal static class PassSourceGenerator {
 			.Select(p => p.GetTextWithoutTrivia());
 		var modProperties = add
 			.Select(a => a.Property)
-			.OfType<string>();
+			.NotNull();
 		var properties = baseProperties
 			.Concat(modProperties)
 			.ToList();
 
-		PassRecord record = new(parent, name, parameters, properties, new HashSet<PassRecord>());
+		PassRecord record = new(
+			parent,
+			name,
+			parameters,
+			properties,
+			new HashSet<PassRecord>(),
+			mod
+		);
 
 		var nested = baseType.GetTypeMembers()
 			.Where(t => t.IsRecord)
@@ -208,6 +222,17 @@ internal static class PassSourceGenerator {
 	private static ParameterListSyntax ParseParameterList(IEnumerable<string> parameters) {
 		string source = $"({string.Join(", ", parameters)})";
 		return SyntaxFactory.ParseParameterList(source);
+	}
+	private static IEnumerable<string> GetParentParameterMods(PassRecord record) {
+		var parentMods = record.Parent is not null
+			? GetParentParameterMods(record.Parent)
+			: Enumerable.Empty<string>();
+		var mods = record.Mod?.Add
+			.Select(a => a.Parameter)
+			.NotNull()
+			?? Enumerable.Empty<string>();
+		return parentMods
+			.Concat(mods);
 	}
 	
 }

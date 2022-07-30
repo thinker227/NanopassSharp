@@ -1,7 +1,7 @@
 ﻿{{- func render_record -}}
 {{- record = $0 -}}
 public sealed record {{ record.name }}(
-{{- for param in record.full_parameters -}}
+{{- for param in record.parameters -}}
 {{ param }}{{ if !for.last }}, {{ end }}
 {{- end -}}
 ) {{ if record.parent != null ~}}
