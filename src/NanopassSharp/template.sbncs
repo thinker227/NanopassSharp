@@ -30,4 +30,5 @@ public record {{ record.name }}(
 
 namespace {{ namespace }};
 
+[global::NanopassSharp.PassAttribute("{{ root.name }}")]
 {{ render_record root }}

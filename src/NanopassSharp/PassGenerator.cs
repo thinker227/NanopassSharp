@@ -97,15 +97,19 @@ public sealed class PassGenerator {
 	private static async Task<Result<PassResult>> GenerateModPassAsync(Project project, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod) {
 		var compilation = await project.GetCompilationAsync();
 		if (compilation is null) return "Failed to retrieve compilation";
-		var preexistingPassType = await TryGetPreexistingPassTypeAsync(project, pass.Name)
-			.ToMaybeDefaultAsync();
-		if (preexistingPassType is not null) {
-			if (await PassTypeIsUpToDateAsync(preexistingPassType, mod)) {
-				return new PassResult(preexistingPassType, project);
+
+		var preexistingTypeResult = await TryGetPreexistingPassTypeAsync(project, pass.Name);
+		if (!preexistingTypeResult.IsSuccess) return preexistingTypeResult.Error;
+		var preexistingType = preexistingTypeResult.Value.Type;
+		project = preexistingTypeResult.Value.Project;
+
+		if (preexistingType is not null) {
+			if (await PassTypeIsUpToDateAsync(preexistingType, mod)) {
+				return new PassResult(preexistingType, project);
 			}
 			else {
-				var newProject = await TryDeleteTypeAsync(project, preexistingPassType);
-				if (!newProject.IsSuccess) return $"Failed to delete out-of-date pass '{preexistingPassType.Name}'";
+				var newProject = await TryDeleteTypeAsync(project, preexistingType);
+				if (!newProject.IsSuccess) return $"Failed to delete out-of-date pass '{preexistingType.Name}'";
 				project = newProject.Value;
 			}
 		}
@@ -138,15 +142,17 @@ public sealed class PassGenerator {
 		return project;
 	}
 
-	private static async Task<Result<INamedTypeSymbol?>> TryGetPreexistingPassTypeAsync(Project project, string passName) {
+	private readonly record struct PreexistingPassTypeResult(INamedTypeSymbol? Type, Project Project);
+	private static async Task<Result<PreexistingPassTypeResult>> TryGetPreexistingPassTypeAsync(Project project, string passName) {
 		var passAttributeResult = await GetPassAttributeAsync(project);
-		if (!passAttributeResult.IsSuccess) return new(passAttributeResult.Error);
+		if (!passAttributeResult.IsSuccess) return passAttributeResult.Error;
 		var passAttribute = passAttributeResult.Value;
 
-		var compilationResult = await passAttribute.Project.GetCompilationResultAsync();
+		project = passAttribute.Project;
+		var compilationResult = await project.GetCompilationResultAsync();
 		if (!compilationResult.IsSuccess) return new(compilationResult.Error);
 
-		var types = compilationResult.Value.SourceModule.GlobalNamespace
+		var type = compilationResult.Value.SourceModule.GlobalNamespace
 			.GetAllTypes()
 			.Select(t => (
 				type: t,
@@ -158,7 +164,7 @@ public sealed class PassGenerator {
 			))
 			.Select(t => t.type)
 			.FirstOrDefault();
-		return Result.Success(types);
+		return new PreexistingPassTypeResult(type, project);
 	}
 	private readonly record struct GetPassAttributeResult(Project Project, INamedTypeSymbol Type);
 	private static async Task<Result<GetPassAttributeResult>> GetPassAttributeAsync(Project project) =>
@@ -186,7 +192,7 @@ public sealed class PassAttribute : Attribute {
 }
 
 """;
-		var newProject = project.AddDocument($"{passAttributeName}.g.cs", source).Project;
+		var newProject = project.AddDocument($"{passAttributeName}.g.cs", source, outputFolders).Project;
 		return await newProject.GetCompilationResultAsync()
 			.MapResultAsync(c => c.GetTypeByMetadataName(passAttributeFullName))
 			.NotNullResultAsync($"Failed to retrieve generated type '{passAttributeFullName}'")
@@ -226,7 +232,7 @@ public sealed class PassAttribute : Attribute {
 		var (source, typeName) = modifiedTypeResult.Value;
 
 		string fileName = $"{typeName.Name}.g.cs";
-		var newProject = project.AddDocument(fileName, source).Project;
+		var newProject = project.AddDocument(fileName, source, outputFolders).Project;
 		var type = (await newProject.GetCompilationAsync())
 			?.GetTypeByMetadataName(typeName.FullName);
 
