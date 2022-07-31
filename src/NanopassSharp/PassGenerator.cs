@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Build.Locator;
@@ -17,6 +18,9 @@ public sealed class PassGenerator {
 	private const string nanopassSharpNamespace = "NanopassSharp";
 	private const string passAttributeName = "PassAttribute";
 	private const string passAttributeFullName = $"{nanopassSharpNamespace}.{passAttributeName}";
+	private static readonly ImmutableArray<string> outputFolders = ImmutableArray.Create(
+		"NanopassSharpGenerated"
+	);
 
 	private readonly IReadOnlyList<PassModel> models;
 
@@ -61,10 +65,12 @@ public sealed class PassGenerator {
 	/// <summary>
 	/// Runs a sequence of passes.
 	/// </summary>
-	private static async Task<Result<PassResult>> RunPassesAsync(INamedTypeSymbol? baseType, Project project, IEnumerable<PassModel> models) => models.Any()
-		? await GeneratePassAsync(project, baseType, models.First())
-			.BindResultAsync(v => RunPassesAsync(v.Type, v.Project, models.Skip(1)))
-		: new();
+	private static async Task<Result<PassResult>> RunPassesAsync(INamedTypeSymbol? baseType, Project project, IEnumerable<PassModel> models) {
+		if (!models.Any()) return new PassResult(baseType, project);
+
+		var pass = await GeneratePassAsync(project, baseType, models.First());
+		return await pass.BindAsync(p => RunPassesAsync(p.Type, p.Project, models.Skip(1)));
+	}
 	/// <summary>
 	/// Generates a pass.
 	/// </summary>
