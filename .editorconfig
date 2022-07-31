@@ -5,10 +5,15 @@
 #Core editorconfig formatting - indentation
 
 #use hard tabs for indentation
-indent_style = tab
+indent_style = space
+tab_width = 4
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
 
 #Formatting - new line options
 
+csharp_new_line_before_open_brace = all
 #place else statements on a new line
 csharp_new_line_before_else = true
 #require members of object intializers to be on separate lines
@@ -113,7 +118,6 @@ dotnet_style_qualification_for_method = false:suggestion
 #prefer properties not to be prefaced with this. or Me. in Visual Basic
 dotnet_style_qualification_for_property = false:suggestion
 csharp_indent_labels= no_change
-insert_final_newline=true
 
 # CA1062: Validate arguments of public methods
 dotnet_diagnostic.CA1062.severity = silent
@@ -148,7 +152,6 @@ csharp_prefer_static_local_function = true:suggestion
 csharp_style_allow_embedded_statements_on_same_line_experimental = true:silent
 csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true:silent
 csharp_style_allow_blank_lines_between_consecutive_braces_experimental = true:silent
-csharp_new_line_before_open_brace =none
 csharp_space_around_binary_operators = before_and_after
 
 [*.{cs,vb}]
@@ -199,9 +202,6 @@ dotnet_naming_style.pascal_case.required_suffix =
 dotnet_naming_style.pascal_case.word_separator = 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
-tab_width = 4
-indent_size = 4
-end_of_line = crlf
 dotnet_style_coalesce_expression = true:suggestion
 dotnet_style_null_propagation = true:suggestion
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
