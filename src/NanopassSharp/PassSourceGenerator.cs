@@ -16,10 +16,7 @@ namespace NanopassSharp;
 internal static class PassSourceGenerator
 {
 
-    public readonly record struct ModifiedTypeResult(
-        string Source,
-        NamespacedTypeName TypeName
-    );
+    public readonly record struct ModifiedTypeResult(string Source, NamespacedTypeName TypeName);
     public static Result<ModifiedTypeResult> GetModifiedTypeSource(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod)
     {
         var typeName = GetNamespacedTypeName(pass, mod, baseType);
@@ -119,10 +116,7 @@ internal static class PassSourceGenerator
         ).ToArray();
     }
 
-    private readonly record struct TypeAndTargetPath(
-        INamedTypeSymbol Type,
-        string Target
-    );
+    private readonly record struct TypeAndTargetPath(INamedTypeSymbol Type, string Target);
     private static IEnumerable<TypeAndTargetPath> GetTargetPaths(INamedTypeSymbol baseType) =>
         GetTargetPaths(baseType, null)
             .Prepend_(new(baseType, "this"))
@@ -140,7 +134,8 @@ internal static class PassSourceGenerator
         }
     }
 
-    private sealed record class PassRecord(
+    private sealed record class PassRecord
+    (
         PassRecord? Parent,
         string Name,
         List<string> Parameters,
