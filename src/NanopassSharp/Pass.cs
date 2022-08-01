@@ -69,11 +69,3 @@ public sealed record class Member
     string? Type,
     ISet<object> Attributes
 );
-
-class C
-{
-    static void M()
-    {
-        Member member = new(null!, null, null, null!);
-    }
-}
