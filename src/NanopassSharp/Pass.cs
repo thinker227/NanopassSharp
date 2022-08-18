@@ -47,7 +47,7 @@ public sealed record class CompilerPass
 /// <param name="Transformations">A list of transformations.</param>
 public sealed record class PassTransformations
 (
-    IList<ITransformation> Transformations
+    IList<ITransformationInfo> Transformations
 );
 
 /// <summary>

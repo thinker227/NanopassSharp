@@ -1,9 +1,9 @@
 ﻿namespace NanopassSharp;
 
 /// <summary>
-/// A transformation on a node tree.
+/// Information about a transformation and pattern.
 /// </summary>
-public interface ITransformation
+public interface ITransformationInfo
 {
 
     /// <summary>
@@ -11,11 +11,33 @@ public interface ITransformation
     /// </summary>
     ITransformationPattern? Pattern { get; }
     /// <summary>
-    /// Applies the transformation onto a node tree.
+    /// The transformation to apply.
     /// </summary>
-    /// <param name="tree">The node tree to apply the transformation onto.</param>
-    /// <returns>A new node tree with the applied transformation.</returns>
-    AstNodeHierarchy Apply(AstNodeHierarchy tree);
+    ITransformation Transformation { get; }
+
+}
+
+/// <summary>
+/// A transformation on a node or node member.
+/// </summary>
+public interface ITransformation
+{
+
+    /// <summary>
+    /// Applies the transformation to a node tree.
+    /// </summary>
+    /// <param name="tree">The tree the node is a part of.</param>
+    /// <param name="node">The node to apply the transformation to.</param>
+    /// <returns>A new node with the applied transformation.</returns>
+    AstNode ApplyToNode(AstNodeHierarchy tree, AstNode node);
+    /// <summary>
+    /// Applies the transformation to a node member.
+    /// </summary>
+    /// <param name="tree">The tree the node of the member is a part of.</param>
+    /// <param name="node">The node the member is a part of.</param>
+    /// <param name="member">The member to apply the transformation to.</param>
+    /// <returns>A new member with the applied transformation.</returns>
+    AstNodeMember ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member);
 
 }
 
@@ -29,10 +51,17 @@ public interface ITransformationPattern
     /// Whether the pattern is recursive.
     /// </summary>
     bool IsRecursive { get; }
+
     /// <summary>
     /// Returns whether a node matches the pattern.
     /// </summary>
     /// <param name="node">The node to check.</param>
     bool IsMatch(AstNode node);
+    /// <summary>
+    /// Returns whether a member of a node matches the pattern.
+    /// </summary>
+    /// <param name="node">The node the member is a part of.</param>
+    /// <param name="member">The node member to check.</param>
+    bool IsMatch(AstNode node, AstNodeMember member);
 
 }
