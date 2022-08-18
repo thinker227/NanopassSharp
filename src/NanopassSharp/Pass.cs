@@ -53,11 +53,12 @@ public sealed record class PassTransformations
 /// <summary>
 /// A tree of nodes representing types which are the input and output of a pass.
 /// </summary>
-/// <param name="Root">The root node.</param>
+/// <param name="Roots">The root nodes.
+/// May be multiple if the language does not support nested types.</param>
 /// <param name="Nodes">The nodes of the tree.</param>
 public sealed record class AstNodeHierarchy
 (
-    AstNode Root,
+    IList<AstNode> Roots,
     IDictionary<string, AstNode> Nodes
 );
 
@@ -67,7 +68,7 @@ public sealed record class AstNodeHierarchy
 /// <param name="Name">The name of the type.</param>
 /// <param name="Documentation">The type's corresponding documentation.</param>
 /// <param name="Parent">The parent type node.
-/// <see langword="null"/> if the node is the root node.</param>
+/// <see langword="null"/> if the node is a root node.</param>
 /// <param name="Children">The children of the node (typically nested types).</param>
 /// <param name="Members">The members of the type.</param>
 /// <param name="Attributes">The language-specific attributes of the type.</param>
@@ -82,7 +83,7 @@ public sealed record class AstNode
 );
 
 /// <summary>
-/// A member of a type.
+/// A member of a <see cref="AstNode"/>.
 /// </summary>
 /// <param name="Name">The name of the member.</param>
 /// <param name="Documentation">The member's corresponding documentation.</param>
