@@ -10,30 +10,30 @@ namespace NanopassSharp;
 /// <param name="Documentation">The pass' corresponding documentation.</param>
 /// <param name="Transformations">The transformations the pass applies to its nodes.</param>
 /// <param name="Previous">The previous pass which this pass is based on.</param>
-public sealed record class Pass
+public sealed record class CompilerPass
 (
     string Name,
     string? Documentation,
     PassTransformations Transformations,
-    Pass Previous
+    CompilerPass Previous
 )
 {
 
     /// <summary>
     /// The next pass immediately based on this pass.
     /// </summary>
-    public Pass? Next { get; set; }
+    public CompilerPass? Next { get; set; }
 
-    private Task<TypeNodeTree>? treeTask;
+    private Task<AstNodeHierarchy>? treeTask;
     /// <summary>
     /// Gets the transformed tree of this pass.
     /// </summary>
-    public Task<TypeNodeTree> GetTreeAsync()
+    public Task<AstNodeHierarchy> GetTreeAsync()
     {
         treeTask ??= GetTreeInternalAsync();
         return treeTask;
     }
-    private async Task<TypeNodeTree> GetTreeInternalAsync()
+    private async Task<AstNodeHierarchy> GetTreeInternalAsync()
     {
         var previousTree = await Previous.GetTreeAsync();
         return await PassTransformer.ApplyTransformationsAsync(previousTree, Transformations);
@@ -42,7 +42,7 @@ public sealed record class Pass
 }
 
 /// <summary>
-/// The transformations applied by a <see cref="Pass"/>.
+/// The transformations applied by a <see cref="CompilerPass"/>.
 /// </summary>
 /// <param name="Transformations">A list of transformations.</param>
 public sealed record class PassTransformations
@@ -55,10 +55,10 @@ public sealed record class PassTransformations
 /// </summary>
 /// <param name="Root">The root node.</param>
 /// <param name="Nodes">The nodes of the tree.</param>
-public sealed record class TypeNodeTree
+public sealed record class AstNodeHierarchy
 (
-    TypeNode Root,
-    IDictionary<string, TypeNode> Nodes
+    AstNode Root,
+    IDictionary<string, AstNode> Nodes
 );
 
 /// <summary>
@@ -71,13 +71,13 @@ public sealed record class TypeNodeTree
 /// <param name="Children">The children of the node (typically nested types).</param>
 /// <param name="Members">The members of the type.</param>
 /// <param name="Attributes">The language-specific attributes of the type.</param>
-public sealed record class TypeNode
+public sealed record class AstNode
 (
     string Name,
     string? Documentation,
-    TypeNode? Parent,
-    IDictionary<string, TypeNode> Children,
-    IDictionary<string, Member> Members,
+    AstNode? Parent,
+    IDictionary<string, AstNode> Children,
+    IDictionary<string, AstNodeMember> Members,
     ISet<object> Attributes
 );
 
@@ -90,7 +90,7 @@ public sealed record class TypeNode
 /// May be <see langword="null"/> in dynamically typed languages
 /// or languages without explicitly typed members.</param>
 /// <param name="Attributes">The language-specific attributes of the member.</param>
-public sealed record class Member
+public sealed record class AstNodeMember
 (
     string Name,
     string? Documentation,

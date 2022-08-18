@@ -6,7 +6,7 @@ namespace NanopassSharp;
 public static class PassTransformer
 {
 
-    public static Task<TypeNodeTree> ApplyTransformationsAsync(TypeNodeTree previousTree, PassTransformations transformations)
+    public static Task<AstNodeHierarchy> ApplyTransformationsAsync(AstNodeHierarchy previousTree, PassTransformations transformations)
     {
         throw new NotImplementedException();
     }

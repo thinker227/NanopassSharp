@@ -15,7 +15,7 @@ public interface ITransformation
     /// </summary>
     /// <param name="tree">The node tree to apply the transformation onto.</param>
     /// <returns>A new node tree with the applied transformation.</returns>
-    TypeNodeTree Apply(TypeNodeTree tree);
+    AstNodeHierarchy Apply(AstNodeHierarchy tree);
 
 }
 
@@ -33,6 +33,6 @@ public interface ITransformationPattern
     /// Returns whether a node matches the pattern.
     /// </summary>
     /// <param name="node">The node to check.</param>
-    bool IsMatch(TypeNode node);
+    bool IsMatch(AstNode node);
 
 }
