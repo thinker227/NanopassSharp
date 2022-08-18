@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NanopassSharp;
 
@@ -8,18 +9,45 @@ namespace NanopassSharp;
 /// <param name="Name">The name of the pass.</param>
 /// <param name="Documentation">The pass' corresponding documentation.</param>
 /// <param name="Transformations">The transformations the pass applies to its nodes.</param>
-/// <param name="Tree">The original node tree of the pass.</param>
+/// <param name="Previous">The previous pass which this pass is based on.</param>
 public sealed record class Pass
 (
     string Name,
     string? Documentation,
-    Pass Previous,
-    IList<ITransformation> Transformations,
-    // Should this be immutable?
-    // Should the tree be the tree resulting from applying the pass' transformations?
-    // Should it be created immediately by the language-specific parser
-    // or be based on the previous pass?
-    TypeNodeTree Tree
+    PassTransformations Transformations,
+    Pass Previous
+)
+{
+
+    /// <summary>
+    /// The next pass immediately based on this pass.
+    /// </summary>
+    public Pass? Next { get; set; }
+
+    private Task<TypeNodeTree>? treeTask;
+    /// <summary>
+    /// Gets the transformed tree of this pass.
+    /// </summary>
+    public Task<TypeNodeTree> GetTreeAsync()
+    {
+        treeTask ??= GetTreeInternalAsync();
+        return treeTask;
+    }
+    private async Task<TypeNodeTree> GetTreeInternalAsync()
+    {
+        var previousTree = await Previous.GetTreeAsync();
+        return await PassTransformer.ApplyTransformationsAsync(previousTree, Transformations);
+    }
+
+}
+
+/// <summary>
+/// The transformations applied by a <see cref="Pass"/>.
+/// </summary>
+/// <param name="Transformations">A list of transformations.</param>
+public sealed record class PassTransformations
+(
+    IList<ITransformation> Transformations
 );
 
 /// <summary>
