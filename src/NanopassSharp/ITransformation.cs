@@ -5,7 +5,6 @@
 /// </summary>
 public interface ITransformationInfo
 {
-
     /// <summary>
     /// The pattern the transformation is triggered by.
     /// </summary>
@@ -14,7 +13,6 @@ public interface ITransformationInfo
     /// The transformation to apply.
     /// </summary>
     ITransformation Transformation { get; }
-
 }
 
 /// <summary>
@@ -22,7 +20,6 @@ public interface ITransformationInfo
 /// </summary>
 public interface ITransformation
 {
-
     /// <summary>
     /// Applies the transformation to a node tree.
     /// </summary>
@@ -38,7 +35,6 @@ public interface ITransformation
     /// <param name="member">The member to apply the transformation to.</param>
     /// <returns>A new member with the applied transformation.</returns>
     AstNodeMember ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member);
-
 }
 
 /// <summary>
@@ -46,7 +42,6 @@ public interface ITransformation
 /// </summary>
 public interface ITransformationPattern
 {
-
     /// <summary>
     /// Whether the pattern is recursive.
     /// </summary>
@@ -63,5 +58,4 @@ public interface ITransformationPattern
     /// <param name="node">The node the member is a part of.</param>
     /// <param name="member">The node member to check.</param>
     bool IsMatch(AstNode node, AstNodeMember member);
-
 }

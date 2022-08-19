@@ -3,7 +3,6 @@
 namespace NanopassSharp.Functional;
 public static class ResultExtensions
 {
-
     /// <summary>
     /// Returns the inner value as either itself or the type's default value.
     /// </summary>
@@ -40,5 +39,4 @@ public static class ResultExtensions
                 new Result<U>(f(x))
             )
         );
-
 }

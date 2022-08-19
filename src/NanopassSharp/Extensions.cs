@@ -7,7 +7,6 @@ namespace NanopassSharp;
 
 public static class Extensions
 {
-
     public static IEnumerable<(T first, T second)> WithNext<T>(this IEnumerable<T> source)
     {
         T? prev = default;
@@ -52,5 +51,4 @@ public static class Extensions
         var result = await task;
         return await f(result);
     }
-
 }

@@ -5,7 +5,6 @@ namespace NanopassSharp;
 
 public static class PassTransformer
 {
-
     /// <summary>
     /// Applies transformations to a <see cref="AstNodeHierarchy"/>.
     /// </summary>
@@ -17,5 +16,4 @@ public static class PassTransformer
     {
         throw new NotImplementedException();
     }
-
 }

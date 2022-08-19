@@ -14,7 +14,6 @@ namespace NanopassSharp.Functional;
 /// <typeparam name="T">The type of the success value.</typeparam>
 public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T>
 {
-
     /// <summary>
     /// The result value.
     /// </summary>
@@ -203,12 +202,10 @@ public readonly struct Result<T> : IEquatable<Result<T>>, IEquatable<T>
         result.Equals(value);
     public static bool operator !=(Result<T> result, T value) =>
         !result.Equals(value);
-
 }
 
 public static class Result
 {
-
     /// <summary>
     /// Creates a <see cref="Result{T}"/> with a successful state.
     /// </summary>
@@ -249,5 +246,4 @@ public static class Result
         value is not null
             ? new(value.Value)
             : new(error ?? $"{callerExpression} was null");
-
 }

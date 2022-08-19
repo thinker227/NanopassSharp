@@ -15,7 +15,6 @@ namespace NanopassSharp;
 
 public sealed class PassGenerator
 {
-
     private const string nanopassSharpNamespace = "NanopassSharp";
     private const string passAttributeName = "PassAttribute";
     private const string passAttributeFullName = $"{nanopassSharpNamespace}.{passAttributeName}";
@@ -284,5 +283,4 @@ public sealed class PassAttribute : Attribute {
             .WithParameterList(parameterList)
             .WithMembers(new(members));
     }
-
 }

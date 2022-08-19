@@ -5,7 +5,6 @@ namespace NanopassSharp.Functional;
 
 public static class TaskResultExtensions
 {
-
     public static async Task<TResult> SwitchResultAsync<T, TResult>(this Task<Result<T>> source, Func<T, Task<TResult>> ifSuccess, Func<string, Task<TResult>> ifFailure) =>
         await (await source).SwitchAsync(ifSuccess, ifFailure);
     public static async Task<TResult> SwitchResultAsync<T, TResult>(this Task<Result<T>> source, Func<T, TResult> ifSuccess, Func<string, TResult> ifFailure) =>
@@ -89,5 +88,4 @@ public static class TaskResultExtensions
     public static async Task<Result<T>> NotNullResultAsync<T>(this Task<Result<T?>> result, string? error = null)
     where T : struct =>
         (await result).Bind(v => v is not null ? new Result<T>(v.Value) : error ?? "Inner result value was null");
-
 }

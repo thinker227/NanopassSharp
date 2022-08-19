@@ -18,7 +18,6 @@ public sealed record class CompilerPass
     CompilerPass Previous
 )
 {
-
     /// <summary>
     /// The next pass immediately based on this pass.
     /// </summary>
@@ -38,7 +37,6 @@ public sealed record class CompilerPass
         var previousTree = await Previous.GetTreeAsync();
         return await PassTransformer.ApplyTransformationsAsync(previousTree, Transformations);
     }
-
 }
 
 /// <summary>
