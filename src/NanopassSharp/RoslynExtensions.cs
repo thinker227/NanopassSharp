@@ -9,7 +9,6 @@ namespace NanopassSharp;
 
 public static class RoslynExtensions
 {
-
     public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceSymbol source) =>
         source
             .GetTypeMembers()
@@ -38,5 +37,4 @@ public static class RoslynExtensions
 
     public static string GetTextWithoutTrivia(this SyntaxNode node) =>
         node.WithoutTrivia().GetText().ToString();
-
 }

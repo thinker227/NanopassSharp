@@ -15,7 +15,6 @@ namespace NanopassSharp;
 
 internal static class PassSourceGenerator
 {
-
     public readonly record struct ModifiedTypeResult(string Source, NamespacedTypeName TypeName);
     public static Result<ModifiedTypeResult> GetModifiedTypeSource(RecordDeclarationSyntax baseSyntax, INamedTypeSymbol baseType, PassModel pass, ModificationPassModel mod)
     {
@@ -248,5 +247,4 @@ internal static class PassSourceGenerator
         return parentMods
             .Concat(mods);
     }
-
 }
