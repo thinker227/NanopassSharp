@@ -10,27 +10,16 @@ namespace NanopassSharp;
 /// <param name="Name">The name of the pass.</param>
 /// <param name="Documentation">The pass' corresponding documentation.</param>
 /// <param name="Transformations">The transformations the pass applies to its nodes.</param>
-/// <param name="Previous">The previous pass which this pass is based on.</param>
+/// <param name="Previous">The name of the previous pass which this pass is based on.</param>
+/// <param name="Next">The name of the next pass immediately based on this pass.</param>
 public sealed record class CompilerPass
 (
     string Name,
     string? Documentation,
     PassTransformations Transformations,
-    CompilerPass Previous
-)
-{
-    /// <summary>
-    /// The next pass immediately based on this pass.
-    /// </summary>
-    public CompilerPass? Next { get; set; }
-
-    private AstNodeHierarchy? tree;
-    /// <summary>
-    /// The transformed tree of this pass.
-    /// </summary>
-    public AstNodeHierarchy Tree =>
-        tree ??= PassTransformer.ApplyTransformations(Previous.Tree, Transformations);
-}
+    string Previous,
+    string? Next
+);
 
 /// <summary>
 /// The transformations applied by a <see cref="CompilerPass"/>.
