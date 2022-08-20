@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NanopassSharp;
 
@@ -48,9 +49,26 @@ public sealed record class PassTransformations
 /// <param name="Nodes">The nodes of the tree.</param>
 public sealed record class AstNodeHierarchy
 (
-    IList<AstNode> Roots,
-    IDictionary<string, AstNode> Nodes
-);
+    IList<AstNode> Roots
+)
+{
+    public bool Equals(AstNodeHierarchy? other)
+    {
+        if (other is null) return false;
+
+        if (!other.Roots.SequenceEqual(Roots)) return false;
+
+        return true;
+    }
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+
+        foreach (var root in Roots) hashCode.Add(root);
+
+        return hashCode.ToHashCode();
+    }
+}
 
 /// <summary>
 /// A node representing a type in a compiler pass.
@@ -70,7 +88,32 @@ public sealed record class AstNode
     IDictionary<string, AstNode> Children,
     IDictionary<string, AstNodeMember> Members,
     ISet<object> Attributes
-);
+)
+{
+    public bool Equals(AstNode? other)
+    {
+        if (other is null) return false;
+
+        if (other.Name != Name) return false;
+        if (other.Documentation != Documentation) return false;
+        if (!other.Children.DictionaryEquals(Children)) return false;
+        if (!other.Members.DictionaryEquals(Members)) return false;
+        if (!other.Attributes.SetEquals(Attributes)) return false;
+        return true;
+    }
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+
+        hashCode.Add(Name);
+        hashCode.Add(Documentation);
+        foreach (var child in Children.Values) hashCode.Add(child);
+        foreach (var member in Members.Values) hashCode.Add(member);
+        foreach (object attribute in Attributes) hashCode.Add(attribute);
+
+        return hashCode.ToHashCode();
+    }
+}
 
 /// <summary>
 /// A member of a <see cref="AstNode"/>.
@@ -87,4 +130,28 @@ public sealed record class AstNodeMember
     string? Documentation,
     string? Type,
     ISet<object> Attributes
-);
+)
+{
+    public bool Equals(AstNodeMember? other)
+    {
+        if (other is null) return false;
+
+        if (other.Name != Name) return false;
+        if (other.Documentation != Documentation) return false;
+        if (other.Type != Type) return false;
+        if (!other.Attributes.SetEquals(Attributes)) return false;
+
+        return true;
+    }
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+
+        hashCode.Add(Name);
+        hashCode.Add(Documentation);
+        hashCode.Add(Type);
+        foreach (object attribute in Attributes) hashCode.Add(attribute);
+
+        return hashCode.ToHashCode();
+    }
+}
