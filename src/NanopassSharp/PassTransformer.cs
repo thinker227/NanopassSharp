@@ -12,7 +12,7 @@ public static class PassTransformer
     /// <param name="transformations">The transformations to apply.</param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public static Task<AstNodeHierarchy> ApplyTransformationsAsync(AstNodeHierarchy tree, PassTransformations transformations)
+    public static AstNodeHierarchy ApplyTransformations(AstNodeHierarchy tree, PassTransformations transformations)
     {
         throw new NotImplementedException();
     }

@@ -23,20 +23,12 @@ public sealed record class CompilerPass
     /// </summary>
     public CompilerPass? Next { get; set; }
 
-    private Task<AstNodeHierarchy>? treeTask;
+    private AstNodeHierarchy? tree;
     /// <summary>
-    /// Gets the transformed tree of this pass.
+    /// The transformed tree of this pass.
     /// </summary>
-    public Task<AstNodeHierarchy> GetTreeAsync()
-    {
-        treeTask ??= GetTreeInternalAsync();
-        return treeTask;
-    }
-    private async Task<AstNodeHierarchy> GetTreeInternalAsync()
-    {
-        var previousTree = await Previous.GetTreeAsync();
-        return await PassTransformer.ApplyTransformationsAsync(previousTree, Transformations);
-    }
+    public AstNodeHierarchy Tree =>
+        tree ??= PassTransformer.ApplyTransformations(Previous.Tree, Transformations);
 }
 
 /// <summary>
