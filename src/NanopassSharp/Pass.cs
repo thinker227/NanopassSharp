@@ -38,7 +38,7 @@ public sealed record class CompilerPass
 /// <param name="Transformations">A list of transformations.</param>
 public sealed record class PassTransformations
 (
-    IList<ITransformationDescription> Transformations
+    IReadOnlyCollection<ITransformationDescription> Transformations
 );
 
 /// <summary>
@@ -49,7 +49,7 @@ public sealed record class PassTransformations
 /// <param name="Nodes">The nodes of the tree.</param>
 public sealed record class AstNodeHierarchy
 (
-    IList<AstNode> Roots
+    IReadOnlyList<AstNode> Roots
 )
 {
     public bool Equals(AstNodeHierarchy? other)
@@ -85,9 +85,9 @@ public sealed record class AstNode
     string Name,
     string? Documentation,
     AstNode? Parent,
-    IDictionary<string, AstNode> Children,
-    IDictionary<string, AstNodeMember> Members,
-    ISet<object> Attributes
+    IReadOnlyDictionary<string, AstNode> Children,
+    IReadOnlyDictionary<string, AstNodeMember> Members,
+    IReadOnlySet<object> Attributes
 )
 {
     public bool Equals(AstNode? other)
@@ -129,7 +129,7 @@ public sealed record class AstNodeMember
     string Name,
     string? Documentation,
     string? Type,
-    ISet<object> Attributes
+    IReadOnlySet<object> Attributes
 )
 {
     public bool Equals(AstNodeMember? other)
