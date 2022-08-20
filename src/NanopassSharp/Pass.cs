@@ -73,13 +73,13 @@ public sealed record class AstNodeHierarchy
 /// <summary>
 /// A node representing a type in a compiler pass.
 /// </summary>
-/// <param name="Name">The name of the type.</param>
-/// <param name="Documentation">The type's corresponding documentation.</param>
-/// <param name="Parent">The parent type node.
+/// <param name="Name">The name of the node.</param>
+/// <param name="Documentation">The node's corresponding documentation.</param>
+/// <param name="Parent">The parent node.
 /// <see langword="null"/> if the node is a root node.</param>
 /// <param name="Children">The children of the node (typically nested types).</param>
-/// <param name="Members">The members of the type.</param>
-/// <param name="Attributes">The language-specific attributes of the type.</param>
+/// <param name="Members">The members of the node.</param>
+/// <param name="Attributes">The language-specific attributes of the node.</param>
 public sealed record class AstNode
 (
     string Name,
