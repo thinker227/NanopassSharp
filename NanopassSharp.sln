@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp", "src\Nanopa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp.Cli", "src\NanopassSharp.Cli\NanopassSharp.Cli.csproj", "{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp.Tests", "src\NanopassSharp.Tests\NanopassSharp.Tests.csproj", "{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +28,14 @@ Global
 		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0BE57320-A330-47A0-AAD8-69A6CCB510E8} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
 		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
+		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
 	EndGlobalSection
 EndGlobal
