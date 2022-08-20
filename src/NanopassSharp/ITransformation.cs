@@ -1,9 +1,9 @@
 ﻿namespace NanopassSharp;
 
 /// <summary>
-/// Information about a transformation and pattern.
+/// A description of a transformation and pattern.
 /// </summary>
-public interface ITransformationInfo
+public interface ITransformationDescription
 {
     /// <summary>
     /// The pattern the transformation is triggered by.
