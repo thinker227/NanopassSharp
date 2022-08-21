@@ -27,18 +27,44 @@ public sealed class PassSequence : IReadOnlyList<CompilerPass>
 
 
 
-    /// <summary>
-    /// Initializes a new <see cref="PassSequence"/> instance.
-    /// </summary>
-    /// <param name="passes">The passes as a linked list.</param>
-    public PassSequence(LinkedList<CompilerPass> passes)
+    private PassSequence(LinkedList<CompilerPass> passes, IReadOnlyDictionary<string, CompilerPass>? dictionary = null)
     {
         trees = new();
         this.passes = passes;
-        Passes = passes.ToDictionary(p => p.Name);
+        Passes = dictionary ?? GenerateDictionary(passes);
     }
 
 
+
+    /// <summary>
+    /// Creates a new <see cref="PassSequence"/>.
+    /// </summary>
+    /// <param name="passes">The passes in the sequence.</param>
+    /// <param name="root">The root pass of the sequence.
+    /// Defaults to <see langword="null"/>, in which case the first element
+    /// of <paramref name="passes"/> will be used as the root.</param>
+    /// <returns></returns>
+    public static PassSequence Create(IEnumerable<CompilerPass> passes, CompilerPass? root = null)
+    {
+        var dict = GenerateDictionary(passes);
+        LinkedList<CompilerPass> list = new();
+
+        var current = root ?? passes.First();
+        while (true)
+        {
+            list.AddLast(current);
+            if (current.Next is null) break;
+            if (!dict.TryGetValue(current.Next, out var next))
+            {
+                throw new KeyNotFoundException($"The pass '{current.Next}' does not exist (specified as next by '{current.Name}')");
+            }
+            current = next;
+        }
+
+        return new(list, dict);
+    }
+    private static IReadOnlyDictionary<string, CompilerPass> GenerateDictionary(IEnumerable<CompilerPass> passes) =>
+        passes.ToDictionary(p => p.Name);
 
     /// <summary>
     /// Gets the tree of a pass by the pass' name.

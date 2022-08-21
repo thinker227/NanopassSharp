@@ -46,21 +46,8 @@ public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassB
     /// <summary>
     /// Builds a <see cref="PassSequence"/> from the builder.
     /// </summary>
-    public PassSequence Build()
-    {
-        var dict = builders.ToDictionary(b => b.Name);
-        LinkedList<CompilerPass> passes = new();
-
-        var current = root;
-        while (true)
-        {
-            passes.AddLast(current.Build());
-            if (current.Next is null) break;
-            if (!dict.TryGetValue(current.Next, out var next)) break;
-            current = next;
-        }
-        return new PassSequence(passes);
-    }
+    public PassSequence Build() =>
+        PassSequence.Create(builders.Select(b => b.Build()), root.Build());
     /// <summary>
     /// Implicitly converts a <see cref="PassSequenceBuilder"/> into a <see cref="PassSequence"/>
     /// by calling <see cref="Build"/>.
