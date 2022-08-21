@@ -86,11 +86,12 @@ public sealed class AstNodeBuilder
     /// </summary>
     /// <param name="name">The name of the child.</param>
     /// <returns>A new builder for the child node.</returns>
-    public AstNodeBuilder AddChild(string name)
+    public AstNodeBuilder AddChild(string name, string? documentation = null)
     {
         AstNodeBuilder nodeBuilder = new(name)
         {
-            parent = this
+            parent = this,
+            Documentation = documentation
         };
         childrenBuilders.Add(name, nodeBuilder);
         return nodeBuilder;
