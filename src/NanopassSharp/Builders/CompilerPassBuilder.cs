@@ -6,7 +6,7 @@ namespace NanopassSharp.Builders;
 /// <summary>
 /// A builder for a <see cref="CompilerPass"/>.
 /// </summary>
-public sealed class CompilerPassBuilder
+public sealed class CompilerPassBuilder : ISequentialCompilerPassBuilder
 {
     /// <summary>
     /// <inheritdoc cref="CompilerPass.Name" path="/summary"/>
@@ -79,6 +79,8 @@ public sealed class CompilerPassBuilder
         Documentation = documentation;
         return this;
     }
+    ISequentialCompilerPassBuilder ISequentialCompilerPassBuilder.WithDocumentation(string? documentation) =>
+        WithDocumentation(documentation);
     /// <summary>
     /// Adds a transformation to the pass.
     /// </summary>
@@ -89,6 +91,8 @@ public sealed class CompilerPassBuilder
         Transformations.Add(transformation);
         return this;
     }
+    ISequentialCompilerPassBuilder ISequentialCompilerPassBuilder.AddTransformation(ITransformationDescription transformation) =>
+        AddTransformation(transformation);
     /// <summary>
     /// Sets the previous pass of the pass.
     /// </summary>
@@ -122,4 +126,50 @@ public sealed class CompilerPassBuilder
     /// <param name="builder">The source builder.</param>
     public static implicit operator CompilerPass(CompilerPassBuilder builder) =>
         builder.Build();
+}
+
+// This is just for the sake of pass builders created using a PassSequenceBuilder
+// not being able to modify the name, previous, or next properties.
+/// <summary>
+/// A sequential builder for a <see cref="CompilerPass"/>.
+/// </summary>
+public interface ISequentialCompilerPassBuilder
+{
+    /// <summary>
+    /// <inheritdoc cref="CompilerPass.Name" path="/summary"/>
+    /// </summary>
+    string Name { get; }
+    /// <summary>
+    /// <inheritdoc cref="CompilerPass.Documentation" path="/summary"/>
+    /// </summary>
+    string? Documentation { get; set; }
+    /// <summary>
+    /// <inheritdoc cref="CompilerPass.Previous" path="/summary"/>
+    /// </summary>
+    string Previous { get; }
+    /// <summary>
+    /// <inheritdoc cref="CompilerPass.Next" path="/summary"/>
+    /// </summary>
+    string? Next { get; }
+    /// <summary>
+    /// <inheritdoc cref="CompilerPass.Transformations" path="/summary"/>
+    /// </summary>
+    IList<ITransformationDescription> Transformations { get; set; }
+
+    /// <summary>
+    /// Sets the documentation of the pass.
+    /// </summary>
+    /// <param name="documentation"><inheritdoc cref="Documentation" path="/summary"/></param>
+    /// <returns>The current builder.</returns>
+    ISequentialCompilerPassBuilder WithDocumentation(string? documentation);
+    /// <summary>
+    /// Adds a transformation to the pass.
+    /// </summary>
+    /// <param name="transformation">The transformation to add.</param>
+    /// <returns>The current builder.</returns>
+    ISequentialCompilerPassBuilder AddTransformation(ITransformationDescription transformation);
+    /// <summary>
+    /// Builds a <see cref="CompilerPass"/> from the builder.
+    /// </summary>
+    CompilerPass Build();
 }
