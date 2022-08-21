@@ -42,6 +42,11 @@ public sealed record class AstNodeHierarchy
     IReadOnlyList<AstNode> Roots
 )
 {
+    /// <summary>
+    /// An empty hierarchy.
+    /// </summary>
+    public static AstNodeHierarchy Empty { get; } = new(Array.Empty<AstNode>());
+
     public bool Equals(AstNodeHierarchy? other)
     {
         if (other is null) return false;
