@@ -7,10 +7,9 @@ internal static class LinqExtensions
 {
     public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> source) => source.OfType<T>();
 
-    public static bool DictionaryEquals<TKey, TValue>(this IDictionary<TKey, TValue> source, IDictionary<TKey, TValue> other) =>
+    public static bool DictionaryEquals<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> source, IReadOnlyDictionary<TKey, TValue> other) =>
         source.DictionaryEquals(other, EqualityComparer<TValue>.Default);
-
-    public static bool DictionaryEquals<TKey, TValue>(this IDictionary<TKey, TValue> source, IDictionary<TKey, TValue> other, IEqualityComparer<TValue> valueComparer)
+    public static bool DictionaryEquals<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> source, IReadOnlyDictionary<TKey, TValue> other, IEqualityComparer<TValue> valueComparer)
     {
         if (source.Count != other.Count) return false;
 
