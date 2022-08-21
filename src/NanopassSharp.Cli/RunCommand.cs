@@ -2,21 +2,15 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-using NanopassSharp.Models;
 
 namespace NanopassSharp.Cli;
 
 internal sealed class RunCommand : AsyncCommand<RunCommand.Settings>
 {
-
     public sealed class Settings : CommandSettings
     {
-
         public Settings()
         {
             projectFile = new(() => FindProjectFile(ProjectPath));
@@ -57,26 +51,12 @@ internal sealed class RunCommand : AsyncCommand<RunCommand.Settings>
 
             return ValidationResult.Success();
         }
-
     }
 
 
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
-    {
-        var projectFile = settings.ProjectFile;
-        var passesFile = settings.PassesFile;
-
-        string yaml = await passesFile!.ReadAllTextAsync();
-        var models = DeserializeYaml(yaml);
-        if (models is null) return 1;
-
-        var generator = await PassGenerator.CreateAsync(models);
-        string s = await generator.RunAsync(projectFile!.FullName);
-        Console.WriteLine(s);
-
-        return 0;
-    }
+    public override Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
+        Task.FromResult(0);
 
     private static FileInfo? FindProjectFile(string path)
     {
@@ -94,22 +74,4 @@ internal sealed class RunCommand : AsyncCommand<RunCommand.Settings>
 
         return null;
     }
-
-    private static IReadOnlyList<PassModel>? DeserializeYaml(string yaml)
-    {
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(HyphenatedNamingConvention.Instance)
-            .IgnoreFields()
-            .Build();
-        try
-        {
-            var result = deserializer.Deserialize<List<PassModel>>(yaml);
-            return result;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
 }
