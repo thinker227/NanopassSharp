@@ -44,7 +44,8 @@ public sealed class AstNodeHierarchyBuilder
     /// <summary>
     /// Builds an <see cref="AstNodeHierarchy"/> from the builder.
     /// </summary>
-    public AstNodeHierarchy Build() => new(Roots.ToList());
+    public AstNodeHierarchy Build() =>
+        rootBuilders.Count == 0 ? AstNodeHierarchy.Empty : (new(Roots.ToList()));
     /// <summary>
     /// Implicitly converts an <see cref="AstNodeBuilder"/> to an <see cref="AstNodeHierarchy"/>
     /// by calling <see cref="Build"/>.
