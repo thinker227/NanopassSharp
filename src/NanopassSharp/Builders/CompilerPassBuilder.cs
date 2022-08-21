@@ -116,7 +116,8 @@ public sealed class CompilerPassBuilder
     public CompilerPass Build() =>
         new(Name, Documentation, new(Transformations.ToList()), Previous, Next);
     /// <summary>
-    /// Implicitly converts a <see cref="CompilerPassBuilder"/> to a <see cref="CompilerPass"/>.
+    /// Implicitly converts a <see cref="CompilerPassBuilder"/> to a <see cref="CompilerPass"/>
+    /// by calling <see cref="Build"/>.
     /// </summary>
     /// <param name="builder">The source builder.</param>
     public static implicit operator CompilerPass(CompilerPassBuilder builder) =>

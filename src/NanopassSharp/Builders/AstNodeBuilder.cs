@@ -24,15 +24,18 @@ public sealed class AstNodeBuilder
     /// <inheritdoc cref="AstNode.Parent" path="/summary"/>
     /// </summary>
     /// <remarks>This property builds the entire node in order to retrieve the parent.</remarks>
-    public AstNode? Parent => Build().Parent;
+    public AstNode? Parent =>
+        Build().Parent;
     /// <summary>
     /// <inheritdoc cref="AstNode.Children" path="/summary"/>
     /// </summary>
+    /// <remarks>This property builds the entire node in order to retrieve the children.</remarks>
     public IReadOnlyDictionary<string, AstNode> Children =>
         Build().Children;
     /// <summary>
     /// <inheritdoc cref="AstNode.Members" path="/summary"/>
     /// </summary>
+    /// <remarks>This property builds all members.</remarks>
     public IReadOnlyDictionary<string, AstNodeMember> Members =>
         memberBuilders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Build());
     /// <summary>

@@ -98,7 +98,8 @@ public sealed class AstNodeMemberBuilder
     public AstNodeMember Build() =>
         new(Name, Documentation, Type, new HashSet<object>(Attributes));
     /// <summary>
-    /// Implicitly converts an <see cref="AstNodeMemberBuilder"/> to an <see cref="AstNodeMember"/>.
+    /// Implicitly converts an <see cref="AstNodeMemberBuilder"/> to an <see cref="AstNodeMember"/>
+    /// by calling <see cref="Build"/>.
     /// </summary>
     /// <param name="builder">The source builder.</param>
     public static implicit operator AstNodeMember(AstNodeMemberBuilder builder) =>

@@ -51,7 +51,8 @@ public sealed class AstNodeHierarchyBuilder
     /// </summary>
     public AstNodeHierarchy Build() => new(Roots.ToList());
     /// <summary>
-    /// Implicitly converts an <see cref="AstNodeBuilder"/> to an <see cref="AstNodeHierarchy"/>.
+    /// Implicitly converts an <see cref="AstNodeBuilder"/> to an <see cref="AstNodeHierarchy"/>
+    /// by calling <see cref="Build"/>.
     /// </summary>
     /// <param name="builder">The source builder.</param>
     public static implicit operator AstNodeHierarchy(AstNodeHierarchyBuilder builder) =>
