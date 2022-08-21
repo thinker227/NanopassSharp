@@ -28,11 +28,6 @@ public sealed class AstNodeHierarchyBuilder
 
 
 
-    //public AstNodeHierarchyBuilder AddRoot(AstNode root)
-    //{
-    //    rootBuilders.Add(new AstNodeBuilder(root));
-    //    return this;
-    //}
     /// <summary>
     /// Adds a root node to the hierarchy.
     /// </summary>

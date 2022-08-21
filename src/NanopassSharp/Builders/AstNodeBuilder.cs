@@ -58,15 +58,6 @@ public sealed class AstNodeBuilder
         memberBuilders = new();
         Attributes = new HashSet<object>();
     }
-    //public AstNodeBuilder(AstNode node)
-    //{
-    //    Name = node.Name;
-    //    Documentation = node.Documentation;
-    //    var members = node.Members
-    //        .Select(kvp => new KeyValuePair<string, AstNodeMemberBuilder>(kvp.Key, new AstNodeMemberBuilder(kvp.Value)));
-    //    memberBuilders = new Dictionary<string, AstNodeMemberBuilder>(members);
-    //    Attributes = new HashSet<object>(node.Attributes);
-    //}
 
 
 
