@@ -9,8 +9,8 @@ namespace NanopassSharp.Builders;
 public sealed class AstNodeBuilder
 {
     private AstNodeBuilder? parent;
-    private readonly Dictionary<string, AstNodeBuilder> childrenBuilders;
-    private readonly Dictionary<string, AstNodeMemberBuilder> memberBuilders;
+    private readonly List<AstNodeBuilder> childrenBuilders;
+    private readonly List<AstNodeMemberBuilder> memberBuilders;
 
     /// <summary>
     /// <inheritdoc cref="AstNode.Name" path="/summary"/>
@@ -23,21 +23,18 @@ public sealed class AstNodeBuilder
     /// <summary>
     /// <inheritdoc cref="AstNode.Parent" path="/summary"/>
     /// </summary>
-    /// <remarks>This property builds the entire node in order to retrieve the parent.</remarks>
-    public AstNode? Parent =>
-        Build().Parent;
+    public AstNodeBuilder? Parent =>
+        parent;
     /// <summary>
     /// <inheritdoc cref="AstNode.Children" path="/summary"/>
     /// </summary>
-    /// <remarks>This property builds the entire node in order to retrieve the children.</remarks>
-    public IReadOnlyDictionary<string, AstNode> Children =>
-        Build().Children;
+    public IReadOnlyDictionary<string, AstNodeBuilder> Children =>
+        childrenBuilders.ToDictionary(b => b.Name);
     /// <summary>
     /// <inheritdoc cref="AstNode.Members" path="/summary"/>
     /// </summary>
-    /// <remarks>This property builds all members.</remarks>
-    public IReadOnlyDictionary<string, AstNodeMember> Members =>
-        memberBuilders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Build());
+    public IReadOnlyDictionary<string, AstNodeMemberBuilder> Members =>
+        memberBuilders.ToDictionary(b => b.Name);
     /// <summary>
     /// <inheritdoc cref="AstNode.Attributes" path="/summary"/>
     /// </summary>
@@ -109,7 +106,7 @@ public sealed class AstNodeBuilder
         var current = root;
         foreach (string p in path)
         {
-            current = current.childrenBuilders[p];
+            current = current.Children[p];
         }
         return current;
     }
@@ -160,7 +157,7 @@ public sealed class AstNodeBuilder
     }
     private AstNodeBuilder AddChild(AstNodeBuilder child)
     {
-        childrenBuilders.Add(child.Name, child);
+        childrenBuilders.Add(child);
         return child;
     }
     /// <summary>
@@ -170,7 +167,7 @@ public sealed class AstNodeBuilder
     /// <returns>The current builder.</returns>
     public AstNodeBuilder AddMember(AstNodeMember member)
     {
-        memberBuilders.Add(member.Name, AstNodeMemberBuilder.FromMember(member));
+        memberBuilders.Add(AstNodeMemberBuilder.FromMember(member));
         return this;
     }
     /// <summary>
@@ -183,7 +180,7 @@ public sealed class AstNodeBuilder
     public AstNodeMemberBuilder AddMember(string name, string? documentation = null, string? type = null)
     {
         var memberBuilder = new AstNodeMemberBuilder(name).WithDocumentation(documentation).WithType(type);
-        memberBuilders.Add(name, memberBuilder);
+        memberBuilders.Add(memberBuilder);
         return memberBuilder;
     }
     /// <summary>
@@ -198,6 +195,11 @@ public sealed class AstNodeBuilder
     }
 
     /// <summary>
+    /// Builds all member builders into a dictionary of members.
+    /// </summary>
+    private IReadOnlyDictionary<string, AstNodeMember> BuildMembers() =>
+        memberBuilders.ToDictionary(b => b.Name, b => b.Build());
+    /// <summary>
     /// Builds the current node "upwards", primarily building the parent node, followed by child nodes.
     /// Any child builders with the same name as <paramref name="child"/> are ignored.
     /// In successive recursive calls, <paramref name="child"/> is always null.
@@ -206,8 +208,8 @@ public sealed class AstNodeBuilder
     {
         var parentNode = parent?.BuildUp(this).node;
         Dictionary<string, AstNode> children = new();
-        AstNode node = new(Name, Documentation, parentNode, children, Members, new HashSet<object>(Attributes));
-        foreach (var (name, builder) in childrenBuilders)
+        AstNode node = new(Name, Documentation, parentNode, children, BuildMembers(), new HashSet<object>(Attributes));
+        foreach (var (name, builder) in Children)
         {
             if (name == child?.Name) continue;
             children.Add(name, builder.BuildDown(node));
@@ -220,8 +222,8 @@ public sealed class AstNodeBuilder
     private AstNode BuildDown(AstNode? parent)
     {
         Dictionary<string, AstNode> children = new();
-        AstNode node = new(Name, Documentation, parent, children, Members, new HashSet<object>(Attributes));
-        foreach (var (name, builder) in childrenBuilders)
+        AstNode node = new(Name, Documentation, parent, children, BuildMembers(), new HashSet<object>(Attributes));
+        foreach (var (name, builder) in Children)
         {
             children.Add(name, builder.BuildDown(node));
         }
