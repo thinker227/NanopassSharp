@@ -29,6 +29,21 @@ public sealed class AstNodeHierarchyBuilder
 
 
     /// <summary>
+    /// Creates a new <see cref="AstNodeHierarchyBuilder"/>
+    /// from a <see cref="AstNodeHierarchy"/>.
+    /// </summary>
+    /// <param name="hierarchy">The source hierarchy.</param>
+    public static AstNodeHierarchyBuilder FromHierarchy(AstNodeHierarchy hierarchy)
+    {
+        AstNodeHierarchyBuilder builder = new();
+        foreach (var root in hierarchy.Roots)
+        {
+            builder.AddRoot(root);
+        }
+        return builder;
+    }
+
+    /// <summary>
     /// Adds a root node to the hierarchy.
     /// </summary>
     /// <param name="name">The name of the node.</param>
@@ -36,9 +51,23 @@ public sealed class AstNodeHierarchyBuilder
     /// <returns>A new builder for the node.</returns>
     public AstNodeBuilder AddRoot(string name, string? documentation = null)
     {
-        var nodeBuilder = new AstNodeBuilder(name).WithDocumentation(documentation);
-        rootBuilders.Add(nodeBuilder);
-        return nodeBuilder;
+        var builder = new AstNodeBuilder(name).WithDocumentation(documentation);
+        return AddRoot(builder);
+    }
+    /// <summary>
+    /// Adds a root node to the hierarchy.
+    /// </summary>
+    /// <param name="root">The root node to add.</param>
+    /// <returns>A new builder for the node.</returns>
+    public AstNodeBuilder AddRoot(AstNode root)
+    {
+        var builder = AstNodeBuilder.FromNode(root);
+        return AddRoot(builder);
+    }
+    private AstNodeBuilder AddRoot(AstNodeBuilder root)
+    {
+        rootBuilders.Add(root);
+        return root;
     }
 
     /// <summary>

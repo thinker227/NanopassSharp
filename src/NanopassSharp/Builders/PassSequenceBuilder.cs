@@ -30,6 +30,21 @@ public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassB
 
 
     /// <summary>
+    /// Creates a new <see cref="PassSequenceBuilder"/>
+    /// from a <see cref="PassSequence"/>.
+    /// </summary>
+    /// <param name="sequence">The source sequence.</param>
+    public static PassSequenceBuilder FromSequence(PassSequence sequence)
+    {
+        PassSequenceBuilder builder = new();
+        foreach (var pass in sequence)
+        {
+            builder.AddPass(pass);
+        }
+        return builder;
+    }
+
+    /// <summary>
     /// Adds a pass to the sequence.
     /// </summary>
     /// <param name="name">The name of the pass.</param>
@@ -39,6 +54,20 @@ public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassB
         var last = builders[^1];
         var builder = new CompilerPassBuilder(name, last.Name).WithDocumentation(documentation);
         builders.Add(builder);
+        last.Next = builder.Name;
+        return builder;
+    }
+    /// <summary>
+    /// Adds a pass to the sequence.
+    /// </summary>
+    /// <param name="pass">The pass to add.</param>
+    /// <returns>A new builder for the pass.</returns>
+    public ISequentialCompilerPassBuilder AddPass(CompilerPass pass)
+    {
+        var last = builders[^1];
+        var builder = CompilerPassBuilder.FromPass(pass);
+        builders.Add(builder);
+        builder.Previous = last.Name;
         last.Next = builder.Name;
         return builder;
     }

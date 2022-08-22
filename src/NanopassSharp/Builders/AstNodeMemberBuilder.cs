@@ -37,19 +37,22 @@ public sealed class AstNodeMemberBuilder
         Type = null;
         Attributes = new HashSet<object>();
     }
+
+
+
     /// <summary>
-    /// Initializes a new <see cref="AstNodeBuilder"/> instance.
+    /// Creates a new <see cref="AstNodeMemberBuilder"/>
+    /// from a <see cref="AstNodeMember"/>.
     /// </summary>
-    /// <param name="member">The <see cref="AstNodeMember"/> to create the builder from.</param>
-    public AstNodeMemberBuilder(AstNodeMember member)
-    {
-        Name = member.Name;
-        Documentation = member.Documentation;
-        Type = member.Type;
-        Attributes = new HashSet<object>(member.Attributes);
-    }
-
-
+    /// <param name="member">The source member.</param>
+    public static AstNodeMemberBuilder FromMember(AstNodeMember member) =>
+        new(member.Name)
+        {
+            Name = member.Name,
+            Documentation = member.Documentation,
+            Type = member.Type,
+            Attributes = new HashSet<object>(member.Attributes)
+        };
 
     /// <summary>
     /// Sets the name of the member.

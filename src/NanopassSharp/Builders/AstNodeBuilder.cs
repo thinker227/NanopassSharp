@@ -62,6 +62,59 @@ public sealed class AstNodeBuilder
 
 
     /// <summary>
+    /// Creates a new <see cref="AstNodeBuilder"/>
+    /// from a <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The source node.</param>
+    public static AstNodeBuilder FromNode(AstNode node)
+    {
+        var root = node.GetRoot();
+        var rootBuilder = ShallowFromNode(root);
+        DeepFromNode(rootBuilder, root);
+        return GetBuilderForNode(rootBuilder, node);
+    }
+    /// <summary>
+    /// Creates a shallow builder from a node.
+    /// </summary>
+    private static AstNodeBuilder ShallowFromNode(AstNode node) =>
+        new(node.Name)
+        {
+            Name = node.Name,
+            Documentation = node.Documentation,
+            Attributes = new HashSet<object>(node.Attributes)
+        };
+    /// <summary>
+    /// Mutates a builder to be a deep copy of a node.
+    /// Modifies <paramref name="builder"/> and thus returns nothing.
+    /// </summary>
+    private static void DeepFromNode(AstNodeBuilder builder, AstNode node)
+    {
+        builder.Name = node.Name;
+        builder.Documentation = node.Documentation;
+        builder.Attributes = new HashSet<object>(node.Attributes);
+
+        foreach (var child in node.Children.Values)
+        {
+            var childBuilder = builder.AddChild(child.Name, child.Documentation);
+            DeepFromNode(childBuilder, child);
+        }
+    }
+    /// <summary>
+    /// Locates the builder for a node from a root builder
+    /// based on the node's path from its root.
+    /// </summary>
+    private static AstNodeBuilder GetBuilderForNode(AstNodeBuilder root, AstNode node)
+    {
+        var path = node.GetPathFromRoot();
+        var current = root;
+        foreach (string p in path)
+        {
+            current = current.childrenBuilders[p];
+        }
+        return current;
+    }
+
+    /// <summary>
     /// Sets the name of the node.
     /// </summary>
     /// <param name="name"><inheritdoc cref="Name" path="/summary"/></param>
@@ -93,8 +146,22 @@ public sealed class AstNodeBuilder
             parent = this,
             Documentation = documentation
         };
-        childrenBuilders.Add(name, nodeBuilder);
-        return nodeBuilder;
+        return AddChild(nodeBuilder);
+    }
+    /// <summary>
+    /// Adds a child to the node.
+    /// </summary>
+    /// <param name="name">The child node.</param>
+    /// <returns>A new builder for the child node.</returns>
+    public AstNodeBuilder AddChild(AstNode child)
+    {
+        var builder = FromNode(child);
+        return AddChild(builder);
+    }
+    private AstNodeBuilder AddChild(AstNodeBuilder child)
+    {
+        childrenBuilders.Add(child.Name, child);
+        return child;
     }
     /// <summary>
     /// Adds a member to the node.
@@ -103,7 +170,7 @@ public sealed class AstNodeBuilder
     /// <returns>The current builder.</returns>
     public AstNodeBuilder AddMember(AstNodeMember member)
     {
-        memberBuilders.Add(member.Name, new AstNodeMemberBuilder(member));
+        memberBuilders.Add(member.Name, AstNodeMemberBuilder.FromMember(member));
         return this;
     }
     /// <summary>

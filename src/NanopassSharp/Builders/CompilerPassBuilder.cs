@@ -44,20 +44,23 @@ public sealed class CompilerPassBuilder : ISequentialCompilerPassBuilder
         Previous = previous;
         Next = null;
     }
+
+
+
     /// <summary>
-    /// Initializes a new <see cref="CompilerPassBuilder"/> instance.
+    /// Creates a new <see cref="CompilerPassBuilder"/>
+    /// from a <see cref="CompilerPass"/>.
     /// </summary>
-    /// <param name="pass">The <see cref="CompilerPass"/> to create the builder from.</param>
-    public CompilerPassBuilder(CompilerPass pass)
-    {
-        Name = pass.Name;
-        Documentation = pass.Documentation;
-        Transformations = pass.Transformations.Transformations.ToList();
-        Previous = pass.Previous;
-        Next = pass.Next;
-    }
-
-
+    /// <param name="pass">The source pass.</param>
+    public static CompilerPassBuilder FromPass(CompilerPass pass) =>
+        new(pass.Name, pass.Previous)
+        {
+            Name = pass.Name,
+            Documentation = pass.Documentation,
+            Transformations = pass.Transformations.Transformations.ToList(),
+            Previous = pass.Previous,
+            Next = pass.Next
+        };
 
     /// <summary>
     /// Sets the name of the pass.
