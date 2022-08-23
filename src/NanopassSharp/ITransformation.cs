@@ -31,7 +31,7 @@ public interface ITransformation
     /// </summary>
     /// <param name="tree">The tree the node is a part of.</param>
     /// <param name="node">The node to apply the transformation to.</param>
-    /// <returns>A new node with the applied transformation.</returns>
+    /// <returns>A new tree with the applied transformation.</returns>
     AstNodeHierarchy ApplyToNode(AstNodeHierarchy tree, AstNode node);
     /// <summary>
     /// Applies the transformation to a node member.
@@ -39,7 +39,7 @@ public interface ITransformation
     /// <param name="tree">The tree the node of the member is a part of.</param>
     /// <param name="node">The node the member is a part of.</param>
     /// <param name="member">The member to apply the transformation to.</param>
-    /// <returns>A new member with the applied transformation.</returns>
+    /// <returns>A new tree with the applied transformation.</returns>
     AstNodeHierarchy ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member);
 }
 
