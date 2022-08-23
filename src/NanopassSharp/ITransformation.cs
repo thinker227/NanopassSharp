@@ -21,6 +21,12 @@ public interface ITransformationDescription
 public interface ITransformation
 {
     /// <summary>
+    /// Applies the transformation to a tree.
+    /// </summary>
+    /// <param name="tree">The tree to apply the transformation to.</param>
+    /// <returns>A new tree with the applied transformation.</returns>
+    AstNodeHierarchy ApplyToTree(AstNodeHierarchy tree);
+    /// <summary>
     /// Applies the transformation to a node tree.
     /// </summary>
     /// <param name="tree">The tree the node is a part of.</param>
@@ -47,6 +53,11 @@ public interface ITransformationPattern
     /// </summary>
     bool IsRecursive { get; }
 
+    /// <summary>
+    /// Returns whether a tree matches the pattern.
+    /// </summary>
+    /// <param name="tree">The tree to check.</param>
+    bool IsMatch(AstNodeHierarchy tree);
     /// <summary>
     /// Returns whether a node matches the pattern.
     /// </summary>
