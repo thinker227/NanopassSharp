@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NanopassSharp.Builders;
@@ -57,12 +58,26 @@ public sealed class AstNodeHierarchyBuilder
     /// <summary>
     /// Adds a root node to the hierarchy.
     /// </summary>
+    /// <param name="name">The name of the node.</param>
+    /// <param name="builderAction">An action to apply to the new builder.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder AddRoot(string name, Action<AstNodeBuilder> builderAction)
+    {
+        AstNodeBuilder builder = new(name);
+        AddRoot(builder);
+        builderAction(builder);
+        return this;
+    }
+    /// <summary>
+    /// Adds a root node to the hierarchy.
+    /// </summary>
     /// <param name="root">The root node to add.</param>
-    /// <returns>A new builder for the node.</returns>
-    public AstNodeBuilder AddRoot(AstNode root)
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder AddRoot(AstNode root)
     {
         var builder = AstNodeBuilder.FromNode(root);
-        return AddRoot(builder);
+        AddRoot(builder);
+        return this;
     }
     private AstNodeBuilder AddRoot(AstNodeBuilder root)
     {

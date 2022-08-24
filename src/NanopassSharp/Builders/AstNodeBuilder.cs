@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NanopassSharp.Builders;
@@ -135,6 +136,7 @@ public sealed class AstNodeBuilder
     /// Adds a child to the node.
     /// </summary>
     /// <param name="name">The name of the child.</param>
+    /// <param name="documentation">The documentation of the child.</param>
     /// <returns>A new builder for the child node.</returns>
     public AstNodeBuilder AddChild(string name, string? documentation = null)
     {
@@ -144,6 +146,22 @@ public sealed class AstNodeBuilder
             Documentation = documentation
         };
         return AddChild(nodeBuilder);
+    }
+    /// <summary>
+    /// Adds a child to the node.
+    /// </summary>
+    /// <param name="name">The name of the child.</param>
+    /// <param name="builderAction">An action to apply to the new builder.</param>
+    /// <returns>A current builder.</returns>
+    public AstNodeBuilder AddChild(string name, Action<AstNodeBuilder> builderAction)
+    {
+        AstNodeBuilder nodeBuilder = new(name)
+        {
+            parent = this
+        };
+        AddChild(nodeBuilder);
+        builderAction(nodeBuilder);
+        return this;
     }
     /// <summary>
     /// Adds a child to the node.
@@ -167,7 +185,7 @@ public sealed class AstNodeBuilder
     /// <returns>The current builder.</returns>
     public AstNodeBuilder AddMember(AstNodeMember member)
     {
-        memberBuilders.Add(AstNodeMemberBuilder.FromMember(member));
+        AddMember(AstNodeMemberBuilder.FromMember(member));
         return this;
     }
     /// <summary>
@@ -180,8 +198,25 @@ public sealed class AstNodeBuilder
     public AstNodeMemberBuilder AddMember(string name, string? documentation = null, string? type = null)
     {
         var memberBuilder = new AstNodeMemberBuilder(name).WithDocumentation(documentation).WithType(type);
-        memberBuilders.Add(memberBuilder);
-        return memberBuilder;
+        return AddMember(memberBuilder);
+    }
+    /// <summary>
+    /// Adds a member to the node.
+    /// </summary>
+    /// <param name="name">The name of the member.</param>
+    /// <param name="builderAction">An action to apply to the new builder.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeBuilder AddMember(string name, Action<AstNodeMemberBuilder> builderAction)
+    {
+        AstNodeMemberBuilder memberBuilder = new(name);
+        AddMember(memberBuilder);
+        builderAction(memberBuilder);
+        return this;
+    }
+    private AstNodeMemberBuilder AddMember(AstNodeMemberBuilder member)
+    {
+        memberBuilders.Add(member);
+        return member;
     }
     /// <summary>
     /// Adds an attribute to the node.
