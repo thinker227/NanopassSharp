@@ -168,13 +168,20 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
     /// <param name="nodeSelector">A function to select the node name from an object.</param>
     /// <returns>A new <see cref="NodePath"/> created by
     /// iterating through the recursive structure.</returns>
-    public static NodePath Create<T>(T start, Func<T, (T?, bool)> nextSelector, Func<T, string> nodeSelector)
+    public static NodePath Create<T>(T start, Func<T, (T?, bool)> nextSelector, Func<T, string> nodeSelector) where T : class
     {
         List<string> nodes = new();
+        HashSet<T> visited = new(ReferenceEqualityComparer.Instance);
 
         var current = start;
         while (true)
         {
+            if (visited.Contains(current))
+            {
+                throw new InvalidOperationException("Instance has already been visited");
+            }
+            visited.Add(current);
+
             string node = nodeSelector(current);
             nodes.Insert(0, node);
 
