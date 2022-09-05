@@ -234,9 +234,3 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
     public static bool operator !=(NodePath a, NodePath b) =>
         !a.Equals(b);
 }
-
-public static class NodePathExtensions
-{
-    public static NodePath GetPath(this AstNode node) =>
-        NodePath.Create(node, n => (n.Parent, n.Parent is not null), n => n.Name);
-}
