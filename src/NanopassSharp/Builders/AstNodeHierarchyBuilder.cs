@@ -111,7 +111,7 @@ public sealed class AstNodeHierarchyBuilder
     public AstNodeBuilder CreateNode(AstNode node)
     {
         var path = node.GetPath();
-        
+
         var builder = CreateNode(path);
         builder.Documentation = node.Documentation;
         builder.Children = node.Children.Keys.ToList();
@@ -139,12 +139,71 @@ public sealed class AstNodeHierarchyBuilder
     }
 
     /// <summary>
+    /// Gets a <see cref="AstNodeBuilder"/> from a specified path to a node.
+    /// </summary>
+    /// <param name="path">The path to get the builder from.</param>
+    /// <returns>The builder for the node that <paramref name="path"/> specified,
+    /// or <see langword="null"/> if there is no builder for the path.</returns>
+    public AstNodeBuilder? GetNodeFromPath(NodePath path) =>
+        builders.TryGetValue(path, out var builder)
+            ? builder
+            : null;
+
+    /// <summary>
     /// Builds an <see cref="AstNodeHierarchy"/> from the builder.
     /// </summary>
-    public AstNodeHierarchy Build()
+    /// <param name="missingChildBehavior">The behavior if a node is missing.</param>
+    public AstNodeHierarchy Build(MissingChildBehavior missingChildBehavior = MissingChildBehavior.Throw)
     {
-        throw new NotImplementedException();
+        List<AstNode> roots = new();
+        AstNodeHierarchy hierarchy = new(roots);
+
+        foreach (string root in Roots)
+        {
+            NodePath rootPath = new(root);
+            var rootBuilder = GetNodeFromPath(rootPath)
+                ?? GetMissingNode(rootPath, missingChildBehavior);
+            var rootNode = BuildNode(null, rootBuilder, missingChildBehavior);
+            roots.Add(rootNode);
+        }
+
+        return hierarchy;
     }
+    private AstNode BuildNode(AstNode? parent, AstNodeBuilder builder, MissingChildBehavior missingChildBehavior)
+    {
+        var path = builder.Path;
+
+        Dictionary<string, AstNode> children = new();
+        AstNode node = new(
+            builder.Name,
+            builder.Documentation,
+            parent,
+            children,
+            null!,
+            new HashSet<object>(builder.Attributes)
+        );
+
+        foreach (string child in builder.Children)
+        {
+            var childPath = path.CreateLeafPath(child);
+            var childBuilder = GetNodeFromPath(childPath)
+                ?? GetMissingNode(childPath, missingChildBehavior);
+            var childNode = BuildNode(node, childBuilder, missingChildBehavior);
+            children.Add(childNode.Name, childNode);
+        }
+
+        return node;
+    }
+    private AstNodeBuilder GetMissingNode(NodePath path, MissingChildBehavior missingChildBehavior)
+    {        
+        if (missingChildBehavior == MissingChildBehavior.Throw)
+        {
+            throw new InvalidOperationException($"Node '{path}' does not exist");
+        }
+
+        return CreateNode(path);
+    }
+
     /// <summary>
     /// Implicitly converts an <see cref="AstNodeBuilder"/> to an <see cref="AstNodeHierarchy"/>
     /// by calling <see cref="Build"/>.
@@ -152,4 +211,21 @@ public sealed class AstNodeHierarchyBuilder
     /// <param name="builder">The source builder.</param>
     public static implicit operator AstNodeHierarchy(AstNodeHierarchyBuilder builder) =>
         builder.Build();
+
+
+
+    /// <summary>
+    /// The behavior if a child node is missing when building a hierarchy.
+    /// </summary>
+    public enum MissingChildBehavior
+    {
+        /// <summary>
+        /// Throw an exception if a child node is missing.
+        /// </summary>
+        Throw,
+        /// <summary>
+        /// Create an empty node if a child node is missing.
+        /// </summary>
+        CreateEmptyNode
+    }
 }
