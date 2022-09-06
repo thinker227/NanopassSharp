@@ -9,13 +9,12 @@ namespace NanopassSharp.Builders;
 /// </summary>
 public sealed class AstNodeHierarchyBuilder
 {
-    private readonly List<AstNodeBuilder> rootBuilders;
+    private readonly Dictionary<NodePath, AstNodeBuilder> builders;
 
     /// <summary>
-    /// <inheritdoc cref="AstNodeHierarchy.Roots"/>
+    /// The roots of the hierarchy.
     /// </summary>
-    public IEnumerable<AstNode> Roots =>
-        rootBuilders.Select(b => b.Build());
+    public ICollection<string> Roots { get; set; }
 
 
 
@@ -24,7 +23,8 @@ public sealed class AstNodeHierarchyBuilder
     /// </summary>
     public AstNodeHierarchyBuilder()
     {
-        rootBuilders = new();
+        builders = new();
+        Roots = new List<string>();
     }
 
 
@@ -36,60 +36,115 @@ public sealed class AstNodeHierarchyBuilder
     /// <param name="hierarchy">The source hierarchy.</param>
     public static AstNodeHierarchyBuilder FromHierarchy(AstNodeHierarchy hierarchy)
     {
-        AstNodeHierarchyBuilder builder = new();
-        foreach (var root in hierarchy.Roots)
-        {
-            builder.AddRoot(root);
-        }
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Creates a new node in the hierarchy.
+    /// </summary>
+    /// <param name="name">The name of the new node.</param>
+    /// <param name="parentPath">The path to the parent of the node.
+    /// If <see langword="null"/> then the node will be a root node.</param>
+    /// <returns>A builder for the new node.</returns>
+    /// <remarks>
+    /// If a builder for a node with the same path already exists,
+    /// then the already existing builder will be returned.
+    /// </remarks>
+    public AstNodeBuilder CreateNode(string name, string? parentPath)
+    {
+        NodePath? pp = parentPath is null
+            ? null
+            : NodePath.ParseUnsafe(parentPath);
+        return CreateNode(name, pp);
+    }
+    /// <summary>
+    /// Creates a new node in the hierarchy.
+    /// </summary>
+    /// <param name="name">The name of the new node.</param>
+    /// <param name="parentPath">The path to the parent of the node.
+    /// If <see langword="null"/> then the node will be a root node.</param>
+    /// <returns>A builder for the new node.</returns>
+    /// <remarks>
+    /// If a builder for a node with the same path already exists,
+    /// then the already existing builder will be returned.
+    /// </remarks>
+    public AstNodeBuilder CreateNode(string name, NodePath? parentPath) =>
+        CreateNode(parentPath?.CreateLeafPath(name) ?? new(name));
+    /// <summary>
+    /// Creates a new node in the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path to the node.</param>
+    /// <returns>A builder for the new node.</returns>
+    /// <remarks>
+    /// If a builder for a node with the same path already exists,
+    /// then the already existing builder will be returned.
+    /// </remarks>
+    public AstNodeBuilder CreateNode(string fullPath) =>
+        CreateNode(NodePath.ParseUnsafe(fullPath));
+    /// <summary>
+    /// Creates a new node in the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path to the node.</param>
+    /// <returns>A builder for the new node.</returns>
+    /// <remarks>
+    /// If a builder for a node with the same path already exists,
+    /// then the already existing builder will be returned.
+    /// </remarks>
+    public AstNodeBuilder CreateNode(NodePath fullPath)
+    {
+        if (builders.TryGetValue(fullPath, out var b)) return b;
+
+        AstNodeBuilder builder = new(this, fullPath);
+        builders.Add(fullPath, builder);
+
+        return builder;
+    }
+    /// <summary>
+    /// Creates a new node in the hierarchy from an existing <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The node to create the new node from.</param>
+    /// <returns>A builder for the new node.</returns>
+    /// <remarks>
+    /// If a builder for a node with the same path already exists,
+    /// then the already existing builder will be overwritten with the data from the node.
+    /// </remarks>
+    public AstNodeBuilder CreateNode(AstNode node)
+    {
+        var path = node.GetPath();
+        
+        var builder = CreateNode(path);
+        builder.Documentation = node.Documentation;
+        builder.Children = node.Children.Keys.ToList();
+        builder.Members = node.Members.Keys.ToList();
+        builder.Attributes = new HashSet<object>(node.Attributes);
+
         return builder;
     }
 
     /// <summary>
     /// Adds a root node to the hierarchy.
     /// </summary>
-    /// <param name="name">The name of the node.</param>
-    /// <param name="documentation">The documentation of the node.</param>
-    /// <returns>A new builder for the node.</returns>
-    public AstNodeBuilder AddRoot(string name, string? documentation = null)
+    /// <param name="name">The name of the new node.</param>
+    /// <returns>A builder for the new node.</returns>
+    /// <remarks>
+    /// If a builder for a root with the same name already exists,
+    /// then the already existing builder will be returned.
+    /// </remarks>
+    public AstNodeBuilder AddRoot(string name)
     {
-        var builder = new AstNodeBuilder(name).WithDocumentation(documentation);
-        return AddRoot(builder);
-    }
-    /// <summary>
-    /// Adds a root node to the hierarchy.
-    /// </summary>
-    /// <param name="name">The name of the node.</param>
-    /// <param name="builderAction">An action to apply to the new builder.</param>
-    /// <returns>The current builder.</returns>
-    public AstNodeHierarchyBuilder AddRoot(string name, Action<AstNodeBuilder> builderAction)
-    {
-        AstNodeBuilder builder = new(name);
-        AddRoot(builder);
-        builderAction(builder);
-        return this;
-    }
-    /// <summary>
-    /// Adds a root node to the hierarchy.
-    /// </summary>
-    /// <param name="root">The root node to add.</param>
-    /// <returns>The current builder.</returns>
-    public AstNodeHierarchyBuilder AddRoot(AstNode root)
-    {
-        var builder = AstNodeBuilder.FromNode(root);
-        AddRoot(builder);
-        return this;
-    }
-    private AstNodeBuilder AddRoot(AstNodeBuilder root)
-    {
-        rootBuilders.Add(root);
-        return root;
+        var builder = CreateNode(name);
+        Roots.Add(name);
+
+        return builder;
     }
 
     /// <summary>
     /// Builds an <see cref="AstNodeHierarchy"/> from the builder.
     /// </summary>
-    public AstNodeHierarchy Build() =>
-        rootBuilders.Count == 0 ? AstNodeHierarchy.Empty : (new(Roots.ToList()));
+    public AstNodeHierarchy Build()
+    {
+        throw new NotImplementedException();
+    }
     /// <summary>
     /// Implicitly converts an <see cref="AstNodeBuilder"/> to an <see cref="AstNodeHierarchy"/>
     /// by calling <see cref="Build"/>.
