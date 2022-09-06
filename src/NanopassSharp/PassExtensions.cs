@@ -15,15 +15,13 @@ public static class PassExtensions
         node.GetDecendantNodes().Prepend(node);
     public static AstNode GetRoot(this AstNode node) =>
         node.Parent?.GetRoot() ?? node;
-    public static IEnumerable<string> GetPathFromRoot(this AstNode node) =>
-        node.Parent is null
-            ? Enumerable.Empty<string>()
-            : node.Parent.GetPathFromRoot().Append(node.Name);
-    public static IEnumerable<string> GetPathWithRoot(this AstNode node) =>
-        node.Parent is null
-            ? new[] { node.Name }
-            : node.Parent.GetPathWithRoot().Append(node.Name);
-
+    /// <summary>
+    /// Gets the path to an <see cref="AstNode"/> from its root.
+    /// </summary>
+    /// <param name="node">The node to get the path to.</param>
+    public static NodePath GetPath(this AstNode node) =>
+        NodePath.Create(node, n => (n.Parent, n.Parent is not null), n => n.Name);
+    
     public static AstNodeHierarchy ReplaceNode(this AstNodeHierarchy tree, AstNode oldNode, AstNode newNode)
     {
         var root = oldNode.GetRoot();
