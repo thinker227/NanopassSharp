@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace NanopassSharp.Builders;
 
@@ -64,6 +65,7 @@ public sealed class AstNodeBuilder
         Documentation = documentation;
         return this;
     }
+
     /// <summary>
     /// Adds an attribute to the node.
     /// </summary>
@@ -74,12 +76,34 @@ public sealed class AstNodeBuilder
         Attributes.Add(attribute);
         return this;
     }
+    /// <summary>
+    /// Sets the attributes of the node.
+    /// </summary>
+    /// <param name="attributes"><inheritdoc cref="Attributes" path="/summary"/></param>
+    /// <returns>The current builder.</returns>
+    public AstNodeBuilder WithAttributes(ISet<object> attributes)
+    {
+        Attributes = attributes;
+        return this;
+    }
 
     /// <summary>
     /// Adds a child to the node.
     /// </summary>
     /// <param name="name">The name of the child node.</param>
-    /// <returns>The current builder.</returns>
+    /// <returns>A builder for the child node.</returns>
     public AstNodeBuilder AddChild(string name) =>
         Hierarchy.CreateNode(name, Path);
+    /// <summary>
+    /// Sets the children of the node.
+    /// </summary>
+    /// <param name="children"><inheritdoc cref="Children" path="/summary"/></param>
+    /// <returns></returns>
+    public AstNodeBuilder WithChildren(IEnumerable<string> children)
+    {
+        Children = children is ICollection<string> collection
+            ? collection
+            : children.ToList();
+        return this;
+    }
 }
