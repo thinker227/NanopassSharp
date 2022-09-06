@@ -158,6 +158,19 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
         return new NodePath(nodes);
     }
     /// <summary>
+    /// Parses a <see cref="NodePath"/> from a string,
+    /// separating node names a period character ('.').
+    /// Throws an exception if the input string is not in the correct format.
+    /// </summary>
+    /// <param name="s">The string to parse.</param>
+    /// <returns>The parsed <see cref="NodePath"/>.</returns>
+    /// <exception cref="FormatException">
+    /// <paramref name="s"/> is not in the correct format.
+    /// </exception>
+    public static NodePath ParseUnsafe(string s) =>
+        Parse(s) ?? throw new FormatException("String was not in the correct format");
+
+    /// <summary>
     /// Creates a new <see cref="NodePath"/> from a recursive structure.
     /// </summary>
     /// <typeparam name="T">The type of the recursive structure.</typeparam>
