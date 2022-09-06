@@ -225,7 +225,7 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
         GetParentPaths().Prepend(this);
 
     public IEnumerator<string> GetEnumerator() =>
-        ((IEnumerable<string>)nodes).GetEnumerator();
+        nodes.Reverse().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() =>
         GetEnumerator();
 
