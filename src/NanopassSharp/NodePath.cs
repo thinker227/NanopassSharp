@@ -127,6 +127,9 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
         return hashCode.ToHashCode();
     }
 
+    public override string ToString() =>
+        string.Join('.', nodes);
+
     /// <summary>
     /// Parses a <see cref="NodePath"/> from a string,
     /// separating node names a period character ('.').
