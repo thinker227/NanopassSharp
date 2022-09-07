@@ -30,12 +30,12 @@ public class NodePathTests
         yield return new object[]
         {
             new NodePath("foo", "bar", "baz"),
-            new NodePath("foo", "baz")
+            new NodePath("foo", "bar")
         };
         yield return new object[]
         {
             new NodePath("foo", "bar", "baz", "boo", "far", "zaz"),
-            new NodePath("foo", "baz", "baz", "boo", "far")
+            new NodePath("foo", "bar", "baz", "boo", "far")
         };
     }
     [MemberData(nameof(Parent_ReturnsParentPath_Data))]

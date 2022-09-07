@@ -16,9 +16,22 @@ public readonly struct NodePath : IEquatable<NodePath>
     /// <summary>
     /// Gets the path to the parent node of the current outer-most leaf node.
     /// </summary>
-    public NodePath Parent => nodes.Length >= 2
-        ? new NodePath(nodes[0..^2])
-        : throw new InvalidOperationException("Cannot get the parent path of the root node");
+    public NodePath Parent
+    {
+        get
+        {
+            if (IsEmpty)
+            {
+                throw NoNodes();
+            }
+            if (IsRoot)
+            {
+                throw new InvalidOperationException("Cannot get the parent of the root");
+            }
+
+            return new(nodes[..^1]);
+        }
+    }
     /// <summary>
     /// The name of the root node of the graph.
     /// </summary>
@@ -30,10 +43,6 @@ public readonly struct NodePath : IEquatable<NodePath>
             {
                 throw NoNodes();
             }
-            if (nodes.Length == 1)
-            {
-                throw new InvalidOperationException("Cannot get the path to the root of the root node");
-            }
 
             return nodes[0];
         }
@@ -41,7 +50,7 @@ public readonly struct NodePath : IEquatable<NodePath>
     /// <summary>
     /// The name of the node the path leads to, the outer "leaf" of the node graph.
     /// </summary>
-    public string Leaf => IsEmpty
+    public string Leaf => !IsEmpty
         ? nodes[^1]
         : throw NoNodes();
     /// <summary>
@@ -233,7 +242,7 @@ public readonly struct NodePath : IEquatable<NodePath>
 
         if (IsRoot) yield break;
 
-        for (int i = nodes.Length - 2; i >= 0; i++)
+        for (int i = nodes.Length - 1; i > 0; i--)
         {
             yield return new NodePath(nodes[0..i]);
         }
