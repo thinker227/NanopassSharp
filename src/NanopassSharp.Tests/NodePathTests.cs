@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace NanopassSharp.Tests;
 
@@ -17,218 +17,95 @@ public class NodePathTests
     [Fact]
     public void Ctor_SucceedsIfNonEmptyEnumerable()
     {
-        _ = new NodePath(new[] { "foo", "bar", "baz" });
+        new NodePath(new[] { "foo", "bar", "baz" });
     }
 
-    private static IEnumerable<object[]> Parent_ReturnsParentPath_Data()
+    [Fact]
+    public void Equals_ReturnsTrue_WhenRoot()
     {
-        yield return new object[]
-        {
-            new NodePath("foo", "bar"),
-            new NodePath("foo")
-        };
-        yield return new object[]
-        {
-            new NodePath("foo", "bar", "baz"),
-            new NodePath("foo", "baz")
-        };
-        yield return new object[]
-        {
-            new NodePath("foo", "bar", "baz", "boo", "far", "zaz"),
-            new NodePath("foo", "baz", "baz", "boo", "far")
-        };
-    }
-    [MemberData(nameof(Parent_ReturnsParentPath_Data))]
-    [Theory]
-    public void Parent_ReturnsParentPath(NodePath path, NodePath expected)
-    {
-        var parent = path.Parent;
-        Assert.Equal(expected, parent);
+        NodePath a = new("foo");
+        NodePath b = new("foo");
+
+        Assert.True(a.Equals(b));
     }
     [Fact]
-    public void Parent_ThrowsIfRoot()
+    public void Equals_ReturnsFalse_WhenDifferentDepth()
+    {
+        NodePath a = new("foo");
+        NodePath b = new(new[] { "foo", "bar" });
+
+        Assert.False(a.Equals(b));
+    }
+    [Fact]
+    public void Equals_ReturnsTrue_WhenSameElements()
+    {
+        NodePath a = new(new[] { "foo", "bar", "baz" });
+        NodePath b = new(new[] { "foo", "bar", "baz" });
+
+        Assert.True(a.Equals(b));
+    }
+    [Fact]
+    public void Equals_ReturnsFalse_WhenDifferentElements()
+    {
+        NodePath a = new(new[] { "foo", "bar", "baz" });
+        NodePath b = new(new[] { "boo", "far", "zaz" });
+
+        Assert.False(a.Equals(b));
+    }
+
+    [Fact]
+    public void ToString_ReturnsSingleNameForRoot()
     {
         NodePath path = new("foo");
 
-        Assert.Throws<InvalidOperationException>(() => path.Parent);
+        Assert.Equal("foo", path.ToString());
     }
     [Fact]
-    public void Parent_ThrowsIfEmpty()
+    public void ToString_ReturnsPeriodSeparatedForMultipleElements()
     {
-        NodePath path = new();
+        NodePath path = new(new[] { "foo", "bar", "baz" });
 
-        Assert.Throws<InvalidOperationException>(() => path.Parent);
-    }
-
-    private static IEnumerable<object[]> Root_ReturnsRoot_Data()
-    {
-        yield return new object[]
-        {
-            new NodePath("foo"),
-            "foo"
-        };
-        yield return new object[]
-        {
-            new NodePath("baz", "bar"),
-            "baz"
-        };
-        yield return new object[]
-        {
-            new NodePath("foo", "bar", "baz", "boo", "far", "zaz"),
-            "foo"
-        };
-    }
-    [MemberData(nameof(Root_ReturnsRoot_Data))]
-    [Theory]
-    public void Root_ReturnsRoot(NodePath path, string expected)
-    {
-        string root = path.Root;
-
-        Assert.Equal(expected, root);
-    }
-    [Fact]
-    public void Root_ThrowsIfEmpty()
-    {
-        NodePath path = new();
-
-        Assert.Throws<InvalidOperationException>(() => path.Root);
-    }
-
-    private static IEnumerable<object[]> Leaf_ReturnsLeaf_Data()
-    {
-        yield return new object[]
-        {
-            new NodePath("foo"),
-            "foo"
-        };
-        yield return new object[]
-        {
-            new NodePath("foo", "bar", "baz"),
-            "baz"
-        };
-        yield return new object[]
-        {
-            new NodePath("foo", "bar", "baz", "boo", "far", "zaz"),
-            "zaz"
-        };
-    }
-    [MemberData(nameof(Leaf_ReturnsLeaf_Data))]
-    [Theory]
-    public void Leaf_ReturnsLeaf(NodePath path, string expected)
-    {
-        string leaf = path.Leaf;
-
-        Assert.Equal(expected, leaf);
-    }
-
-    [InlineData(new object[] { new[] { "foo" } })]
-    [InlineData(new object[] { new[] { "foo", "bar" } })]
-    [InlineData(new object[] { new[] { "foo", "bar", "baz", "boo", "far", "zaz" } })]
-    [Theory]
-    public void Depth_ReturnsArrayLengthMinusOne(string[] pathValues)
-    {
-        NodePath path = new(pathValues);
-
-        int expected = pathValues.Length - 1;
-        Assert.Equal(expected, path.Depth);
-    }
-    [Fact]
-    public void Depth_ThrowsWhenEmpty()
-    {
-        NodePath path = new();
-
-        Assert.Throws<InvalidOperationException>(() => path.Depth);
+        Assert.Equal("foo.bar.baz", path.ToString());
     }
 
     [Fact]
-    public void IsRoot_ReturnsTrue_WhenRoot()
+    public void Enumeration_ReturnsCorrectOrder()
     {
-        NodePath path = new("foo");
+        NodePath path = new(new[] { "foo", "bar", "baz" });
 
-        Assert.True(path.IsRoot);
-    }
-    [Fact]
-    public void IsRoot_ReturnsFalse_WhenNotRoot()
-    {
-        NodePath path = new("foo", "bar", "baz");
-
-        Assert.False(path.IsRoot);
-    }
-    [Fact]
-    public void IsRoot_ThrowsWhenEmpty()
-    {
-        NodePath path = new();
-
-        Assert.Throws<InvalidOperationException>(() => path.IsRoot);
-    }
-
-    [InlineData(new[] { "foo" }, new[] { "foo" })]
-    [InlineData(new[] { "foo", "bar", "baz" }, new[] { "foo", "bar", "baz" })]
-    [Theory]
-    public void Equals_ReturnsTrue(string[] a, string[] b)
-    {
-        NodePath pathA = new(a);
-        NodePath pathB = new(b);
-
-        Assert.True(pathA.Equals(pathB));
-    }
-    [InlineData(new[] { "foo" }, new[] { "foo", "bar" })]
-    [InlineData(new[] { "foo", "bar", "baz" }, new[] { "boo", "far", "zaz" })]
-    [Theory]
-    public void Equals_ReturnsFalse(string[] a, string[] b)
-    {
-        NodePath pathA = new(a);
-        NodePath pathB = new(b);
-
-        Assert.False(pathA.Equals(pathB));
-    }
-    
-    [InlineData(new object[] { new[] { "foo" } })]
-    [InlineData(new object[] { new[] { "foo", "bar", "baz" } })]
-    [Theory]
-    public void ToString_ReturnsPeriodSeparatedPath(string[] pathValues)
-    {
-        NodePath path = new(pathValues);
-
-        string expected = string.Join('.', pathValues);
-        Assert.Equal(expected, path.ToString());
-    }
-
-    [InlineData(new object[] { new[] { "foo" } })]
-    [InlineData(new object[] { new[] { "foo", "bar", "baz" } })]
-    [Theory]
-    public void Enumeration_ReturnsReverseOrder(string[] pathValues)
-    {
-        NodePath path = new(pathValues);
-
-        var expected = pathValues.Reverse();
+        string[] expected = new[] { "baz", "bar", "foo" };
         Assert.Equal(expected, path);
     }
 
-    [InlineData("")]
-    [InlineData("foo..bar")]
-    [InlineData(".foo")]
-    [InlineData("foo.bar.")]
-    [Theory]
-    public void Parse_ReturnsNullIfBadFormat(string str)
+    [Fact]
+    public void Parse_ReturnsNullIfEmptyString()
     {
-        var path = NodePath.Parse(str);
+        var path = NodePath.Parse("");
 
         Assert.Null(path);
     }
-    private static IEnumerable<object[]> Parse_ReturnsExpected_Data()
+    [Fact]
+    public void Parse_ReturnsPathIfRoot()
     {
-        yield return new object[] { "foo", new NodePath("foo") };
-        yield return new object[] { "foo.bar", new NodePath("foo", "bar") };
-        yield return new object[] { "foo.bar.baz.boo.far.zaz", new NodePath("foo", "bar", "baz", "boo", "far", "zaz") };
-    }
-    [MemberData(nameof(Parse_ReturnsExpected_Data))]
-    [Theory]
-    public void Parse_ReturnsExpected(string str, NodePath expected)
-    {
-        var path = NodePath.Parse(str);
+        var path = NodePath.Parse("foo");
 
+        NodePath expected = new(new[] { "foo" });
         Assert.Equal(expected, path);
+    }
+    [Fact]
+    public void Parse_ReturnsPathIfPeriodSeparatedNames()
+    {
+        var path = NodePath.Parse("foo.bar.baz");
+
+        NodePath expected = new(new[] { "foo", "bar", "baz" });
+        Assert.Equal(expected, path);
+    }
+    [Fact]
+    public void Parse_ReturnsNullIfMissingName()
+    {
+        var path = NodePath.Parse("foo..bar");
+
+        Assert.Null(path);
     }
 
     [Fact]
@@ -237,61 +114,49 @@ public class NodePathTests
         NodePath path = new("foo");
         var leafPath = path.CreateLeafPath("bar");
 
-        NodePath expected = new("foo", "bar");
+        NodePath expected = new(new[] { "foo", "bar" });
         Assert.Equal(expected, leafPath);
     }
 
-    private static IEnumerable<object[]> GetParentPaths_ReturnsParentPaths_Data()
+    [Fact]
+    public void GetParentPaths_ReturnsParentPaths()
     {
-        yield return new object[]
+        NodePath path = new(new[] { "foo", "bar", "baz" });
+
+        var expected = new NodePath[]
         {
-            new NodePath("foo"),
-            Array.Empty<NodePath>()
+            new NodePath(new[] { "foo", "bar" }),
+            new NodePath(new[] { "foo" })
         };
-        yield return new object[]
-        {
-            new NodePath("foo", "bar", "baz"),
-            new NodePath[]
-            {
-                new("foo", "bar"),
-                new("foo")
-            }
-        };
+        Assert.Equal(expected, path.GetParentPaths());
     }
-    [MemberData(nameof(GetParentPaths_ReturnsParentPaths_Data))]
-    [Theory]
-    public void GetParentPaths_ReturnsParentPaths(NodePath path, NodePath[] expected)
+    [Fact]
+    public void GetParentPaths_ReturnsEmptyForRoot()
     {
-        var parentPaths = path.GetParentPaths();
-        Assert.Equal(expected, parentPaths);
+        NodePath path = new("foo");
+
+        Assert.Empty(path.GetParentPaths());
     }
 
-    private static IEnumerable<object[]> GetParentPathsAndSelf_ReturnsParentPathsAndSelf_Data()
+    [Fact]
+    public void GetParentPathsAndSelf_ReturnsParentPaths()
     {
-        yield return new object[]
+        NodePath path = new(new[] { "foo", "bar", "baz" });
+
+        var expected = new NodePath[]
         {
-            new NodePath("foo"),
-            new NodePath[]
-            {
-                new("foo")
-            }
+            new NodePath(new[] { "foo", "bar", "baz" }),
+            new NodePath(new[] { "foo", "bar" }),
+            new NodePath(new[] { "foo" })
         };
-        yield return new object[]
-        {
-            new NodePath("foo", "bar", "baz"),
-            new NodePath[]
-            {
-                new("foo", "bar", "baz"),
-                new("foo", "bar"),
-                new("foo")
-            }
-        };
+        Assert.Equal(expected, path.GetParentPathsAndSelf());
     }
-    [MemberData(nameof(GetParentPathsAndSelf_ReturnsParentPathsAndSelf_Data))]
-    [Theory]
-    public void GetParentPathsAndSelf_ReturnsParentPathsAndSelf(NodePath path, NodePath[] expected)
+    [Fact]
+    public void GetParentPathsAndSelf_ReturnsSelfForRoot()
     {
-        var parentPathsAndSelf = path.GetParentPathsAndSelf();
-        Assert.Equal(expected, parentPathsAndSelf);
+        NodePath path = new("foo");
+
+        var expected = new[] { path };
+        Assert.Equal(expected, path.GetParentPathsAndSelf());
     }
 }
