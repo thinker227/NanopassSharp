@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -9,7 +8,7 @@ namespace NanopassSharp;
 /// <summary>
 /// A path to a node in a node graph.
 /// </summary>
-public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
+public readonly struct NodePath : IEquatable<NodePath>
 {
     private readonly string[] nodes;
 
@@ -246,10 +245,11 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
     public IEnumerable<NodePath> GetParentPathsAndSelf() =>
         GetParentPaths().Prepend(this);
 
-    public IEnumerator<string> GetEnumerator() =>
-        nodes.Reverse().GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() =>
-        GetEnumerator();
+    /// <summary>
+    /// Gets the nodes in the path, in order from the current leaf to the root.
+    /// </summary>
+    public IEnumerable<string> GetNodes() =>
+        nodes.Reverse();
 
     public static bool operator ==(NodePath a, NodePath b) =>
         a.Equals(b);

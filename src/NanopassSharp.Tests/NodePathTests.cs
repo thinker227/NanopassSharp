@@ -194,17 +194,6 @@ public class NodePathTests
         Assert.Equal(expected, path.ToString());
     }
 
-    [InlineData(new object[] { new[] { "foo" } })]
-    [InlineData(new object[] { new[] { "foo", "bar", "baz" } })]
-    [Theory]
-    public void Enumeration_ReturnsReverseOrder(string[] pathValues)
-    {
-        NodePath path = new(pathValues);
-
-        var expected = pathValues.Reverse();
-        Assert.Equal(expected, path);
-    }
-
     [InlineData("")]
     [InlineData("foo..bar")]
     [InlineData(".foo")]
@@ -293,5 +282,18 @@ public class NodePathTests
     {
         var parentPathsAndSelf = path.GetParentPathsAndSelf();
         Assert.Equal(expected, parentPathsAndSelf);
+    }
+
+    [InlineData(new object[] { new[] { "foo" } })]
+    [InlineData(new object[] { new[] { "foo", "bar", "baz" } })]
+    [InlineData(new object[] { new[] { "foo", "bar", "baz", "boo", "far", "zaz" } })]
+    [Theory]
+    public void GetNodes_ReturnsNodesInReverseOrder(string[] pathValues)
+    {
+        NodePath path = new(pathValues);
+        var nodes = path.GetNodes();
+
+        var expected = pathValues.Reverse();
+        Assert.Equal(expected, nodes);
     }
 }
