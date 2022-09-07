@@ -89,6 +89,12 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
     /// <summary>
     /// Initializes a new <see cref="NodePath"/> instance.
     /// </summary>
+    /// <param name="nodes">The nodes the path consists of,
+    /// in order from the root to the outer-most leaf.</param>
+    public NodePath(params string[] nodes) : this((IEnumerable<string>)nodes) { }
+    /// <summary>
+    /// Initializes a new <see cref="NodePath"/> instance.
+    /// </summary>
     /// <param name="root">The root node of the path.</param>
     public NodePath(string root)
     {
