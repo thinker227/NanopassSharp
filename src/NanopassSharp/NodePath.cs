@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -9,7 +8,7 @@ namespace NanopassSharp;
 /// <summary>
 /// A path to a node in a node graph.
 /// </summary>
-public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
+public readonly struct NodePath : IEquatable<NodePath>
 {
     private readonly string[] nodes;
 
@@ -17,9 +16,22 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
     /// <summary>
     /// Gets the path to the parent node of the current outer-most leaf node.
     /// </summary>
-    public NodePath Parent => nodes.Length >= 2
-        ? new NodePath(nodes[0..^2])
-        : throw new InvalidOperationException("Cannot get the parent path of the root node");
+    public NodePath Parent
+    {
+        get
+        {
+            if (IsEmpty)
+            {
+                throw NoNodes();
+            }
+            if (IsRoot)
+            {
+                throw new InvalidOperationException("Cannot get the parent of the root");
+            }
+
+            return new(nodes[..^1]);
+        }
+    }
     /// <summary>
     /// The name of the root node of the graph.
     /// </summary>
@@ -31,10 +43,6 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
             {
                 throw NoNodes();
             }
-            if (nodes.Length == 1)
-            {
-                throw new InvalidOperationException("Cannot get the path to the root of the root node");
-            }
 
             return nodes[0];
         }
@@ -42,7 +50,7 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
     /// <summary>
     /// The name of the node the path leads to, the outer "leaf" of the node graph.
     /// </summary>
-    public string Leaf => IsEmpty
+    public string Leaf => !IsEmpty
         ? nodes[^1]
         : throw NoNodes();
     /// <summary>
@@ -86,6 +94,12 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
             throw new ArgumentException("Length of nodes has to be greater or equal to 1.", nameof(nodes));
         }
     }
+    /// <summary>
+    /// Initializes a new <see cref="NodePath"/> instance.
+    /// </summary>
+    /// <param name="nodes">The nodes the path consists of,
+    /// in order from the root to the outer-most leaf.</param>
+    public NodePath(params string[] nodes) : this((IEnumerable<string>)nodes) { }
     /// <summary>
     /// Initializes a new <see cref="NodePath"/> instance.
     /// </summary>
@@ -228,7 +242,7 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
 
         if (IsRoot) yield break;
 
-        for (int i = nodes.Length - 2; i >= 0; i++)
+        for (int i = nodes.Length - 1; i > 0; i--)
         {
             yield return new NodePath(nodes[0..i]);
         }
@@ -240,10 +254,11 @@ public readonly struct NodePath : IEnumerable<string>, IEquatable<NodePath>
     public IEnumerable<NodePath> GetParentPathsAndSelf() =>
         GetParentPaths().Prepend(this);
 
-    public IEnumerator<string> GetEnumerator() =>
-        nodes.Reverse().GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() =>
-        GetEnumerator();
+    /// <summary>
+    /// Gets the nodes in the path, in order from the current leaf to the root.
+    /// </summary>
+    public IEnumerable<string> GetNodes() =>
+        nodes.Reverse();
 
     public static bool operator ==(NodePath a, NodePath b) =>
         a.Equals(b);
