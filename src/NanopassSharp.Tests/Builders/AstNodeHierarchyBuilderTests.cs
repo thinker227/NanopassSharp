@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 // I won't type "AstNodeHierarchyBuilder" a million times throughout this file
 using TreeBuilder = NanopassSharp.Builders.AstNodeHierarchyBuilder;
@@ -214,6 +215,62 @@ public class AstNodeHierarchyBuilderTests
             c.Name.ShouldBe("c");
             c.Parent.ShouldBeNull();
             c.Children.ShouldBeEmpty();
+        }
+    }
+    [Fact]
+    public void Build_BuildsMembers()
+    {
+        TreeBuilder builder = new();
+        var fooBuilder = builder.AddRoot("foo");
+        fooBuilder.AddMember("a")
+            .WithType("type a")
+            .WithDocumentation("docs a")
+            .WithAttributes(new HashSet<object>(new object[] { "attribute a", 0, true }));
+        fooBuilder.AddMember("b")
+            .WithType("type b")
+            .WithDocumentation("docs b")
+            .WithAttributes(new HashSet<object>(new object[] { "attribute b", 1, false }));
+        fooBuilder.AddMember("c")
+            .WithType("type c")
+            .WithDocumentation("docs c")
+            .WithAttributes(new HashSet<object>(new object[] { "attribute c", 2, true }));
+
+        var tree = builder.Build();
+
+
+
+        tree.Roots.Count.ShouldBe(1);
+
+        {
+            var foo = tree.Roots[0];
+            foo.Members.Count.ShouldBe(3);
+            foo.Members.Keys.ShouldContain("a");
+            foo.Members.Keys.ShouldContain("b");
+            foo.Members.Keys.ShouldContain("c");
+
+            {
+                var a = foo.Members["a"];
+                a.Name.ShouldBe("a");
+                a.Type.ShouldBe("type a");
+                a.Documentation.ShouldBe("docs a");
+                a.Attributes.ShouldBe(new object[] { "attribute a", 0, true });
+            }
+
+            {
+                var b = foo.Members["b"];
+                b.Name.ShouldBe("b");
+                b.Type.ShouldBe("type b");
+                b.Documentation.ShouldBe("docs b");
+                b.Attributes.ShouldBe(new object[] { "attribute b", 1, false });
+            }
+
+            {
+                var c = foo.Members["c"];
+                c.Name.ShouldBe("c");
+                c.Type.ShouldBe("type c");
+                c.Documentation.ShouldBe("docs c");
+                c.Attributes.ShouldBe(new object[] { "attribute c", 2, true });
+            }
         }
     }
 }
