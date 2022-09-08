@@ -203,4 +203,37 @@ public class AstNodeHierarchyBuilderTests
             }
         }
     }
+    [Fact]
+    public void Build_BuildsAllRoots()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("a");
+        builder.AddRoot("b");
+        builder.AddRoot("c");
+
+        var tree = builder.Build();
+
+
+
+        Assert.Equal(3, builder.Roots.Count);
+
+        {
+            var a = tree.Roots[0];
+            Assert.Equal("a", a.Name);
+            Assert.Null(a.Parent);
+            Assert.Empty(a.Children);
+        }
+        {
+            var b = tree.Roots[1];
+            Assert.Equal("b", b.Name);
+            Assert.Null(b.Parent);
+            Assert.Empty(b.Children);
+        }
+        {
+            var c = tree.Roots[2];
+            Assert.Equal("c", c.Name);
+            Assert.Null(c.Parent);
+            Assert.Empty(c.Children);
+        }
+    }
 }
