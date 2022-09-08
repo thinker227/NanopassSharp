@@ -98,7 +98,7 @@ public class AstNodeHierarchyBuilderTests
         builder.CreateNode("ast.expr.binary");
         builder.CreateNode("ast.expr.literal");
 
-        var tree = builder.Build(TreeBuilder.MissingChildBehavior.Throw);
+        var tree = builder.Build(MissingChildBehavior.Throw);
 
 
 
@@ -174,7 +174,7 @@ public class AstNodeHierarchyBuilderTests
         builder.AddRoot("a")
             .WithChildren(new[] { "b" });
 
-        Assert.Throws<InvalidOperationException>(() => builder.Build(TreeBuilder.MissingChildBehavior.Throw));
+        Assert.Throws<InvalidOperationException>(() => builder.Build(MissingChildBehavior.Throw));
     }
     [Fact]
     public void Build_CreatesMissingChild_WhenMissingChildWithCreateBehavior()
@@ -183,7 +183,7 @@ public class AstNodeHierarchyBuilderTests
         builder.AddRoot("a")
             .WithChildren(new[] { "b" });
 
-        var tree = builder.Build(TreeBuilder.MissingChildBehavior.CreateEmptyNode);
+        var tree = builder.Build(MissingChildBehavior.CreateEmptyNode);
 
 
 
