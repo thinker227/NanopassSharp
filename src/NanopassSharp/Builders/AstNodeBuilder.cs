@@ -98,7 +98,7 @@ public sealed class AstNodeBuilder
     /// Sets the children of the node.
     /// </summary>
     /// <param name="children"><inheritdoc cref="Children" path="/summary"/></param>
-    /// <returns></returns>
+    /// <returns>The current builder.</returns>
     public AstNodeBuilder WithChildren(IEnumerable<string> children)
     {
         Children = children is ICollection<string> collection
