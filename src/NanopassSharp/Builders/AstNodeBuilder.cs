@@ -8,6 +8,8 @@ namespace NanopassSharp.Builders;
 /// </summary>
 public sealed class AstNodeBuilder
 {
+    private readonly List<AstNodeMemberBuilder> members;
+
     /// <summary>
     /// The hierarchy this node is a part of.
     /// </summary>
@@ -35,7 +37,7 @@ public sealed class AstNodeBuilder
     /// <summary>
     /// <inheritdoc cref="AstNode.Members" path="/summary"/>
     /// </summary>
-    public ICollection<string> Members { get; set; }
+    public IReadOnlyCollection<AstNodeMemberBuilder> Members => members;
     /// <summary>
     /// <inheritdoc cref="AstNode.Attributes" path="/summary"/>
     /// </summary>
@@ -45,11 +47,11 @@ public sealed class AstNodeBuilder
 
     internal AstNodeBuilder(AstNodeHierarchyBuilder hierarchy, NodePath path)
     {
+        members = new();
         Hierarchy = hierarchy;
         Path = path;
         Documentation = null;
         Children = new List<string>();
-        Members = new List<string>();
         Attributes = new HashSet<object>();
     }
 
@@ -104,6 +106,47 @@ public sealed class AstNodeBuilder
         Children = children is ICollection<string> collection
             ? collection
             : children.ToList();
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a member to the node.
+    /// </summary>
+    /// <param name="name">The name of the member.</param>
+    /// <returns>A builder for the member.</returns>
+    public AstNodeMemberBuilder AddMember(string name)
+    {
+        AstNodeMemberBuilder builder = new(name);
+        members.Add(builder);
+        return builder;
+    }
+    /// <summary>
+    /// Adds a member to the node.
+    /// </summary>
+    /// <param name="member">The member to add.</param>
+    /// <returns>A builder for the member.</returns>
+    public AstNodeMemberBuilder AddMember(AstNodeMember member) => AddMember(member)
+        .WithDocumentation(member.Documentation)
+        .WithType(member.Type)
+        .WithAttributes(new HashSet<object>(member.Attributes));
+    /// <summary>
+    /// Removes a member from the node.
+    /// </summary>
+    /// <param name="name">The name of the member to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeBuilder RemoveMember(string name)
+    {
+        members.RemoveAll(m => m.Name == name);
+        return this;
+    }
+    /// <summary>
+    /// Removes a member from the node.
+    /// </summary>
+    /// <param name="builder">The builder to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeBuilder RemoveMember(AstNodeMemberBuilder builder)
+    {
+        members.Remove(builder);
         return this;
     }
 
