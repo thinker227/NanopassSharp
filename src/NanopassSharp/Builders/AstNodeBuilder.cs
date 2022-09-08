@@ -94,8 +94,12 @@ public sealed class AstNodeBuilder
     /// </summary>
     /// <param name="name">The name of the child node.</param>
     /// <returns>A builder for the child node.</returns>
-    public AstNodeBuilder AddChild(string name) =>
-        Hierarchy.CreateNode(name, Path);
+    public AstNodeBuilder AddChild(string name)
+    {
+        var builder = Hierarchy.CreateNode(name, Path);
+        Children.Add(builder.Name);
+        return builder;
+    }
     /// <summary>
     /// Sets the children of the node.
     /// </summary>
