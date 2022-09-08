@@ -115,8 +115,11 @@ public sealed class AstNodeHierarchyBuilder
         var builder = CreateNode(path);
         builder.Documentation = node.Documentation;
         builder.Children = node.Children.Keys.ToList();
-        builder.Members = node.Members.Keys.ToList();
         builder.Attributes = new HashSet<object>(node.Attributes);
+        foreach (var member in node.Members.Values)
+        {
+            builder.AddMember(member);
+        }
 
         return builder;
     }
@@ -174,12 +177,14 @@ public sealed class AstNodeHierarchyBuilder
         var path = builder.Path;
 
         Dictionary<string, AstNode> children = new();
+        var members = builder.Members
+            .ToDictionary(b => b.Name, b => b.Build());
         AstNode node = new(
             builder.Name,
             builder.Documentation,
             parent,
             children,
-            null!,
+            members,
             new HashSet<object>(builder.Attributes)
         );
 
