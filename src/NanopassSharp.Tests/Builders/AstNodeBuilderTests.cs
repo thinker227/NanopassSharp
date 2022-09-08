@@ -90,4 +90,70 @@ public class AstNodeBuilderTests
         child.Path.ShouldBe(expectedPath);
         child.Parent.ShouldBe("a");
     }
+
+    [Fact]
+    public void AddMember_AddsMember()
+    {
+        TreeBuilder builder = new();
+        var fooBuilder = builder.AddRoot("foo");
+        fooBuilder.AddMember("a");
+        fooBuilder.AddMember("b");
+        fooBuilder.AddMember("c");
+
+        var tree = builder.Build();
+
+
+
+        tree.Roots.Count.ShouldBe(1);
+
+        {
+            var foo = tree.Roots[0];
+            foo.Members.Count.ShouldBe(3);
+        }
+    }
+
+    [Fact]
+    public void RemoveMember_RemovesMember_WithStringParameter()
+    {
+        TreeBuilder builder = new();
+        var fooBuilder = builder.AddRoot("foo");
+        fooBuilder.AddMember("a");
+        fooBuilder.AddMember("b");
+        fooBuilder.AddMember("c");
+        fooBuilder.RemoveMember("a");
+        fooBuilder.RemoveMember("b");
+
+        var tree = builder.Build();
+
+
+
+        tree.Roots.Count.ShouldBe(1);
+
+        {
+            var foo = tree.Roots[0];
+            foo.Members.Count.ShouldBe(1);
+        }
+    }
+    [Fact]
+    public void RemoveMember_RemovesNodeMember_WithNodeParameter()
+    {
+        TreeBuilder builder = new();
+        var fooBuilder = builder.AddRoot("foo");
+        var a = fooBuilder.AddMember("a");
+        var b = fooBuilder.AddMember("b");
+        fooBuilder.AddMember("c");
+        fooBuilder.RemoveMember(a);
+        fooBuilder.RemoveMember(b);
+
+        var tree = builder.Build();
+
+
+
+        tree.Roots.Count.ShouldBe(1);
+
+        {
+            var foo = tree.Roots[0];
+            foo.Members.Count.ShouldBe(1);
+        }
+    }
 }
