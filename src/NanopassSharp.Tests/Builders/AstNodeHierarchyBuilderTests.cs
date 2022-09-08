@@ -175,6 +175,7 @@ public class AstNodeHierarchyBuilderTests
             a.Name.ShouldBe("a");
             a.Parent.ShouldBeNull();
             a.Children.Count.ShouldBe(1);
+            a.Children.Keys.ShouldContain("b");
 
             {
                 var b = a.Children["b"];
