@@ -168,6 +168,72 @@ public class AstNodeHierarchyBuilderTests
         }
     }
     [Fact]
+    public void Build_BuildsChildren()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("a")
+            .WithChildren(new[] { "b", "c" });
+        builder.CreateNode("a.b")
+            .WithChildren(new[] { "d", "e", "f" });
+        builder.CreateNode("a.c");
+        builder.CreateNode("a.b.d");
+        builder.CreateNode("a.b.e");
+        builder.CreateNode("a.b.f");
+
+        var tree = builder.Build();
+
+
+
+        tree.Roots.Count.ShouldBe(1);
+
+        {
+            var a = tree.Roots[0];
+            a.Name.ShouldBe("a");
+            a.Parent.ShouldBeNull();
+            a.Children.Count.ShouldBe(2);
+            a.Children.Keys.ShouldContain("b");
+            a.Children.Keys.ShouldContain("c");
+
+            {
+                var b = a.Children["b"];
+                b.Name.ShouldBe("b");
+                b.Parent.ShouldBeSameAs(a);
+                b.Children.Count.ShouldBe(3);
+                b.Children.Keys.ShouldContain("d");
+                b.Children.Keys.ShouldContain("e");
+                b.Children.Keys.ShouldContain("f");
+
+                {
+                    var d = b.Children["d"];
+                    d.Name.ShouldBe("d");
+                    d.Parent.ShouldBeSameAs(b);
+                    d.Children.ShouldBeEmpty();
+                }
+
+                {
+                    var e = b.Children["e"];
+                    e.Name.ShouldBe("e");
+                    e.Parent.ShouldBeSameAs(b);
+                    e.Children.ShouldBeEmpty();
+                }
+
+                {
+                    var f = b.Children["f"];
+                    f.Name.ShouldBe("f");
+                    f.Parent.ShouldBeSameAs(b);
+                    f.Children.ShouldBeEmpty();
+                }
+            }
+
+            {
+                var c = a.Children["c"];
+                c.Name.ShouldContain("c");
+                c.Parent.ShouldBeSameAs(a);
+                c.Children.ShouldBeEmpty();
+            }
+        }
+    }
+    [Fact]
     public void Build_Throws_WhenMissingChildWithThrowBehavior()
     {
         TreeBuilder builder = new();
