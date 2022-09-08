@@ -64,6 +64,7 @@ public sealed class AstNodeMemberBuilder
         Name = name;
         return this;
     }
+
     /// <summary>
     /// Sets the documentation of the member.
     /// </summary>
@@ -74,6 +75,7 @@ public sealed class AstNodeMemberBuilder
         Documentation = documentation;
         return this;
     }
+
     /// <summary>
     /// Sets the type of the member.
     /// </summary>
@@ -84,6 +86,7 @@ public sealed class AstNodeMemberBuilder
         Type = type;
         return this;
     }
+
     /// <summary>
     /// Adds an attribute to the member.
     /// </summary>
@@ -92,6 +95,16 @@ public sealed class AstNodeMemberBuilder
     public AstNodeMemberBuilder AddAttribute(object attribute)
     {
         Attributes.Add(attribute);
+        return this;
+    }
+    /// <summary>
+    /// Sets the attributes of the member.
+    /// </summary>
+    /// <param name="attributes"><inheritdoc cref="Attributes" path="/summary"/></param>
+    /// <returns>The current builder.</returns>
+    public AstNodeMemberBuilder WithAttributes(ISet<object> attributes)
+    {
+        Attributes = attributes;
         return this;
     }
 
