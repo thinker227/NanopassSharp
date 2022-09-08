@@ -212,20 +212,30 @@ public sealed class AstNodeHierarchyBuilder
     internal AstNode BuildNode(AstNodeBuilder builder, MissingChildBehavior missingChildBehavior)
     {
         var path = builder.Path;
+        string root = path.IsRoot ? path.Leaf : path.Root;
+        NodePath rootPath = new(root);
 
-        if (!builders.ContainsKey(path))
+        if (!builders.ContainsKey(path)) throw nodeDoesNotExist(path);
+        if (!builders.TryGetValue(rootPath, out var rootBuilder)) throw nodeDoesNotExist(rootPath);
+
+        var rootNode = BuildNode(null, rootBuilder, missingChildBehavior);
+
+        var pathNodesEnumerator = path.GetNodes().GetEnumerator();
+        pathNodesEnumerator.MoveNext();
+        var node = rootNode;
+        while (pathNodesEnumerator.MoveNext())
         {
-            throw nodeDoesNotExist();
+            node = getNode(pathNodesEnumerator.Current);
         }
 
-        var hierarchy = Build(missingChildBehavior);
+        return node;
 
-        var node = hierarchy.GetNodeFromPath(path);
-        return node is null
-            ? throw nodeDoesNotExist()
-            : node;
-
-        InvalidOperationException nodeDoesNotExist() =>
+        AstNode getNode(string name)
+        {
+            if (node!.Children.TryGetValue(name, out var n)) return n;
+            throw nodeDoesNotExist(node.GetPath().CreateLeafPath(name));
+        }
+        static InvalidOperationException nodeDoesNotExist(NodePath path) =>
             new($"The node '{path}' does not exist in the hierarchy");
     }
 
