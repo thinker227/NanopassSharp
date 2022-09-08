@@ -1,4 +1,6 @@
-﻿// I won't type "AstNodeHierarchyBuilder" a million times throughout this file
+﻿using System;
+
+// I won't type "AstNodeHierarchyBuilder" a million times throughout this file
 using TreeBuilder = NanopassSharp.Builders.AstNodeHierarchyBuilder;
 
 namespace NanopassSharp.Builders.Tests;
@@ -162,6 +164,42 @@ public class AstNodeHierarchyBuilderTests
                     Assert.True(ReferenceEquals(expr, literal.Parent));
                     Assert.Equal("literal", literal.Name);
                 }
+            }
+        }
+    }
+    [Fact]
+    public void Build_Throws_WhenMissingChildWithThrowBehavior()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("a")
+            .WithChildren(new[] { "b" });
+
+        Assert.Throws<InvalidOperationException>(() => builder.Build(TreeBuilder.MissingChildBehavior.Throw));
+    }
+    [Fact]
+    public void Build_CreatesMissingChild_WhenMissingChildWithCreateBehavior()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("a")
+            .WithChildren(new[] { "b" });
+
+        var tree = builder.Build(TreeBuilder.MissingChildBehavior.CreateEmptyNode);
+
+
+
+        Assert.Equal(1, tree.Roots.Count);
+
+        {
+            var a = tree.Roots[0];
+            Assert.Equal("a", a.Name);
+            Assert.Null(a.Parent);
+            Assert.Equal(1, a.Children.Count);
+
+            {
+                var b = a.Children["b"];
+                Assert.Equal("b", b.Name);
+                Assert.True(ReferenceEquals(a, b.Parent));
+                Assert.Empty(b.Children);
             }
         }
     }
