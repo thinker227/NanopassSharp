@@ -106,4 +106,16 @@ public sealed class AstNodeBuilder
             : children.ToList();
         return this;
     }
+
+    /// <summary>
+    /// Builds the current node.
+    /// </summary>
+    /// <param name="missingChildBehavior">The behavior if a node is missing.</param>
+    /// <remarks>
+    /// In order to build the current node, the entire hierarchy
+    /// is built from the root of the current builder.
+    /// This means that the root of the current node is built along with all its children.
+    /// </remarks>
+    public AstNode Build(MissingChildBehavior missingChildBehavior = MissingChildBehavior.Throw) =>
+        Hierarchy.BuildNode(this, missingChildBehavior);
 }

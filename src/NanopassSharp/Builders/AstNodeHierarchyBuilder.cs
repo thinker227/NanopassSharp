@@ -204,6 +204,26 @@ public sealed class AstNodeHierarchyBuilder
         return CreateNode(path);
     }
 
+    internal AstNode BuildNode(AstNodeBuilder builder, MissingChildBehavior missingChildBehavior)
+    {
+        var path = builder.Path;
+
+        if (!builders.ContainsKey(path))
+        {
+            throw nodeDoesNotExist();
+        }
+
+        var hierarchy = Build(missingChildBehavior);
+
+        var node = hierarchy.GetNodeFromPath(path);
+        return node is null
+            ? throw nodeDoesNotExist()
+            : node;
+
+        InvalidOperationException nodeDoesNotExist() =>
+            new($"The node '{path}' does not exist in the hierarchy");
+    }
+
     /// <summary>
     /// Implicitly converts an <see cref="AstNodeBuilder"/> to an <see cref="AstNodeHierarchy"/>
     /// by calling <see cref="Build"/>.
