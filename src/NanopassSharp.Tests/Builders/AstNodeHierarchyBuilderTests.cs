@@ -12,7 +12,7 @@ public class AstNodeHierarchyBuilderTests
     {
         TreeBuilder builder = new();
 
-        Assert.NotNull(builder.Roots);
+        builder.Roots.ShouldNotBeNull();
     }
 
     [InlineData("a")]
@@ -24,12 +24,12 @@ public class AstNodeHierarchyBuilderTests
         var path = NodePath.ParseUnsafe(pathString);
         var node = builder.CreateNode(path);
 
-        Assert.Equal(builder, node.Hierarchy);
-        Assert.Equal(path, node.Path);
-        Assert.Null(node.Documentation);
-        Assert.Empty(node.Children);
-        Assert.Empty(node.Members);
-        Assert.Empty(node.Attributes);
+        node.Hierarchy.ShouldBe(builder);
+        node.Path.ShouldBe(path);
+        node.Documentation.ShouldBeNull();
+        node.Children.ShouldBeEmpty();
+        node.Members.ShouldBeEmpty();
+        node.Attributes.ShouldBeEmpty();
     }
 
     [Fact]
@@ -40,12 +40,12 @@ public class AstNodeHierarchyBuilderTests
 
         NodePath expectedPath = new("a");
 
-        Assert.Equal(builder, root.Hierarchy);
-        Assert.Equal(expectedPath, root.Path);
-        Assert.Null(root.Documentation);
-        Assert.Empty(root.Children);
-        Assert.Empty(root.Members);
-        Assert.Empty(root.Attributes);
+        root.Hierarchy.ShouldBe(builder);
+        root.Path.ShouldBe(expectedPath);
+        root.Documentation.ShouldBeNull();
+        root.Children.ShouldBeEmpty();
+        root.Members.ShouldBeEmpty();
+        root.Attributes.ShouldBeEmpty();
     }
     [Fact]
     public void AddRoot_AddsRoot()
@@ -54,7 +54,7 @@ public class AstNodeHierarchyBuilderTests
         builder.AddRoot("a");
 
         string[] expected = new[] { "a" };
-        Assert.Equal(expected, builder.Roots);
+        builder.Roots.ShouldBe(expected);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class AstNodeHierarchyBuilderTests
         builder.CreateNode("d.e");
 
         var actual = builder.GetNodeFromPath(NodePath.ParseUnsafe("a.b"));
-        Assert.Equal(node.Path, actual?.Path);
+        actual?.Path.ShouldBe(node.Path);
     }
     [Fact]
     public void GetNodeFromPath_ReturnsNull_WhenNodeDoesNotExist()
@@ -78,7 +78,7 @@ public class AstNodeHierarchyBuilderTests
         builder.CreateNode("d.e");
 
         var actual = builder.GetNodeFromPath(NodePath.ParseUnsafe("a.b.c"));
-        Assert.Null(actual);
+        actual.ShouldBeNull();
     }
 
     [Fact]
@@ -102,67 +102,67 @@ public class AstNodeHierarchyBuilderTests
 
 
 
-        Assert.Equal(1, tree.Roots.Count);
+        tree.Roots.Count.ShouldBe(1);
 
         {
             var ast = tree.Roots[0];
-            Assert.Equal("ast", ast.Name);
-            Assert.Null(ast.Parent);
-            Assert.Equal(2, ast.Children.Count);
+            ast.Name.ShouldBe("ast");
+            ast.Parent.ShouldBeNull();
+            ast.Children.Count.ShouldBe(2);
 
             {
                 var stmt = ast.Children["stmt"];
-                Assert.Equal("stmt", stmt.Name);
-                Assert.True(ReferenceEquals(ast, stmt.Parent));
-                Assert.Equal(3, stmt.Children.Count);
+                stmt.Name.ShouldBe("stmt");
+                stmt.Parent.ShouldBeSameAs(ast);
+                stmt.Children.Count.ShouldBe(3);
 
                 {
                     var var = stmt.Children["var"];
-                    Assert.Empty(var.Children);
-                    Assert.True(ReferenceEquals(stmt, var.Parent));
-                    Assert.Equal("var", var.Name);
+                    var.Children.ShouldBeEmpty();
+                    var.Parent.ShouldBeSameAs(stmt);
+                    var.Name.ShouldBe("var");
                 }
 
                 {
                     var @if = stmt.Children["if"];
-                    Assert.Empty(@if.Children);
-                    Assert.True(ReferenceEquals(stmt, @if.Parent));
-                    Assert.Equal("if", @if.Name);
+                    @if.Children.ShouldBeEmpty();
+                    @if.Parent.ShouldBeSameAs(stmt);
+                    @if.Name.ShouldBe("if");
                 }
 
                 {
                     var exprStmt = stmt.Children["exprStmt"];
-                    Assert.Empty(exprStmt.Children);
-                    Assert.True(ReferenceEquals(stmt, exprStmt.Parent));
-                    Assert.Equal("exprStmt", exprStmt.Name);
+                    exprStmt.Children.ShouldBeEmpty();
+                    exprStmt.Parent.ShouldBeSameAs(stmt);
+                    exprStmt.Name.ShouldBe("exprStmt");
                 }
             }
 
             {
                 var expr = ast.Children["expr"];
-                Assert.Equal("expr", expr.Name);
-                Assert.True(ReferenceEquals(ast, expr.Parent));
-                Assert.Equal(3, expr.Children.Count);
+                expr.Name.ShouldBe("expr");
+                expr.Parent.ShouldBeSameAs(ast);
+                expr.Children.Count.ShouldBe(3);
 
                 {
                     var unary = expr.Children["unary"];
-                    Assert.Empty(unary.Children);
-                    Assert.True(ReferenceEquals(expr, unary.Parent));
-                    Assert.Equal("unary", unary.Name);
+                    unary.Children.ShouldBeEmpty();
+                    unary.Parent.ShouldBeSameAs(expr);
+                    unary.Name.ShouldBe("unary");
                 }
 
                 {
                     var binary = expr.Children["binary"];
-                    Assert.Empty(binary.Children);
-                    Assert.True(ReferenceEquals(expr, binary.Parent));
-                    Assert.Equal("binary", binary.Name);
+                    binary.Children.ShouldBeEmpty();
+                    binary.Parent.ShouldBeSameAs(expr);
+                    binary.Name.ShouldBe("binary");
                 }
 
                 {
                     var literal = expr.Children["literal"];
-                    Assert.Empty(literal.Children);
-                    Assert.True(ReferenceEquals(expr, literal.Parent));
-                    Assert.Equal("literal", literal.Name);
+                    literal.Children.ShouldBeEmpty();
+                    literal.Parent.ShouldBeSameAs(expr);
+                    literal.Name.ShouldBe("literal");
                 }
             }
         }
@@ -174,7 +174,7 @@ public class AstNodeHierarchyBuilderTests
         builder.AddRoot("a")
             .WithChildren(new[] { "b" });
 
-        Assert.Throws<InvalidOperationException>(() => builder.Build(MissingChildBehavior.Throw));
+        Should.Throw<InvalidOperationException>(() => builder.Build(MissingChildBehavior.Throw));
     }
     [Fact]
     public void Build_CreatesMissingChild_WhenMissingChildWithCreateBehavior()
@@ -187,19 +187,19 @@ public class AstNodeHierarchyBuilderTests
 
 
 
-        Assert.Equal(1, tree.Roots.Count);
+        tree.Roots.Count.ShouldBe(1);
 
         {
             var a = tree.Roots[0];
-            Assert.Equal("a", a.Name);
-            Assert.Null(a.Parent);
-            Assert.Equal(1, a.Children.Count);
+            a.Name.ShouldBe("a");
+            a.Parent.ShouldBeNull();
+            a.Children.Count.ShouldBe(1);
 
             {
                 var b = a.Children["b"];
-                Assert.Equal("b", b.Name);
-                Assert.True(ReferenceEquals(a, b.Parent));
-                Assert.Empty(b.Children);
+                b.Name.ShouldBe("b");
+                b.Parent.ShouldBeSameAs(a);
+                b.Children.ShouldBeEmpty();
             }
         }
     }
@@ -215,25 +215,25 @@ public class AstNodeHierarchyBuilderTests
 
 
 
-        Assert.Equal(3, builder.Roots.Count);
+        builder.Roots.Count.ShouldBe(3);
 
         {
             var a = tree.Roots[0];
-            Assert.Equal("a", a.Name);
-            Assert.Null(a.Parent);
-            Assert.Empty(a.Children);
+            a.Name.ShouldBe("a");
+            a.Parent.ShouldBeNull();
+            a.Children.ShouldBeEmpty();
         }
         {
             var b = tree.Roots[1];
-            Assert.Equal("b", b.Name);
-            Assert.Null(b.Parent);
-            Assert.Empty(b.Children);
+            b.Name.ShouldBe("b");
+            b.Parent.ShouldBeNull();
+            b.Children.ShouldBeEmpty();
         }
         {
             var c = tree.Roots[2];
-            Assert.Equal("c", c.Name);
-            Assert.Null(c.Parent);
-            Assert.Empty(c.Children);
+            c.Name.ShouldBe("c");
+            c.Parent.ShouldBeNull();
+            c.Children.ShouldBeEmpty();
         }
     }
 }

@@ -9,7 +9,7 @@ public class NodePathTests
     [Fact]
     public void Ctor_ThrowsIfEmptyEnumerable()
     {
-        Assert.Throws<ArgumentException>(() =>
+        Should.Throw<ArgumentException>(() =>
         {
             new NodePath(Enumerable.Empty<string>());
         });
@@ -17,7 +17,7 @@ public class NodePathTests
     [Fact]
     public void Ctor_SucceedsIfNonEmptyEnumerable()
     {
-        _ = new NodePath(new[] { "foo", "bar", "baz" });
+        Should.NotThrow(() => new NodePath(new[] { "foo", "bar", "baz" }));
     }
 
     private static IEnumerable<object[]> Parent_ReturnsParentPath_Data()
@@ -43,21 +43,21 @@ public class NodePathTests
     public void Parent_ReturnsParentPath(NodePath path, NodePath expected)
     {
         var parent = path.Parent;
-        Assert.Equal(expected, parent);
+        parent.ShouldBe(expected);
     }
     [Fact]
     public void Parent_ThrowsIfRoot()
     {
         NodePath path = new("foo");
 
-        Assert.Throws<InvalidOperationException>(() => path.Parent);
+        Should.Throw<InvalidOperationException>(() => path.Parent);
     }
     [Fact]
     public void Parent_ThrowsIfEmpty()
     {
         NodePath path = new();
 
-        Assert.Throws<InvalidOperationException>(() => path.Parent);
+        Should.Throw<InvalidOperationException>(() => path.Parent);
     }
 
     private static IEnumerable<object[]> Root_ReturnsRoot_Data()
@@ -84,14 +84,14 @@ public class NodePathTests
     {
         string root = path.Root;
 
-        Assert.Equal(expected, root);
+        root.ShouldBe(expected);
     }
     [Fact]
     public void Root_ThrowsIfEmpty()
     {
         NodePath path = new();
 
-        Assert.Throws<InvalidOperationException>(() => path.Root);
+        Should.Throw<InvalidOperationException>(() => path.Root);
     }
 
     private static IEnumerable<object[]> Leaf_ReturnsLeaf_Data()
@@ -118,7 +118,7 @@ public class NodePathTests
     {
         string leaf = path.Leaf;
 
-        Assert.Equal(expected, leaf);
+        leaf.ShouldBe(expected);
     }
 
     [InlineData(new object[] { new[] { "foo" } })]
@@ -130,14 +130,14 @@ public class NodePathTests
         NodePath path = new(pathValues);
 
         int expected = pathValues.Length - 1;
-        Assert.Equal(expected, path.Depth);
+        path.Depth.ShouldBe(expected);
     }
     [Fact]
     public void Depth_ThrowsWhenEmpty()
     {
         NodePath path = new();
 
-        Assert.Throws<InvalidOperationException>(() => path.Depth);
+        Should.Throw<InvalidOperationException>(() => path.Depth);
     }
 
     [Fact]
@@ -145,21 +145,21 @@ public class NodePathTests
     {
         NodePath path = new("foo");
 
-        Assert.True(path.IsRoot);
+        path.IsRoot.ShouldBeTrue();
     }
     [Fact]
     public void IsRoot_ReturnsFalse_WhenNotRoot()
     {
         NodePath path = new("foo", "bar", "baz");
 
-        Assert.False(path.IsRoot);
+        path.IsRoot.ShouldBeFalse();
     }
     [Fact]
     public void IsRoot_ThrowsWhenEmpty()
     {
         NodePath path = new();
 
-        Assert.Throws<InvalidOperationException>(() => path.IsRoot);
+        Should.Throw<InvalidOperationException>(() => path.IsRoot);
     }
 
     [InlineData(new[] { "foo" }, new[] { "foo" })]
@@ -170,7 +170,7 @@ public class NodePathTests
         NodePath pathA = new(a);
         NodePath pathB = new(b);
 
-        Assert.True(pathA.Equals(pathB));
+        pathA.Equals(pathB).ShouldBeTrue();
     }
     [InlineData(new[] { "foo" }, new[] { "foo", "bar" })]
     [InlineData(new[] { "foo", "bar", "baz" }, new[] { "boo", "far", "zaz" })]
@@ -180,7 +180,7 @@ public class NodePathTests
         NodePath pathA = new(a);
         NodePath pathB = new(b);
 
-        Assert.False(pathA.Equals(pathB));
+        pathA.Equals(pathB).ShouldBeFalse();
     }
 
     [InlineData(new object[] { new[] { "foo" } })]
@@ -191,7 +191,7 @@ public class NodePathTests
         NodePath path = new(pathValues);
 
         string expected = string.Join('.', pathValues);
-        Assert.Equal(expected, path.ToString());
+        path.ToString().ShouldBe(expected);
     }
 
     [InlineData("")]
@@ -203,7 +203,7 @@ public class NodePathTests
     {
         var path = NodePath.Parse(str);
 
-        Assert.Null(path);
+        path.ShouldBeNull();
     }
     private static IEnumerable<object[]> Parse_ReturnsExpected_Data()
     {
@@ -217,7 +217,7 @@ public class NodePathTests
     {
         var path = NodePath.Parse(str);
 
-        Assert.Equal(expected, path);
+        path.ShouldBe(expected);
     }
 
     [Fact]
@@ -227,7 +227,7 @@ public class NodePathTests
         var leafPath = path.CreateLeafPath("bar");
 
         NodePath expected = new("foo", "bar");
-        Assert.Equal(expected, leafPath);
+        leafPath.ShouldBe(expected);
     }
 
     private static IEnumerable<object[]> GetParentPaths_ReturnsParentPaths_Data()
@@ -252,7 +252,7 @@ public class NodePathTests
     public void GetParentPaths_ReturnsParentPaths(NodePath path, NodePath[] expected)
     {
         var parentPaths = path.GetParentPaths();
-        Assert.Equal(expected, parentPaths);
+        parentPaths.ShouldBe(expected);
     }
 
     private static IEnumerable<object[]> GetParentPathsAndSelf_ReturnsParentPathsAndSelf_Data()
@@ -281,7 +281,7 @@ public class NodePathTests
     public void GetParentPathsAndSelf_ReturnsParentPathsAndSelf(NodePath path, NodePath[] expected)
     {
         var parentPathsAndSelf = path.GetParentPathsAndSelf();
-        Assert.Equal(expected, parentPathsAndSelf);
+        parentPathsAndSelf.ShouldBe(expected);
     }
 
     [InlineData(new object[] { new[] { "foo" } })]
@@ -294,6 +294,6 @@ public class NodePathTests
         var nodes = path.GetNodes();
 
         var expected = pathValues.Reverse();
-        Assert.Equal(expected, nodes);
+        nodes.ShouldBe(expected);
     }
 }
