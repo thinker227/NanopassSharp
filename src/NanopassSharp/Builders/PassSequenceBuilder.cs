@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,14 +8,12 @@ namespace NanopassSharp.Builders;
 /// <summary>
 /// A builder for a linked list of passes.
 /// </summary>
-public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassBuilder>
+public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
 {
-    private readonly CompilerPassBuilder root;
-    private readonly List<CompilerPassBuilder> builders;
-    private const string rootName = "<rootPass>";
+    private readonly Dictionary<string, CompilerPassBuilder> builders;
+    private const string empty = "<empty>";
 
-    public ISequentialCompilerPassBuilder this[int index] => builders[index];
-    public int Count => builders.Count;
+    public string Root { get; set; }
 
 
 
@@ -23,8 +22,8 @@ public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassB
     /// </summary>
     public PassSequenceBuilder()
     {
-        root = new(rootName, rootName);
-        builders = new() { root };
+        builders = new();
+        Root = "";
     }
 
 
@@ -49,12 +48,18 @@ public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassB
     /// </summary>
     /// <param name="name">The name of the pass.</param>
     /// <returns>A new builder for the pass.</returns>
-    public ISequentialCompilerPassBuilder AddPass(string name, string? documentation = null)
+    public CompilerPassBuilder AddPass(string name)
     {
-        var last = builders[^1];
-        var builder = new CompilerPassBuilder(name, last.Name).WithDocumentation(documentation);
-        builders.Add(builder);
-        last.Next = builder.Name;
+        if (IsReservedPassName(name))
+        {
+            throw new ArgumentException($"Name '{name}' is reserved", nameof(name));
+        }
+
+        if (builders.TryGetValue(name, out var b)) return b;
+
+        CompilerPassBuilder builder = new(name);
+        builders.Add(builder.Name, builder);
+
         return builder;
     }
     /// <summary>
@@ -62,21 +67,82 @@ public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassB
     /// </summary>
     /// <param name="pass">The pass to add.</param>
     /// <returns>A new builder for the pass.</returns>
-    public ISequentialCompilerPassBuilder AddPass(CompilerPass pass)
+    public CompilerPassBuilder AddPass(CompilerPass pass) => AddPass(pass.Name)
+        .WithDocumentation(pass.Documentation)
+        .WithTransformations(pass.Transformations.Transformations)
+        .WithPrevious(pass.Previous)
+        .WithNext(pass.Next);
+    private static bool IsReservedPassName(string name) =>
+        name is "<empty>" or "<null>";
+
+    public IEnumerator<CompilerPassBuilder> GetEnumerator()
     {
-        var last = builders[^1];
-        var builder = CompilerPassBuilder.FromPass(pass);
-        builders.Add(builder);
-        builder.Previous = last.Name;
-        last.Next = builder.Name;
-        return builder;
+        return builders.Values.GetEnumerator();
     }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
     /// Builds a <see cref="PassSequence"/> from the builder.
     /// </summary>
-    public PassSequence Build() =>
-        PassSequence.Create(builders.Select(b => b.Build()), root.Build());
+    public PassSequence Build()
+    {
+        if (!IsValidRoot(Root))
+        {
+            string rootName = Root ?? "<null>";
+            throw new InvalidOperationException($"Root name '{rootName}' is not valid");
+        }
+
+        var passes = EnumerateBuilders()
+            .Select(BuildPass)
+            .Prepend(GetEmptyPass(Root));
+
+        return PassSequence.Create(passes);
+    }
+    private static bool IsValidRoot(string root) =>
+        root is not (null or "") && !IsReservedPassName(root);
+    private IEnumerable<CompilerPassBuilder> EnumerateBuilders()
+    {
+        string targetName = Root;
+        CompilerPassBuilder? previous = null;
+
+        while (true)
+        {
+            if (!builders.TryGetValue(targetName, out var current))
+            {
+                throw new InvalidOperationException($"Pass '{targetName}' does not exist");
+            }
+
+            if (current.Previous is not null && current.Previous != previous?.Name)
+            {
+                string currentName = current.Name;
+                string currentPrevious = current.Previous;
+                string previousName = previous?.Name ?? "<null>";
+                throw new InvalidOperationException($"Inconsistent pass lineage: pass '{currentName}' specifies '{currentPrevious}' as its previous pass, expected '{previousName}' or null");
+            }
+
+            yield return current;
+
+            if (current.Next is null) break;
+
+            targetName = current.Next;
+            previous = current;
+        }
+    }
+    private CompilerPass BuildPass(CompilerPassBuilder builder) => new(
+        builder.Name,
+        builder.Documentation,
+        new PassTransformations(builder.Transformations.ToArray()),
+        builder.Previous ?? empty,
+        builder.Next
+    );
+    private static CompilerPass GetEmptyPass(string root) => new(
+        empty,
+        null,
+        new PassTransformations(Array.Empty<ITransformationDescription>()),
+        empty,
+        root
+    );
+
     /// <summary>
     /// Implicitly converts a <see cref="PassSequenceBuilder"/> into a <see cref="PassSequence"/>
     /// by calling <see cref="Build"/>.
@@ -84,9 +150,4 @@ public sealed class PassSequenceBuilder : IReadOnlyList<ISequentialCompilerPassB
     /// <param name="builder">The source builder.</param>
     public static implicit operator PassSequence(PassSequenceBuilder builder) =>
         builder.Build();
-
-    public IEnumerator<ISequentialCompilerPassBuilder> GetEnumerator() =>
-        builders.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() =>
-        GetEnumerator();
 }
