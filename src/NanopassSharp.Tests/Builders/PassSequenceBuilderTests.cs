@@ -5,6 +5,38 @@ namespace NanopassSharp.Builders.Tests;
 public class PassSequenceBuilderTests
 {
     [Fact]
+    public void AddPass_ReturnsCorrectPass()
+    {
+        PassSequenceBuilder builder = new();
+        var pass = builder.AddPass("a");
+
+        pass.Name.ShouldBe("a");
+        pass.Documentation.ShouldBe(null);
+        pass.Transformations.ShouldNotBeNull();
+        pass.Transformations.ShouldBeEmpty();
+        pass.Previous.ShouldBeNull();
+        pass.Next.ShouldBeNull();
+    }
+    [InlineData("<empty>")]
+    [InlineData("<null>")]
+    [Theory]
+    public void AddPass_Throws_WhenInvalidName(string name)
+    {
+        PassSequenceBuilder builder = new();
+
+        Should.Throw<ArgumentException>(() => builder.AddPass(name));
+    }
+    [Fact]
+    public void AddPass_ReturnsExistingPass()
+    {
+        PassSequenceBuilder builder = new();
+        var pass1 = builder.AddPass("a");
+        var pass2 = builder.AddPass("a");
+
+        pass2.ShouldBeSameAs(pass1);
+    }
+
+    [Fact]
     public void Build_ReturnsCorrectSequence()
     {
         PassSequenceBuilder builder = new();
