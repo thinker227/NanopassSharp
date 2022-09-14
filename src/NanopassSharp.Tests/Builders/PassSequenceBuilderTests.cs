@@ -41,7 +41,7 @@ public class PassSequenceBuilderTests
         pass.Name.ShouldBe("a");
         pass.Documentation.ShouldBe("docs a");
         pass.Transformations.ShouldBe(transformations);
-        pass.Previous.ShouldBeNull();
+        pass.Previous.ShouldBe("b");
         pass.Next.ShouldBe("c");
     }
     [InlineData("<empty>")]
