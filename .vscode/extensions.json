@@ -1,6 +1,7 @@
 {
 	"recommendations": [
 		"ms-dotnettools.csharp",
-		"xoofx.scriban"
+		"xoofx.scriban",
+		"formulahendry.dotnet-test-explorer"
 	]
 }
