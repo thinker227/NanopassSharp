@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml.Linq;
 
 namespace NanopassSharp.Builders.Tests;
 
@@ -111,11 +110,13 @@ public class PassSequenceBuilderTests
     }
     [InlineData("<empty>")]
     [InlineData("<null>")]
+    [InlineData("")]
+    [InlineData(null)]
     [Theory]
-    public void Build_Throws_WhenInvalidRoot(string name)
+    public void Build_Throws_WhenInvalidRoot(string? name)
     {
         PassSequenceBuilder builder = new();
-        builder.Root = name;
+        builder.Root = name!;
         builder.AddPass("a");
 
         Should.Throw<InvalidOperationException>(builder.Build);
