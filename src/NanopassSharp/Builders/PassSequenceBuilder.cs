@@ -72,6 +72,35 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
         .WithTransformations(pass.Transformations.Transformations)
         .WithPrevious(pass.Previous)
         .WithNext(pass.Next);
+
+    /// <summary>
+    /// Sets the root of the sequence.
+    /// </summary>
+    /// <param name="name">The name of the root.</param>
+    /// <returns>A new builder for the pass.</returns>
+    public CompilerPassBuilder SetRoot(string name)
+    {
+        var builder = AddPass(name);
+        Root = builder.Name;
+        return builder;
+    }
+    /// <summary>
+    /// Sets the root of the sequence.
+    /// </summary>
+    /// <param name="pass">The pass to set the root to.</param>
+    /// <returns>A new builder for the pass.</returns>
+    /// <remarks>
+    /// Ignores <see cref="CompilerPass.Previous"/>
+    /// as the root builder does not have a previous pass.
+    /// </remarks>
+    public CompilerPassBuilder SetRoot(CompilerPass pass)
+    {
+        var builder = AddPass(pass)
+            .WithPrevious(null);
+        Root = builder.Name;
+        return builder;
+    }
+
     private static bool IsReservedPassName(string name) =>
         name is "<empty>" or "<null>";
 

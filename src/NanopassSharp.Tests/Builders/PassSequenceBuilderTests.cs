@@ -1,4 +1,5 @@
 ﻿using System;
+using NanopassSharp.Tests;
 
 namespace NanopassSharp.Builders.Tests;
 
@@ -11,11 +12,37 @@ public class PassSequenceBuilderTests
         var pass = builder.AddPass("a");
 
         pass.Name.ShouldBe("a");
-        pass.Documentation.ShouldBe(null);
+        pass.Documentation.ShouldBeNull();
         pass.Transformations.ShouldNotBeNull();
         pass.Transformations.ShouldBeEmpty();
         pass.Previous.ShouldBeNull();
         pass.Next.ShouldBeNull();
+    }
+    [Fact]
+    public void AddPass_CopiesPass()
+    {
+        PassSequenceBuilder builder = new();
+
+        var transformations = new[]
+        {
+            new MockTransformationDescription(),
+            new MockTransformationDescription(),
+            new MockTransformationDescription()
+        };
+        CompilerPass existingPass = new(
+            "a",
+            "docs a",
+            new PassTransformations(transformations),
+            "b",
+            "c"
+        );
+        var pass = builder.AddPass(existingPass);
+
+        pass.Name.ShouldBe("a");
+        pass.Documentation.ShouldBe("docs a");
+        pass.Transformations.ShouldBe(transformations);
+        pass.Previous.ShouldBeNull();
+        pass.Next.ShouldBe("c");
     }
     [InlineData("<empty>")]
     [InlineData("<null>")]
@@ -34,6 +61,64 @@ public class PassSequenceBuilderTests
         var pass2 = builder.AddPass("a");
 
         pass2.ShouldBeSameAs(pass1);
+    }
+
+    [Fact]
+    public void SetRoot_ReturnsCorrectPass()
+    {
+        PassSequenceBuilder builder = new();
+        var root = builder.SetRoot("a");
+
+        root.Name.ShouldBe("a");
+        root.Documentation.ShouldBeNull();
+        root.Transformations.ShouldNotBeNull();
+        root.Transformations.ShouldBeEmpty();
+        root.Previous.ShouldBeNull();
+        root.Next.ShouldBeNull();
+    }
+    [Fact]
+    public void SetRoot_CopiesPass()
+    {
+        PassSequenceBuilder builder = new();
+
+        var transformations = new[]
+        {
+            new MockTransformationDescription(),
+            new MockTransformationDescription(),
+            new MockTransformationDescription()
+        };
+        CompilerPass pass = new(
+            "a",
+            "docs a",
+            new PassTransformations(transformations),
+            "b",
+            "c"
+        );
+        var root = builder.SetRoot(pass);
+
+        root.Name.ShouldBe("a");
+        root.Documentation.ShouldBe("docs a");
+        root.Transformations.ShouldBe(transformations);
+        root.Previous.ShouldBeNull();
+        root.Next.ShouldBe("c");
+    }
+    [InlineData("<empty>")]
+    [InlineData("<null>")]
+    [Theory]
+    public void AddPass_ThrowsWhenInvalidName(string name)
+    {
+        PassSequenceBuilder builder = new();
+
+        Should.Throw<ArgumentException>(() => builder.SetRoot(name));
+    }
+    [Fact]
+    public void AddPass_ReturnsExistingRoot()
+    {
+        PassSequenceBuilder builder = new();
+        var root1 = builder.SetRoot("a");
+        var root2 = builder.SetRoot("a");
+
+        root2.ShouldBeSameAs(root1);
     }
 
     [Fact]
