@@ -46,6 +46,7 @@ public class AstNodeHierarchyBuilderTests
         root.Members.ShouldBeEmpty();
         root.Attributes.ShouldBeEmpty();
     }
+
     [Fact]
     public void AddRoot_AddsRoot()
     {
@@ -68,6 +69,7 @@ public class AstNodeHierarchyBuilderTests
         var actual = builder.GetNodeFromPath(NodePath.ParseUnsafe("a.b"));
         actual?.Path.ShouldBe(node.Path);
     }
+
     [Fact]
     public void GetNodeFromPath_ReturnsNull_WhenNodeDoesNotExist()
     {
@@ -146,6 +148,7 @@ public class AstNodeHierarchyBuilderTests
             }
         }
     }
+
     [Fact]
     public void Build_Throws_WhenMissingChildWithThrowBehavior()
     {
@@ -155,6 +158,7 @@ public class AstNodeHierarchyBuilderTests
 
         Should.Throw<InvalidOperationException>(() => builder.Build(MissingChildBehavior.Throw));
     }
+
     [Fact]
     public void Build_CreatesMissingChild_WhenMissingChildWithCreateBehavior()
     {
@@ -183,6 +187,7 @@ public class AstNodeHierarchyBuilderTests
             }
         }
     }
+
     [Fact]
     public void Build_BuildsAllRoots()
     {
@@ -216,6 +221,7 @@ public class AstNodeHierarchyBuilderTests
             c.Children.ShouldBeEmpty();
         }
     }
+
     [Fact]
     public void Build_BuildsMembers()
     {

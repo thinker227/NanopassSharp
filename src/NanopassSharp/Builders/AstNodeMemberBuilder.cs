@@ -11,14 +11,17 @@ public sealed class AstNodeMemberBuilder
     /// <inheritdoc cref="AstNodeMember.Name" path="/summary"/>
     /// </summary>
     public string Name { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="AstNodeMember.Documentation" path="/summary"/>
     /// </summary>
     public string? Documentation { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="AstNodeMember.Type" path="/summary"/>
     /// </summary>
     public string? Type { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="AstNodeMember.Attributes" path="/summary"/>
     /// </summary>
@@ -97,6 +100,7 @@ public sealed class AstNodeMemberBuilder
         Attributes.Add(attribute);
         return this;
     }
+
     /// <summary>
     /// Sets the attributes of the member.
     /// </summary>
@@ -113,6 +117,7 @@ public sealed class AstNodeMemberBuilder
     /// </summary>
     public AstNodeMember Build() =>
         new(Name, Documentation, Type, new HashSet<object>(Attributes));
+
     /// <summary>
     /// Implicitly converts an <see cref="AstNodeMemberBuilder"/> to an <see cref="AstNodeMember"/>
     /// by calling <see cref="Build"/>.

@@ -18,6 +18,7 @@ public class PassSequenceBuilderTests
         pass.Previous.ShouldBeNull();
         pass.Next.ShouldBeNull();
     }
+
     [Fact]
     public void AddPass_CopiesPass()
     {
@@ -44,6 +45,7 @@ public class PassSequenceBuilderTests
         pass.Previous.ShouldBe("b");
         pass.Next.ShouldBe("c");
     }
+
     [InlineData("<empty>")]
     [InlineData("<null>")]
     [Theory]
@@ -53,6 +55,7 @@ public class PassSequenceBuilderTests
 
         Should.Throw<ArgumentException>(() => builder.AddPass(name));
     }
+
     [Fact]
     public void AddPass_ReturnsExistingPass()
     {
@@ -76,6 +79,7 @@ public class PassSequenceBuilderTests
         root.Previous.ShouldBeNull();
         root.Next.ShouldBeNull();
     }
+
     [Fact]
     public void SetRoot_CopiesPass()
     {
@@ -102,6 +106,7 @@ public class PassSequenceBuilderTests
         root.Previous.ShouldBeNull();
         root.Next.ShouldBe("c");
     }
+
     [InlineData("<empty>")]
     [InlineData("<null>")]
     [Theory]
@@ -111,6 +116,7 @@ public class PassSequenceBuilderTests
 
         Should.Throw<ArgumentException>(() => builder.SetRoot(name));
     }
+
     [Fact]
     public void AddPass_ReturnsExistingRoot()
     {
@@ -168,6 +174,7 @@ public class PassSequenceBuilderTests
         };
         sequence.ShouldBe(expected);
     }
+
     [Fact]
     public void Build_Throws_WhenInconsistentLineage()
     {
@@ -180,6 +187,7 @@ public class PassSequenceBuilderTests
 
         Should.Throw<InvalidOperationException>(builder.Build);
     }
+
     [Fact]
     public void Build_DoesNotThrow_WhenNullPrevious()
     {
@@ -191,6 +199,7 @@ public class PassSequenceBuilderTests
 
         Should.NotThrow(builder.Build);
     }
+
     [Fact]
     public void Build_Throws_WhenCircularReference()
     {
@@ -207,6 +216,7 @@ public class PassSequenceBuilderTests
 
         Should.Throw<InvalidOperationException>(builder.Build);
     }
+
     [Fact]
     public void Build_Throws_WhenNextNotFound()
     {
@@ -217,6 +227,7 @@ public class PassSequenceBuilderTests
 
         Should.Throw<InvalidOperationException>(builder.Build);
     }
+
     [Fact]
     public void Build_Throws_WhenRootNotFound()
     {
@@ -225,6 +236,7 @@ public class PassSequenceBuilderTests
 
         Should.Throw<InvalidOperationException>(builder.Build);
     }
+
     [InlineData("<empty>")]
     [InlineData("<null>")]
     [InlineData("")]

@@ -46,6 +46,7 @@ public class AstNodeMemberBuilderTests
             )
         };
     }
+
     [MemberData(nameof(FromMember_ReturnsCorrectBuilder_Data))]
     [Theory]
     public void FromMember_ReturnsCorrectBuilder(AstNodeMember member)
@@ -66,6 +67,7 @@ public class AstNodeMemberBuilderTests
 
         builder.Name.ShouldBe("b");
     }
+
     [Fact]
     public void WithName_ReturnsSelf()
     {
@@ -83,6 +85,7 @@ public class AstNodeMemberBuilderTests
 
         builder.Documentation.ShouldBe("docs a");
     }
+
     [Fact]
     public void WithDocumentation_ReturnsSelf()
     {
@@ -100,6 +103,7 @@ public class AstNodeMemberBuilderTests
 
         builder.Type.ShouldBe("type a");
     }
+
     [Fact]
     public void WithType_ReturnsSelf()
     {
@@ -125,6 +129,7 @@ public class AstNodeMemberBuilderTests
         };
         builder.Attributes.ShouldBeSubsetOf(expected);
     }
+
     [Fact]
     public void AddAttribute_ReturnsSelf()
     {
@@ -148,6 +153,7 @@ public class AstNodeMemberBuilderTests
 
         builder.Attributes.ShouldBeSubsetOf(attributes);
     }
+
     [Fact]
     public void WithAttributes_ReturnsSelf()
     {
@@ -193,6 +199,7 @@ public class AstNodeMemberBuilderTests
             }
         };
     }
+
     [MemberData(nameof(Build_ReturnsCorrectMember_Data))]
     [Theory]
     public void Build_ReturnsCorrectMember(AstNodeMemberBuilder builder)

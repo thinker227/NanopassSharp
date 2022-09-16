@@ -13,6 +13,7 @@ public readonly struct NodePath : IEquatable<NodePath>
     private readonly string[] nodes;
 
     private bool IsEmpty => nodes.Length <= 0;
+
     /// <summary>
     /// Gets the path to the parent node of the current outer-most leaf node.
     /// </summary>
@@ -32,6 +33,7 @@ public readonly struct NodePath : IEquatable<NodePath>
             return new(nodes[..^1]);
         }
     }
+
     /// <summary>
     /// The name of the root node of the graph.
     /// </summary>
@@ -47,18 +49,21 @@ public readonly struct NodePath : IEquatable<NodePath>
             return nodes[0];
         }
     }
+
     /// <summary>
     /// The name of the node the path leads to, the outer "leaf" of the node graph.
     /// </summary>
     public string Leaf => !IsEmpty
         ? nodes[^1]
         : throw NoNodes();
+
     /// <summary>
     /// The depth of the node the path leads to. 0 for the root node, 1 for the root's children, etc.
     /// </summary>
     public int Depth => nodes.Length >= 1
         ? nodes.Length - 1
         : throw NoNodes();
+
     /// <summary>
     /// Whether the path is only a root node.
     /// </summary>
@@ -80,6 +85,7 @@ public readonly struct NodePath : IEquatable<NodePath>
         // properties will throw appropriate exceptions when accessed.
         nodes = Array.Empty<string>();
     }
+
     /// <summary>
     /// Initializes a new <see cref="NodePath"/> instance.
     /// </summary>
@@ -94,12 +100,14 @@ public readonly struct NodePath : IEquatable<NodePath>
             throw new ArgumentException("Length of nodes has to be greater or equal to 1.", nameof(nodes));
         }
     }
+
     /// <summary>
     /// Initializes a new <see cref="NodePath"/> instance.
     /// </summary>
     /// <param name="nodes">The nodes the path consists of,
     /// in order from the root to the outer-most leaf.</param>
     public NodePath(params string[] nodes) : this((IEnumerable<string>)nodes) { }
+
     /// <summary>
     /// Initializes a new <see cref="NodePath"/> instance.
     /// </summary>
@@ -115,6 +123,7 @@ public readonly struct NodePath : IEquatable<NodePath>
     {
         if (IsEmpty) throw NoNodes();
     }
+
     private static InvalidOperationException NoNodes() =>
         new("The path contains no nodes");
 
@@ -129,8 +138,10 @@ public readonly struct NodePath : IEquatable<NodePath>
 
         return true;
     }
+
     public override bool Equals([NotNullWhen(true)] object? obj) =>
         obj is NodePath nodePath && Equals(nodePath);
+
     public override int GetHashCode()
     {
         HashCode hashCode = new();
@@ -174,6 +185,7 @@ public readonly struct NodePath : IEquatable<NodePath>
 
         return new NodePath(nodes);
     }
+
     /// <summary>
     /// Parses a <see cref="NodePath"/> from a string,
     /// separating node names a period character ('.').
@@ -247,6 +259,7 @@ public readonly struct NodePath : IEquatable<NodePath>
             yield return new NodePath(nodes[0..i]);
         }
     }
+
     /// <summary>
     /// Gets the paths to all parent nodes of the current path including the current path,
     /// in order from the current path to the root node.
@@ -262,6 +275,7 @@ public readonly struct NodePath : IEquatable<NodePath>
 
     public static bool operator ==(NodePath a, NodePath b) =>
         a.Equals(b);
+
     public static bool operator !=(NodePath a, NodePath b) =>
         !a.Equals(b);
 }

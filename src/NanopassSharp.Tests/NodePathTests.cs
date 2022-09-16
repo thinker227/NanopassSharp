@@ -14,6 +14,7 @@ public class NodePathTests
             new NodePath(Enumerable.Empty<string>());
         });
     }
+
     [Fact]
     public void Ctor_SucceedsIfNonEmptyEnumerable()
     {
@@ -38,6 +39,7 @@ public class NodePathTests
             new NodePath("foo", "bar", "baz", "boo", "far")
         };
     }
+
     [MemberData(nameof(Parent_ReturnsParentPath_Data))]
     [Theory]
     public void Parent_ReturnsParentPath(NodePath path, NodePath expected)
@@ -45,6 +47,7 @@ public class NodePathTests
         var parent = path.Parent;
         parent.ShouldBe(expected);
     }
+
     [Fact]
     public void Parent_ThrowsIfRoot()
     {
@@ -52,6 +55,7 @@ public class NodePathTests
 
         Should.Throw<InvalidOperationException>(() => path.Parent);
     }
+
     [Fact]
     public void Parent_ThrowsIfEmpty()
     {
@@ -78,6 +82,7 @@ public class NodePathTests
             "foo"
         };
     }
+
     [MemberData(nameof(Root_ReturnsRoot_Data))]
     [Theory]
     public void Root_ReturnsRoot(NodePath path, string expected)
@@ -86,6 +91,7 @@ public class NodePathTests
 
         root.ShouldBe(expected);
     }
+
     [Fact]
     public void Root_ThrowsIfEmpty()
     {
@@ -112,6 +118,7 @@ public class NodePathTests
             "zaz"
         };
     }
+
     [MemberData(nameof(Leaf_ReturnsLeaf_Data))]
     [Theory]
     public void Leaf_ReturnsLeaf(NodePath path, string expected)
@@ -132,6 +139,7 @@ public class NodePathTests
         int expected = pathValues.Length - 1;
         path.Depth.ShouldBe(expected);
     }
+
     [Fact]
     public void Depth_ThrowsWhenEmpty()
     {
@@ -147,6 +155,7 @@ public class NodePathTests
 
         path.IsRoot.ShouldBeTrue();
     }
+
     [Fact]
     public void IsRoot_ReturnsFalse_WhenNotRoot()
     {
@@ -154,6 +163,7 @@ public class NodePathTests
 
         path.IsRoot.ShouldBeFalse();
     }
+
     [Fact]
     public void IsRoot_ThrowsWhenEmpty()
     {
@@ -172,6 +182,7 @@ public class NodePathTests
 
         pathA.Equals(pathB).ShouldBeTrue();
     }
+
     [InlineData(new[] { "foo" }, new[] { "foo", "bar" })]
     [InlineData(new[] { "foo", "bar", "baz" }, new[] { "boo", "far", "zaz" })]
     [Theory]
@@ -205,12 +216,14 @@ public class NodePathTests
 
         path.ShouldBeNull();
     }
+
     private static IEnumerable<object[]> Parse_ReturnsExpected_Data()
     {
         yield return new object[] { "foo", new NodePath("foo") };
         yield return new object[] { "foo.bar", new NodePath("foo", "bar") };
         yield return new object[] { "foo.bar.baz.boo.far.zaz", new NodePath("foo", "bar", "baz", "boo", "far", "zaz") };
     }
+
     [MemberData(nameof(Parse_ReturnsExpected_Data))]
     [Theory]
     public void Parse_ReturnsExpected(string str, NodePath expected)
@@ -247,6 +260,7 @@ public class NodePathTests
             }
         };
     }
+
     [MemberData(nameof(GetParentPaths_ReturnsParentPaths_Data))]
     [Theory]
     public void GetParentPaths_ReturnsParentPaths(NodePath path, NodePath[] expected)
@@ -276,6 +290,7 @@ public class NodePathTests
             }
         };
     }
+
     [MemberData(nameof(GetParentPathsAndSelf_ReturnsParentPathsAndSelf_Data))]
     [Theory]
     public void GetParentPathsAndSelf_ReturnsParentPathsAndSelf(NodePath path, NodePath[] expected)

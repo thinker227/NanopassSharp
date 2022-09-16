@@ -14,11 +14,14 @@ public sealed class PassSequence : IReadOnlyList<CompilerPass>
     private readonly LinkedList<CompilerPass> passes;
 
     public CompilerPass this[int index] => passes.ElementAt(index);
+
     public int Count => passes.Count;
+
     /// <summary>
     /// The passes as a dictionary, with the name of each pass being a key in the dictionary.
     /// </summary>
     public IReadOnlyDictionary<string, CompilerPass> Passes { get; }
+
     /// <summary>
     /// Gets a pass by its name.
     /// </summary>
@@ -63,6 +66,7 @@ public sealed class PassSequence : IReadOnlyList<CompilerPass>
 
         return new(list, dict);
     }
+
     private static IReadOnlyDictionary<string, CompilerPass> GenerateDictionary(IEnumerable<CompilerPass> passes) =>
         passes.ToDictionary(p => p.Name);
 
@@ -73,6 +77,7 @@ public sealed class PassSequence : IReadOnlyList<CompilerPass>
     /// <returns>The <see cref="AstNodeHierarchy"/> of the pass with the name <paramref name="passName"/>.</returns>
     public AstNodeHierarchy GetTree(string passName) =>
         GetTree(Passes[passName]);
+
     /// <summary>
     /// Gets the tree of a specified pass.
     /// </summary>
@@ -100,6 +105,7 @@ public sealed class PassSequence : IReadOnlyList<CompilerPass>
 
     public IEnumerator<CompilerPass> GetEnumerator() =>
         passes.GetEnumerator();
+
     IEnumerator IEnumerable.GetEnumerator() =>
         GetEnumerator();
 }

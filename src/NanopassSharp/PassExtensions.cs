@@ -9,18 +9,23 @@ public static class PassExtensions
 {
     public static IEnumerable<AstNode> GetNodes(this AstNodeHierarchy tree) =>
         tree.Roots.SelectMany(r => r.GetDecendantNodesAndSelf());
+
     public static IEnumerable<AstNode> GetDecendantNodes(this AstNode node) =>
         node.Children.Values.SelectMany(n => n.GetDecendantNodes());
+
     public static IEnumerable<AstNode> GetDecendantNodesAndSelf(this AstNode node) =>
         node.GetDecendantNodes().Prepend(node);
+
     public static AstNode GetRoot(this AstNode node) =>
         node.Parent?.GetRoot() ?? node;
+
     /// <summary>
     /// Gets the path to an <see cref="AstNode"/> from its root.
     /// </summary>
     /// <param name="node">The node to get the path to.</param>
     public static NodePath GetPath(this AstNode node) =>
         NodePath.Create(node, n => (n.Parent, n.Parent is not null), n => n.Name);
+
     public static AstNode? GetNodeFromPath(this AstNodeHierarchy hierarchy, NodePath path)
     {
         var nodesEnumerator = path.GetNodes().Reverse().GetEnumerator();
@@ -63,6 +68,7 @@ public static class PassExtensions
         };
         return tree.ReplaceNode(parent, newParent);
     }
+
     public static AstNodeHierarchy RemoveNode(this AstNodeHierarchy tree, AstNode node)
     {
         var root = node.GetRoot();
@@ -96,6 +102,7 @@ public static class PassExtensions
             Members = node.Members.ToImmutableDictionary().SetItem(name, member)
         };
     }
+
     public static AstNode RemoveMember(this AstNode node, AstNodeMember member)
     {
         string name = member.Name;

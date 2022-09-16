@@ -14,30 +14,37 @@ public sealed class AstNodeBuilder
     /// The hierarchy this node is a part of.
     /// </summary>
     public AstNodeHierarchyBuilder Hierarchy { get; }
+
     /// <summary>
     /// The path to this node.
     /// </summary>
     public NodePath Path { get; }
+
     /// <summary>
     /// <inheritdoc cref="AstNode.Name" path="/summary"/>
     /// </summary>
     public string Name => Path.Leaf;
+
     /// <summary>
     /// <inheritdoc cref="AstNode.Documentation" path="/summary"/>
     /// </summary>
     public string? Documentation { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="AstNode.Parent" path="/summary"/>
     /// </summary>
     public string? Parent => Path.Parent.Leaf;
+
     /// <summary>
     /// <inheritdoc cref="AstNode.Children" path="/summary"/>
     /// </summary>
     public ICollection<string> Children { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="AstNode.Members" path="/summary"/>
     /// </summary>
     public IReadOnlyCollection<AstNodeMemberBuilder> Members => members;
+
     /// <summary>
     /// <inheritdoc cref="AstNode.Attributes" path="/summary"/>
     /// </summary>
@@ -78,6 +85,7 @@ public sealed class AstNodeBuilder
         Attributes.Add(attribute);
         return this;
     }
+
     /// <summary>
     /// Sets the attributes of the node.
     /// </summary>
@@ -100,6 +108,7 @@ public sealed class AstNodeBuilder
         Children.Add(builder.Name);
         return builder;
     }
+
     /// <summary>
     /// Sets the children of the node.
     /// </summary>
@@ -124,6 +133,7 @@ public sealed class AstNodeBuilder
         members.Add(builder);
         return builder;
     }
+
     /// <summary>
     /// Adds a member to the node.
     /// </summary>
@@ -133,6 +143,7 @@ public sealed class AstNodeBuilder
         .WithDocumentation(member.Documentation)
         .WithType(member.Type)
         .WithAttributes(new HashSet<object>(member.Attributes));
+
     /// <summary>
     /// Removes a member from the node.
     /// </summary>
@@ -143,6 +154,7 @@ public sealed class AstNodeBuilder
         members.RemoveAll(m => m.Name == name);
         return this;
     }
+
     /// <summary>
     /// Removes a member from the node.
     /// </summary>

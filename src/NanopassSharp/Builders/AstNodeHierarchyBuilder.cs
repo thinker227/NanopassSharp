@@ -57,6 +57,7 @@ public sealed class AstNodeHierarchyBuilder
             : NodePath.ParseUnsafe(parentPath);
         return CreateNode(name, pp);
     }
+
     /// <summary>
     /// Creates a new node in the hierarchy.
     /// </summary>
@@ -70,6 +71,7 @@ public sealed class AstNodeHierarchyBuilder
     /// </remarks>
     public AstNodeBuilder CreateNode(string name, NodePath? parentPath) =>
         CreateNode(parentPath?.CreateLeafPath(name) ?? new(name));
+
     /// <summary>
     /// Creates a new node in the hierarchy.
     /// </summary>
@@ -81,6 +83,7 @@ public sealed class AstNodeHierarchyBuilder
     /// </remarks>
     public AstNodeBuilder CreateNode(string fullPath) =>
         CreateNode(NodePath.ParseUnsafe(fullPath));
+
     /// <summary>
     /// Creates a new node in the hierarchy.
     /// </summary>
@@ -99,6 +102,7 @@ public sealed class AstNodeHierarchyBuilder
 
         return builder;
     }
+
     /// <summary>
     /// Creates a new node in the hierarchy from an existing <see cref="AstNode"/>.
     /// </summary>
@@ -172,6 +176,7 @@ public sealed class AstNodeHierarchyBuilder
 
         return hierarchy;
     }
+
     private AstNode BuildNode(AstNode? parent, AstNodeBuilder builder, MissingChildBehavior missingChildBehavior)
     {
         var path = builder.Path;
@@ -199,6 +204,7 @@ public sealed class AstNodeHierarchyBuilder
 
         return node;
     }
+
     private AstNodeBuilder GetMissingNode(NodePath path, MissingChildBehavior missingChildBehavior)
     {        
         if (missingChildBehavior == MissingChildBehavior.Throw)

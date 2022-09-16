@@ -14,6 +14,7 @@ public class AstNodeBuilderTests
 
         node.Documentation.ShouldBe("docs");
     }
+
     [Fact]
     public void WithDocumentation_ReturnsSelf()
     {
@@ -36,6 +37,7 @@ public class AstNodeBuilderTests
         object[] expected = new object[] { "attribute", 27, true };
         node.Attributes.ShouldBe(expected);
     }
+
     [Fact]
     public void AddAttribute_ReturnsSelf()
     {
@@ -56,6 +58,7 @@ public class AstNodeBuilderTests
 
         node.Attributes.ShouldBe(attributes);
     }
+
     [Fact]
     public void WithAttributes_ReturnsSelf()
     {
@@ -77,6 +80,7 @@ public class AstNodeBuilderTests
         IEnumerable<string> expected = new[] { "b" };
         node.Children.ShouldBe(expected);
     }
+
     [Fact]
     public void AddsChild_ReturnsChildBuilder()
     {
@@ -132,6 +136,7 @@ public class AstNodeBuilderTests
             foo.Members.Count.ShouldBe(1);
         }
     }
+
     [Fact]
     public void RemoveMember_RemovesNodeMember_WithNodeParameter()
     {

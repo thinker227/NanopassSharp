@@ -5,6 +5,7 @@ namespace NanopassSharp.Tests;
 internal sealed class MockTransformationDescription : ITransformationDescription
 {
     public ITransformationPattern? Pattern { get; set; }
+
     public ITransformation Transformation { get; set; } = new MockTransformation();
 }
 
@@ -26,11 +27,13 @@ internal sealed class MockTransformationPattern : ITransformationPattern
         isMatchNodeFunc = func;
         return this;
     }
+
     /// <summary>
     /// Sets the return value for <see cref="IsMatch(AstNode)"/>.
     /// </summary>
     public MockTransformationPattern IsMatchNodeReturns(bool value) =>
         IsMatchNodeReturns((_) => value);
+
     /// <summary>
     /// Sets the function for <see cref="IsMatch(AstNode, AstNodeMember)"/>.
     /// </summary>
@@ -39,6 +42,7 @@ internal sealed class MockTransformationPattern : ITransformationPattern
         isMatchMemberFunc = func;
         return this;
     }
+
     /// <summary>
     /// Sets the return value for <see cref="IsMatch(AstNode, AstNodeMember)"/>.
     /// </summary>
@@ -46,6 +50,7 @@ internal sealed class MockTransformationPattern : ITransformationPattern
         IsMatchMemberReturns((_, _) => value);
 
     public bool IsMatch(AstNode node) => isMatchNodeFunc(node);
+
     public bool IsMatch(AstNode node, AstNodeMember member) => isMatchMemberFunc(node, member);
 }
 
@@ -66,11 +71,13 @@ internal sealed class MockTransformation : ITransformation
         applyToMemberFunc = func;
         return this;
     }
+
     /// <summary>
     /// Sets the return value for <see cref="ApplyToMember(AstNodeHierarchy, AstNode, AstNodeMember)"/>.
     /// </summary>
     public MockTransformation ApplyToMemberReturns(AstNodeMember value) =>
         ApplyToMemberReturns((_, _, _) => value);
+
     /// <summary>
     /// Sets the function for <see cref="ApplyToNode(AstNodeHierarchy, AstNode)"/>.
     /// </summary>
@@ -79,6 +86,7 @@ internal sealed class MockTransformation : ITransformation
         applyToNodeFunc = func;
         return this;
     }
+
     /// <summary>
     /// Sets the return value for <see cref="ApplyToNode(AstNodeHierarchy, AstNode)"/>.
     /// </summary>
@@ -87,6 +95,7 @@ internal sealed class MockTransformation : ITransformation
 
     public AstNodeMember ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member) =>
         applyToMemberFunc(tree, node, member);
+
     public AstNode ApplyToNode(AstNodeHierarchy tree, AstNode node) =>
         applyToNodeFunc(tree, node);
 }

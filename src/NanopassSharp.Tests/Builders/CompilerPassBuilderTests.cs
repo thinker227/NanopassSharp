@@ -35,6 +35,7 @@ public class CompilerPassBuilderTests
             new CompilerPass("bar", null, new PassTransformations(Array.Empty<ITransformationDescription>()), "bar", null)
         };
     }
+
     [MemberData(nameof(FromPass_ReturnsCorrectBuilder_Data))]
     [Theory]
     public void FromPass_ReturnsCorrectBuilder(CompilerPass pass)
@@ -56,6 +57,7 @@ public class CompilerPassBuilderTests
 
         builder.Documentation.ShouldBe("docs foo");
     }
+
     [Fact]
     public void WithDocumentation_ReturnsSelf()
     {
@@ -80,6 +82,7 @@ public class CompilerPassBuilderTests
 
         builder.Transformations.ShouldBe(descriptions);
     }
+
     [Fact]
     public void WithTransformations_ReturnsSelf()
     {
@@ -102,6 +105,7 @@ public class CompilerPassBuilderTests
         };
         builder.Transformations.ShouldBe(expected);
     }
+
     [Fact]
     public void AddTransformation_ReturnsSelf()
     {
@@ -119,6 +123,7 @@ public class CompilerPassBuilderTests
 
         builder.Previous.ShouldBe("bar");
     }
+
     [Fact]
     public void WithPrevious_ReturnsSelf()
     {
@@ -136,6 +141,7 @@ public class CompilerPassBuilderTests
 
         builder.Next.ShouldBe("bar");
     }
+
     [Fact]
     public void WithNext_ReturnsSelf()
     {

@@ -12,18 +12,22 @@ public sealed class CompilerPassBuilder
     /// <inheritdoc cref="CompilerPass.Name" path="/summary"/>
     /// </summary>
     public string Name { get; }
+
     /// <summary>
     /// <inheritdoc cref="CompilerPass.Documentation" path="/summary"/>
     /// </summary>
     public string? Documentation { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="CompilerPass.Transformations" path="/summary"/>
     /// </summary>
     public IList<ITransformationDescription> Transformations { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="CompilerPass.Previous" path="/summary"/>
     /// </summary>
     public string? Previous { get; set; }
+
     /// <summary>
     /// <inheritdoc cref="CompilerPass.Next" path="/summary"/>
     /// </summary>
@@ -74,6 +78,7 @@ public sealed class CompilerPassBuilder
             : transformations.ToList();
         return this;
     }
+
     public CompilerPassBuilder AddTransformation(ITransformationDescription transformation)
     {
         Transformations.Add(transformation);
