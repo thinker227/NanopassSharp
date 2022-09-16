@@ -11,27 +11,16 @@ namespace NanopassSharp;
 /// <param name="Name">The name of the pass.</param>
 /// <param name="Documentation">The pass' corresponding documentation.</param>
 /// <param name="Transformations">The transformations the pass applies to its nodes.</param>
-/// <param name="Previous">The previous pass which this pass is based on.</param>
+/// <param name="Previous">The name of the previous pass which this pass is based on.</param>
+/// <param name="Next">The name of the next pass immediately based on this pass.</param>
 public sealed record class CompilerPass
 (
     string Name,
     string? Documentation,
     PassTransformations Transformations,
-    CompilerPass Previous
-)
-{
-    /// <summary>
-    /// The next pass immediately based on this pass.
-    /// </summary>
-    public CompilerPass? Next { get; set; }
-
-    private AstNodeHierarchy? tree;
-    /// <summary>
-    /// The transformed tree of this pass.
-    /// </summary>
-    public AstNodeHierarchy Tree =>
-        tree ??= PassTransformer.ApplyTransformations(Previous.Tree, Transformations);
-}
+    string Previous,
+    string? Next
+);
 
 /// <summary>
 /// The transformations applied by a <see cref="CompilerPass"/>.
@@ -39,7 +28,7 @@ public sealed record class CompilerPass
 /// <param name="Transformations">A list of transformations.</param>
 public sealed record class PassTransformations
 (
-    IList<ITransformationDescription> Transformations
+    IReadOnlyCollection<ITransformationDescription> Transformations
 );
 
 /// <summary>
@@ -50,9 +39,14 @@ public sealed record class PassTransformations
 /// <param name="Nodes">The nodes of the tree.</param>
 public sealed record class AstNodeHierarchy
 (
-    IList<AstNode> Roots
+    IReadOnlyList<AstNode> Roots
 )
 {
+    /// <summary>
+    /// An empty hierarchy.
+    /// </summary>
+    public static AstNodeHierarchy Empty { get; } = new(Array.Empty<AstNode>());
+
     public bool Equals(AstNodeHierarchy? other)
     {
         if (other is null) return false;
@@ -74,21 +68,21 @@ public sealed record class AstNodeHierarchy
 /// <summary>
 /// A node representing a type in a compiler pass.
 /// </summary>
-/// <param name="Name">The name of the type.</param>
-/// <param name="Documentation">The type's corresponding documentation.</param>
-/// <param name="Parent">The parent type node.
+/// <param name="Name">The name of the node.</param>
+/// <param name="Documentation">The node's corresponding documentation.</param>
+/// <param name="Parent">The parent node.
 /// <see langword="null"/> if the node is a root node.</param>
 /// <param name="Children">The children of the node (typically nested types).</param>
-/// <param name="Members">The members of the type.</param>
-/// <param name="Attributes">The language-specific attributes of the type.</param>
+/// <param name="Members">The members of the node.</param>
+/// <param name="Attributes">The language-specific attributes of the node.</param>
 public sealed record class AstNode
 (
     string Name,
     string? Documentation,
     AstNode? Parent,
-    IDictionary<string, AstNode> Children,
-    IDictionary<string, AstNodeMember> Members,
-    ISet<object> Attributes
+    IReadOnlyDictionary<string, AstNode> Children,
+    IReadOnlyDictionary<string, AstNodeMember> Members,
+    IReadOnlySet<object> Attributes
 )
 {
     public bool Equals(AstNode? other)
@@ -130,7 +124,7 @@ public sealed record class AstNodeMember
     string Name,
     string? Documentation,
     string? Type,
-    ISet<object> Attributes
+    IReadOnlySet<object> Attributes
 )
 {
     public bool Equals(AstNodeMember? other)
