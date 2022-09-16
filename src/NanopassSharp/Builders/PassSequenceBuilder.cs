@@ -13,6 +13,9 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
     private readonly Dictionary<string, CompilerPassBuilder> builders;
     private const string empty = "<empty>";
 
+    /// <summary>
+    /// The name of the root pass.
+    /// </summary>
     public string Root { get; set; }
 
 
