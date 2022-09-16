@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
-// I won't type "AstNodeHierarchyBuilder" a million times throughout this file
 using TreeBuilder = NanopassSharp.Builders.AstNodeHierarchyBuilder;
 
 namespace NanopassSharp.Builders.Tests;

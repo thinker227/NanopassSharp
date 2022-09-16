@@ -1,7 +1,5 @@
-﻿using TreeBuilder = NanopassSharp.Builders.AstNodeHierarchyBuilder;
-using NodeBuilder = NanopassSharp.Builders.AstNodeBuilder;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using TreeBuilder = NanopassSharp.Builders.AstNodeHierarchyBuilder;
 
 namespace NanopassSharp.Builders.Tests;
 
