@@ -10,10 +10,10 @@
 	</a>
 </p>
 
-A language-agnostic reimagining/adaptation of the [Nanopass Framework](https://nanopass.org/), which intended purpose is to reduce the amount boilerplate required when writing compilers. The project aims to allow for easy implementation of new target languages, as well as being easily extendable.
+A language-agnostic reimagining/adaptation of the [Nanopass Framework](https://nanopass.org/), which intended purpose is to reduce the amount of boilerplate required when writing compilers. The project aims to allow for easy implementation of new target languages, as well as being easily extendable.
 
 > **Warning**
-> This project is still **a work in progress**, currently **does not work as intended** and **is missing extensive documentation**.
+> This project is still **a work in progress**, currently **does not work as intended**, and **is missing extensive documentation**.
 
 <br>
 
