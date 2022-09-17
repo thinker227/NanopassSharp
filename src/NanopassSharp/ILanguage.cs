@@ -1,0 +1,66 @@
+﻿using System.Threading.Tasks;
+
+namespace NanopassSharp;
+
+/// <summary>
+/// Defines a language.
+/// </summary>
+public interface ILanguage : ISourceHierarchyLocator
+{
+    /// <summary>
+    /// The name of the language.
+    /// </summary>
+    string Name { get; }
+
+    /// <summary>
+    /// Emits an <see cref="AstNodeHierarchy"/> to the current context.
+    /// </summary>
+    /// <param name="hierarchy">The hierarchy to emit.</param>
+    /// <param name="context">The context of the current execution.</param>
+    Task EmitAsync(AstNodeHierarchy hierarchy, ExecutionContext context);
+}
+
+/// <summary>
+/// A locator for the source hierarchy of a given context.
+/// </summary>
+public interface ISourceHierarchyLocator
+{
+    /// <summary>
+    /// Locates the source hierarchy based on the name of the hierarchy.
+    /// </summary>
+    /// <param name="name">The name of the hierarchy to locate.</param>
+    /// <param name="context">The current execution context.</param>
+    /// <returns>The source hierarchy,
+    /// or <see langword="null"/> if the hierarchy could not be found.</returns>
+    Task<AstNodeHierarchy?> LocateSourceHierarchyAsync(string name, ExecutionContext context);
+}
+
+/// <summary>
+/// A provider for a single language.
+/// </summary>
+public interface ILanguageProvider
+{
+    /// <summary>
+    /// The pattern which determines whether the language should be used.
+    /// </summary>
+    ILanguagePattern Pattern { get; }
+
+    /// <summary>
+    /// Creates a language.
+    /// </summary>
+    /// <param name="context">The current execution context.</param>
+    /// <returns>A new <see cref="ILanguage"/>.</returns>
+    Task<ILanguage> CreateLanguageAsync(ExecutionContext context);
+}
+
+/// <summary>
+/// A pattern which determines whether a language should be used.
+/// </summary>
+public interface ILanguagePattern
+{
+    /// <summary>
+    /// Returns whether to use the language based on the current context.
+    /// </summary>
+    /// <param name="context">The current execution context.</param>
+    Task<bool> IsMatchAsync(ExecutionContext context);
+}
