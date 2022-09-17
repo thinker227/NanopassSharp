@@ -39,10 +39,10 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
-    - name: 'Print manual run reason'
+    - name: 'Print manual run information'
       if: github.event_name == 'workflow_dispatch'
       run: |
-        echo 'Reason: ${{ inputs.reason }}'
+        echo "Reason: ${{ inputs.reason }}`nConfiguration: ${{ inputs.configuration }}"
 
     - name: Checkout
       uses: actions/checkout@v3
