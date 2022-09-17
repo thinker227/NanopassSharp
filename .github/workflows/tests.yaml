@@ -42,7 +42,8 @@ jobs:
     - name: 'Print manual run information'
       if: github.event_name == 'workflow_dispatch'
       run: |
-        echo "Reason: ${{ inputs.reason }}`nConfiguration: ${{ inputs.configuration }}"
+        echo 'Reason: ${{ inputs.reason }}'
+        echo 'Configuration: ${{ inputs.configuration }}'
 
     - name: Checkout
       uses: actions/checkout@v3
