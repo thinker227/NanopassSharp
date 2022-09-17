@@ -1,6 +1,6 @@
 # Checks that the current branch passes all tests
 
-name: run tests
+name: tests
 
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ env:
 
 jobs:
   run-tests:
-    name: run-tests-${{matrix.os}}
+    name: tests-${{matrix.os}}
 
     runs-on: ${{ matrix.os }}
     strategy:
