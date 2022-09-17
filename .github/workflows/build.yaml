@@ -10,6 +10,14 @@ on:
         required: true
         type: text
         default: 'Manual run'
+      configuration:
+        description: 'The project configuration to run the workflow using'
+        required: true
+        type: choice
+        options:
+          - Release
+          - Debug
+        default: Release
   push:
     paths:
     - 'src/**'
@@ -48,4 +56,4 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration ${{ inputs.configuration }} --no-restore
