@@ -55,5 +55,8 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
+    - name: Build
+      run: dotnet build --configuration ${{ inputs.configuration }} --no-restore
+
     - name: Run tests
-      run: dotnet test --configuration ${{ inputs.configuration }} --no-restore
+      run: dotnet test --no-build
