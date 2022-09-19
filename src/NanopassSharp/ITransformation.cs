@@ -61,12 +61,14 @@ public interface ITransformationPattern
     /// <summary>
     /// Returns whether a node matches the pattern.
     /// </summary>
+    /// <param name="tree">The tree the node is a part of.</param>
     /// <param name="node">The node to check.</param>
-    bool IsMatch(AstNode node);
+    bool IsMatch(AstNodeHierarchy tree, AstNode node);
     /// <summary>
     /// Returns whether a member of a node matches the pattern.
     /// </summary>
+    /// <param name="tree">The tree the member is a part of.</param>
     /// <param name="node">The node the member is a part of.</param>
     /// <param name="member">The node member to check.</param>
-    bool IsMatch(AstNode node, AstNodeMember member);
+    bool IsMatch(AstNodeHierarchy tree, AstNode node, AstNodeMember member);
 }
