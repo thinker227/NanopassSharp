@@ -12,46 +12,63 @@ internal sealed class MockTransformationDescription : ITransformationDescription
 internal sealed class MockTransformationPattern : ITransformationPattern
 {
     public bool IsRecursive { get; set; } = false;
-    private Func<AstNode, bool> isMatchNodeFunc =
-        (_) => true;
-    private Func<AstNode, AstNodeMember, bool> isMatchMemberFunc =
+    private Func<AstNodeHierarchy, bool> isMatchTreeFunc =
+        _ => true;
+    private Func<AstNodeHierarchy, AstNode, bool> isMatchNodeFunc =
         (_, _) => true;
+    private Func<AstNodeHierarchy, AstNode, AstNodeMember, bool> isMatchMemberFunc =
+        (_, _, _) => true;
 
 
 
     /// <summary>
-    /// Sets the function for <see cref="IsMatch(AstNode)"/>.
+    /// Sets the function for <see cref="IsMatch(AstNodeHierarchy)"/>.
     /// </summary>
-    public MockTransformationPattern IsMatchNodeReturns(Func<AstNode, bool> func)
+    public MockTransformationPattern IsMatchTreeReturns(Func<AstNodeHierarchy, bool> func)
+    {
+        isMatchTreeFunc = func;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the return value for <see cref="IsMatch(AstNodeHierarchy)"/>.
+    /// </summary>
+    public MockTransformationPattern IsMatchTreeReturns(bool value) =>
+        IsMatchTreeReturns(_ => value);
+
+    /// <summary>
+    /// Sets the function for <see cref="IsMatch(AstNodeHierarchy, AstNode)"/>.
+    /// </summary>
+    public MockTransformationPattern IsMatchNodeReturns(Func<AstNodeHierarchy, AstNode, bool> func)
     {
         isMatchNodeFunc = func;
         return this;
     }
 
     /// <summary>
-    /// Sets the return value for <see cref="IsMatch(AstNode)"/>.
+    /// Sets the return value for <see cref="IsMatch(AstNodeHierarchy, AstNode)"/>.
     /// </summary>
     public MockTransformationPattern IsMatchNodeReturns(bool value) =>
-        IsMatchNodeReturns((_) => value);
+        IsMatchNodeReturns((_, _) => value);
 
     /// <summary>
-    /// Sets the function for <see cref="IsMatch(AstNode, AstNodeMember)"/>.
+    /// Sets the function for <see cref="IsMatch(AstNodeHierarchy, AstNode, AstNodeMember)"/>.
     /// </summary>
-    public MockTransformationPattern IsMatchMemberReturns(Func<AstNode, AstNodeMember, bool> func)
+    public MockTransformationPattern IsMatchMemberReturns(Func<AstNodeHierarchy, AstNode, AstNodeMember, bool> func)
     {
         isMatchMemberFunc = func;
         return this;
     }
 
     /// <summary>
-    /// Sets the return value for <see cref="IsMatch(AstNode, AstNodeMember)"/>.
+    /// Sets the return value for <see cref="IsMatch(AstNodeHierarchy, AstNode, AstNodeMember)"/>.
     /// </summary>
     public MockTransformationPattern IsMatchMemberReturns(bool value) =>
-        IsMatchMemberReturns((_, _) => value);
+        IsMatchMemberReturns((_, _, _) => value);
 
-    public bool IsMatch(AstNode node) => isMatchNodeFunc(node);
-
-    public bool IsMatch(AstNode node, AstNodeMember member) => isMatchMemberFunc(node, member);
+    public bool IsMatch(AstNodeHierarchy tree) => isMatchTreeFunc(tree);
+    public bool IsMatch(AstNodeHierarchy tree, AstNode node) => isMatchNodeFunc(tree, node);
+    public bool IsMatch(AstNodeHierarchy tree, AstNode node, AstNodeMember member) => isMatchMemberFunc(tree, node, member);
 }
 
 internal sealed class MockTransformation : ITransformation
@@ -60,6 +77,8 @@ internal sealed class MockTransformation : ITransformation
         (_, _, member) => member;
     private Func<AstNodeHierarchy, AstNode, AstNode> applyToNodeFunc =
         (_, node) => node;
+    private Func<AstNodeHierarchy, AstNodeHierarchy> applyToTreeFunc =
+        tree => tree;
 
 
 
@@ -93,9 +112,27 @@ internal sealed class MockTransformation : ITransformation
     public MockTransformation ApplyToNodeReturns(AstNode value) =>
         ApplyToNodeReturns((_, _) => value);
 
+    /// <summary>
+    /// Sets the function for <see cref="ApplyToTree(AstNodeHierarchy)"/>.
+    /// </summary>
+    public MockTransformation ApplyToTreeReturns(Func<AstNodeHierarchy, AstNodeHierarchy> func)
+    {
+        applyToTreeFunc = func;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the return value for <see cref="ApplyToTree(AstNodeHierarchy)"/>.
+    /// </summary>
+    public MockTransformation ApplyToTreeReturns(AstNodeHierarchy value) =>
+        ApplyToTreeReturns(_ => value);
+
     public AstNodeMember ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member) =>
         applyToMemberFunc(tree, node, member);
 
     public AstNode ApplyToNode(AstNodeHierarchy tree, AstNode node) =>
         applyToNodeFunc(tree, node);
+
+    public AstNodeHierarchy ApplyToTree(AstNodeHierarchy tree) =>
+        applyToTreeFunc(tree);
 }
