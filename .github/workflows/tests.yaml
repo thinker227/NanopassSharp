@@ -10,14 +10,6 @@ on:
         required: true
         type: text
         default: 'Manual run'
-      configuration:
-        description: 'The project configuration to run the workflow using'
-        required: true
-        type: choice
-        options:
-          - Release
-          - Debug
-        default: Release
   push:
     paths:
     - 'src/**'
@@ -28,6 +20,7 @@ on:
 
 env:
   DOTNET_VERSION: '6.0.x' # The .NET SDK version to use
+  CONFIGURATION: 'Release'
 
 jobs:
   run-tests:
@@ -43,7 +36,6 @@ jobs:
       if: github.event_name == 'workflow_dispatch'
       run: |
         echo 'Reason: ${{ inputs.reason }}'
-        echo 'Configuration: ${{ inputs.configuration }}'
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -57,7 +49,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration ${{ inputs.configuration }} --no-restore
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
 
     - name: Run tests
       run: dotnet test --no-build
