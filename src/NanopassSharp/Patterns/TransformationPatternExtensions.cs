@@ -1,4 +1,6 @@
-﻿namespace NanopassSharp.Patterns;
+﻿using NanopassSharp.Descriptions;
+
+namespace NanopassSharp.Patterns;
 
 public static class TransformationPatternExtensions
 {
@@ -36,4 +38,13 @@ public static class TransformationPatternExtensions
     /// <param name="operand">The operand.</param>
     public static ITransformationPattern Not(this ITransformationPattern operand) =>
         new UnaryPattern(operand, x => !x);
+
+    /// <summary>
+    /// Creates an <see cref="ITransformationDescription"/> from a pattern and a transformation.
+    /// </summary>
+    /// <param name="pattern">The pattern.</param>
+    /// <param name="transformation">The transformation.</param>
+    /// <returns>A new transformation description.</returns>
+    public static ITransformationDescription WithTransformation(this ITransformationPattern? pattern, ITransformation transformation) =>
+        new SimpleDescription(pattern, transformation);
 }
