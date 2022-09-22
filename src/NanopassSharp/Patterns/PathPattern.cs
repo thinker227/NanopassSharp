@@ -20,7 +20,6 @@ public sealed class PathPattern : ITransformationPattern
     /// <param name="path"><inheritdoc cref="Path" path="/summary"/></param>
     public PathPattern(NodePath path)
     {
-        Target = target;
         Path = path;
     }
 
