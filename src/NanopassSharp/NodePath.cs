@@ -252,28 +252,33 @@ public readonly struct NodePath : IEquatable<NodePath>
     public NodePath CreateLeafPath(string leafNode) =>
         new(nodes.Append(leafNode));
 
-    /// <summary>
-    /// Gets the paths to all parent nodes of the current path,
-    /// in order from the parent of the current outer-most leaf to the root node.
-    /// </summary>
-    public IEnumerable<NodePath> GetParentPaths()
+    private IEnumerable<NodePath> GetParentPaths(bool includeSelf)
     {
         ThrowIfNoNodes();
 
-        if (IsRoot) yield break;
+        int start = includeSelf
+            ? nodes.Count
+            : nodes.Count - 1;
 
-        for (int i = nodes.Count - 1; i > 0; i--)
+        for (int i = start; i > 0; i--)
         {
             yield return new NodePath(nodes[0..i]);
         }
     }
 
     /// <summary>
+    /// Gets the paths to all parent nodes of the current path,
+    /// in order from the parent of the current outer-most leaf to the root node.
+    /// </summary>
+    public IEnumerable<NodePath> GetParentPaths() =>
+        GetParentPaths(false);
+
+    /// <summary>
     /// Gets the paths to all parent nodes of the current path including the current path,
     /// in order from the current path to the root node.
     /// </summary>
     public IEnumerable<NodePath> GetParentPathsAndSelf() =>
-        GetParentPaths().Prepend(this);
+        GetParentPaths(true);
 
     /// <summary>
     /// Gets the nodes in the path, in order from the current leaf to the root.
