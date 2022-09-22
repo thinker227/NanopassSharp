@@ -5,7 +5,7 @@ namespace NanopassSharp;
 /// <summary>
 /// Defines a language.
 /// </summary>
-public interface ILanguage : ISourceHierarchyLocator
+public interface ILanguage
 {
     /// <summary>
     /// The name of the language.
@@ -18,21 +18,6 @@ public interface ILanguage : ISourceHierarchyLocator
     /// <param name="hierarchy">The hierarchy to emit.</param>
     /// <param name="context">The context of the current execution.</param>
     Task EmitAsync(AstNodeHierarchy hierarchy, ExecutionContext context);
-}
-
-/// <summary>
-/// A locator for the source hierarchy of a given context.
-/// </summary>
-public interface ISourceHierarchyLocator
-{
-    /// <summary>
-    /// Locates the source hierarchy based on the name of the hierarchy.
-    /// </summary>
-    /// <param name="name">The name of the hierarchy to locate.</param>
-    /// <param name="context">The current execution context.</param>
-    /// <returns>The source hierarchy,
-    /// or <see langword="null"/> if the hierarchy could not be found.</returns>
-    Task<AstNodeHierarchy?> LocateSourceHierarchyAsync(string name, ExecutionContext context);
 }
 
 /// <summary>
