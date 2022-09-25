@@ -136,12 +136,31 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
     {
         string targetName = Root;
         CompilerPassBuilder? previous = null;
+        HashSet<string> built = new();
 
         while (true)
         {
             if (!builders.TryGetValue(targetName, out var current))
             {
                 throw new InvalidOperationException($"Pass '{targetName}' does not exist");
+            }
+
+            if (built.Contains(targetName))
+            {
+                // An exception is going to be thrown anyway
+                // so it doesn't matter that this isn't very efficient
+                string[] refs = builders.Values
+                    .Where(p => p.Next == targetName)
+                    .Select(p => $"'{p.Name}'")
+                    .ToArray();
+                string refsMessage = refs.Length switch
+                {
+                    0 => "",
+                    1 => $"{refs[0]}", // Wouldn't make sense if this happened, but for completeness' sake
+                    2 => $"{refs[0]} and {refs[1]}",
+                    _ => $"{string.Join(", ", refs[..^1])}, and {refs[^1]}"
+                };
+                throw new InvalidOperationException($"Circular reference in pass lineage: pass '{targetName}' is specified as the next pass for multiple passes ({refsMessage})");
             }
 
             if (current.Previous is not null && current.Previous != previous?.Name)
@@ -156,6 +175,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
 
             if (current.Next is null) break;
 
+            built.Add(targetName);
             targetName = current.Next;
             previous = current;
         }
