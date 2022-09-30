@@ -6,6 +6,9 @@ using ITransformations = System.Collections.Generic.IReadOnlyCollection<Nanopass
 
 namespace NanopassSharp;
 
+/// <summary>
+/// Transforms AST node hierarchies.
+/// </summary>
 public static class PassTransformer
 {
     /// <summary>
