@@ -20,6 +20,12 @@ public interface ITransformationDescription
 /// </summary>
 public interface ITransformation
 {
+    // Returning null from a tree transformation makes no sense,
+    // would mean the tree would disappear, and then what would
+    // the consuming code do with that?
+    // Nodes and members are fine to remove though, as such an
+    // action has well-defined semantics on the resulting tree.
+
     /// <summary>
     /// Applies the transformation to a tree.
     /// </summary>
@@ -31,16 +37,18 @@ public interface ITransformation
     /// </summary>
     /// <param name="tree">The tree the node is a part of.</param>
     /// <param name="node">The node to apply the transformation to.</param>
-    /// <returns>A new tree with the applied transformation.</returns>
-    AstNode ApplyToNode(AstNodeHierarchy tree, AstNode node);
+    /// <returns>A new node with the applied transformation,
+    /// or <see langword="null"/> if the node should be removed.</returns>
+    AstNode? ApplyToNode(AstNodeHierarchy tree, AstNode node);
     /// <summary>
     /// Applies the transformation to a node member.
     /// </summary>
     /// <param name="tree">The tree the node of the member is a part of.</param>
     /// <param name="node">The node the member is a part of.</param>
     /// <param name="member">The member to apply the transformation to.</param>
-    /// <returns>A new tree with the applied transformation.</returns>
-    AstNodeMember ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member);
+    /// <returns>A new member with the applied transformation,
+    /// or <see langword="null"/> if the member should be removed.</returns>
+    AstNodeMember? ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member);
 }
 
 /// <summary>
