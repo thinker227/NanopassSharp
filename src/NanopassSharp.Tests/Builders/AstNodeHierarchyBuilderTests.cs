@@ -278,4 +278,45 @@ public class AstNodeHierarchyBuilderTests
             }
         }
     }
+
+    private static IEnumerable<object[]> BuildNode_BuildsNode_Data()
+    {
+        {
+            TreeBuilder builder = new();
+            var foo = builder.AddRoot("foo");
+
+            yield return new object[]
+            {
+                builder,
+                foo,
+                "foo"
+            };
+        }
+
+        {
+            TreeBuilder builder = new();
+            var a = builder.AddRoot("a");
+            var b = a.AddChild("b");
+            var c = b.AddChild("c");
+            var d = c.AddChild("d");
+            var e = d.AddChild("e");
+            var f = e.AddChild("f");
+
+            yield return new object[]
+            {
+                builder,
+                f,
+                "f"
+            };
+        }
+    }
+
+    [MemberData(nameof(BuildNode_BuildsNode_Data))]
+    [Theory]
+    public void BuildNode_BuildsNode(TreeBuilder treeBuilder, AstNodeBuilder nodeBuilder, string expectedName)
+    {
+        var node = treeBuilder.BuildNode(nodeBuilder, MissingChildBehavior.Throw);
+
+        node.Name.ShouldBe(expectedName);
+    }
 }
