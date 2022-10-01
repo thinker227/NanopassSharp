@@ -12,7 +12,7 @@ public static class PassExtensions
     /// <param name="tree">The hierarchy to get the nodes of.</param>
     /// <returns>A collection of nodes.</returns>
     public static IEnumerable<AstNode> GetNodes(this AstNodeHierarchy tree) =>
-        tree.Roots.SelectMany(r => r.GetDecendantNodesAndSelf());
+        tree.Roots.SelectMany(r => GetDecendantNodes(r, true));
 
     /// <summary>
     /// Gets the decendant nodes of a node, excluding itself.
@@ -20,7 +20,7 @@ public static class PassExtensions
     /// <param name="node">The node to get the decendants of.</param>
     /// <returns>A collection of decendant nodes.</returns>
     public static IEnumerable<AstNode> GetDecendantNodes(this AstNode node) =>
-        node.Children.Values.SelectMany(n => n.GetDecendantNodes());
+        GetDecendantNodes(node, false);
 
     /// <summary>
     /// Gets the decendant nodes of a node, including itself.
@@ -28,7 +28,30 @@ public static class PassExtensions
     /// <param name="node">The node to get the decendants of.</param>
     /// <returns>A collection of decendant nodes and the current node.</returns>
     public static IEnumerable<AstNode> GetDecendantNodesAndSelf(this AstNode node) =>
-        node.GetDecendantNodes().Prepend(node);
+        GetDecendantNodes(node, true);
+
+    private static IEnumerable<AstNode> GetDecendantNodes(AstNode node, bool includeSelf)
+    {
+        List<AstNode> nodes = new();
+
+        if (includeSelf)
+        {
+            nodes.Add(node);
+        }
+
+        AddDecendantNodes(node, nodes);
+
+        return nodes;
+    }
+
+    private static void AddDecendantNodes(AstNode node, List<AstNode> nodes)
+    {
+        foreach (var child in node.Children.Values)
+        {
+            nodes.Add(child);
+            AddDecendantNodes(child, nodes);
+        }
+    }
 
     /// <summary>
     /// Gets the root of an <see cref="AstNode"/>.

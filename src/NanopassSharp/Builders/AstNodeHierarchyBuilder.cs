@@ -226,7 +226,7 @@ public sealed class AstNodeHierarchyBuilder
 
         var rootNode = BuildNode(null, rootBuilder, missingChildBehavior);
 
-        var pathNodesEnumerator = path.GetNodes().GetEnumerator();
+        var pathNodesEnumerator = path.GetNodes().Reverse().GetEnumerator();
         pathNodesEnumerator.MoveNext();
         var node = rootNode;
         while (pathNodesEnumerator.MoveNext())
