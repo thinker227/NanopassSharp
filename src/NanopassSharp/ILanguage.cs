@@ -11,6 +11,10 @@ public interface ILanguage
     /// The name of the language.
     /// </summary>
     string Name { get; }
+	/// <summary>
+    /// The pattern which determines whether the language should be used.
+	/// </summary>
+	ILanguagePattern Pattern { get; }
 
     /// <summary>
     /// Emits an <see cref="AstNodeHierarchy"/> to the current context.
@@ -18,24 +22,6 @@ public interface ILanguage
     /// <param name="hierarchy">The hierarchy to emit.</param>
     /// <param name="context">The context of the current execution.</param>
     Task EmitAsync(AstNodeHierarchy hierarchy, ExecutionContext context);
-}
-
-/// <summary>
-/// A provider for a single language.
-/// </summary>
-public interface ILanguageProvider
-{
-    /// <summary>
-    /// The pattern which determines whether the language should be used.
-    /// </summary>
-    ILanguagePattern Pattern { get; }
-
-    /// <summary>
-    /// Creates a language.
-    /// </summary>
-    /// <param name="context">The current execution context.</param>
-    /// <returns>A new <see cref="ILanguage"/>.</returns>
-    Task<ILanguage> CreateLanguageAsync(ExecutionContext context);
 }
 
 /// <summary>
