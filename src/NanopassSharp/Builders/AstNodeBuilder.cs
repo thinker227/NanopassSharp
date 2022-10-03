@@ -139,7 +139,7 @@ public sealed class AstNodeBuilder
     /// </summary>
     /// <param name="member">The member to add.</param>
     /// <returns>A builder for the member.</returns>
-    public AstNodeMemberBuilder AddMember(AstNodeMember member) => AddMember(member)
+    public AstNodeMemberBuilder AddMember(AstNodeMember member) => AddMember(member.Name)
         .WithDocumentation(member.Documentation)
         .WithType(member.Type)
         .WithAttributes(new HashSet<object>(member.Attributes));
