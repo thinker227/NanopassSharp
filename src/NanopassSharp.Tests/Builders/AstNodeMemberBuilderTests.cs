@@ -140,6 +140,29 @@ public class AstNodeMemberBuilderTests
     }
 
     [Fact]
+    public void RemoveAttribute_RemovesAttribute()
+    {
+        AstNodeMemberBuilder builder = new("a");
+        builder.AddAttribute("attribute");
+        builder.AddAttribute(56);
+        builder.AddAttribute(true);
+
+        builder.RemoveAttribute("attribute");
+        builder.RemoveAttribute(true);
+
+        builder.Attributes.ShouldBe(new object[] { 56 }, true);
+    }
+
+    [Fact]
+    public void RemoveAttribute_ReturnsSelf()
+    {
+        AstNodeMemberBuilder builder = new("a");
+        builder.AddAttribute("attribute");
+
+        builder.RemoveAttribute("attribute").ShouldBeSameAs(builder);
+    }
+
+    [Fact]
     public void WithAttributes_SetsAttributes()
     {
         object[] attributes = new object[]
