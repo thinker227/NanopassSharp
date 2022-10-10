@@ -36,7 +36,29 @@ public sealed class AstNodeHierarchyBuilder
     /// <param name="hierarchy">The source hierarchy.</param>
     public static AstNodeHierarchyBuilder FromHierarchy(AstNodeHierarchy hierarchy)
     {
-        throw new NotImplementedException();
+        AstNodeHierarchyBuilder builder = new();
+
+        foreach (var root in hierarchy.Roots)
+        {
+            AddNodeAndChildren(builder, root);
+            builder.Roots = hierarchy.Roots
+                .Select(n => n.Name)
+                .ToArray();
+        }
+
+        return builder;
+    }
+
+    private static void AddNodeAndChildren(AstNodeHierarchyBuilder builder, AstNode node)
+    {
+        var nodeBuilder = builder.CreateNode(node)
+            .WithDocumentation(node.Documentation)
+            .WithAttributes(new HashSet<object>(node.Attributes));
+
+        foreach (var child in node.Children.Values)
+        {
+            AddNodeAndChildren(builder, child);
+        }
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TreeBuilder = NanopassSharp.Builders.AstNodeHierarchyBuilder;
 
 namespace NanopassSharp.Builders.Tests;
@@ -12,6 +13,124 @@ public class AstNodeHierarchyBuilderTests
         TreeBuilder builder = new();
 
         builder.Roots.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void FromHierarchy_DecsendsNode()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("a")
+            .WithChildren(new[] { "b", "d" });
+        builder.CreateNode("a.b")
+            .WithChildren(new[] { "c" });
+        builder.CreateNode("a.b.c");
+        builder.CreateNode("a.d");
+        builder.AddRoot("e");
+        var tree = builder.Build();
+
+        var fromHierarchy = TreeBuilder.FromHierarchy(tree);
+
+        fromHierarchy.Roots.Count.ShouldBe(2);
+        fromHierarchy.Roots.ShouldBe(new[] { "a", "e" }, true);
+
+        var a = fromHierarchy.GetNodeFromPath("a");
+        a.ShouldNotBeNull();
+        a.Children.ShouldBe(new[] { "b", "d" });
+
+        var ab = fromHierarchy.GetNodeFromPath("a.b");
+        ab.ShouldNotBeNull();
+        ab.Children.ShouldBe(new[] { "c" });
+
+        var abc = fromHierarchy.GetNodeFromPath("a.b.c");
+        abc.ShouldNotBeNull();
+        abc.Children.ShouldBeEmpty();
+
+        var ad = fromHierarchy.GetNodeFromPath("a.d");
+        ad.ShouldNotBeNull();
+        ad.Children.ShouldBeEmpty();
+
+        var e = fromHierarchy.GetNodeFromPath("e");
+        e.ShouldNotBeNull();
+        e.Children.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void FromHierarchy_SetsAttributesAndDocumentation()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("foo")
+            .AddAttribute(true)
+            .AddAttribute(27)
+            .WithDocumentation("A glorious foo")
+            .WithChildren(new[] { "bar" });
+        builder.CreateNode("foo.bar")
+            .AddAttribute(false)
+            .AddAttribute(10)
+            .WithDocumentation("A fantastic bar");
+        var tree = builder.Build();
+
+        var fromHierarchy = TreeBuilder.FromHierarchy(tree);
+
+        var foo = fromHierarchy.GetNodeFromPath("foo");
+        foo.ShouldNotBeNull();
+        foo.Attributes.ShouldBe(new object[] { true, 27 }, true);
+        foo.Documentation.ShouldBe("A glorious foo");
+
+        var bar = fromHierarchy.GetNodeFromPath("foo.bar");
+        bar.ShouldNotBeNull();
+        bar.Attributes.ShouldBe(new object[] { false, 10 });
+        bar.Documentation.ShouldBe("A fantastic bar");
+    }
+
+    [Fact]
+    public void FromHierarchy_SetsMembers()
+    {
+        TreeBuilder builder = new();
+        var fooBuilder = builder.AddRoot("foo")
+            .WithChildren(new[] { "bar" });
+        var barBuilder = builder.CreateNode("foo.bar");
+        fooBuilder.AddMember("a")
+            .AddAttribute("attribute")
+            .AddAttribute(27)
+            .WithDocumentation("An a")
+            .WithType("type a");
+        fooBuilder.AddMember("b")
+            .AddAttribute("far")
+            .AddAttribute(10)
+            .WithDocumentation("A b")
+            .WithType("type b");
+        barBuilder.AddMember("c")
+            .WithDocumentation("A c")
+            .WithType("type c");
+        var tree = builder.Build();
+
+        var fromHierarchy = TreeBuilder.FromHierarchy(tree);
+
+        var foo = fromHierarchy.GetNodeFromPath("foo");
+        foo.ShouldNotBeNull();
+        foo.Members.Count.ShouldBe(2);
+
+        var a = foo.Members.First(m => m.Name == "a");
+        a.ShouldNotBeNull();
+        a.Attributes.ShouldBe(new object[] { "attribute", 27 }, true);
+        a.Documentation.ShouldBe("An a");
+        a.Type.ShouldBe("type a");
+
+        var b = foo.Members.First(m => m.Name == "b");
+        b.ShouldNotBeNull();
+        b.Attributes.ShouldBe(new object[] { "far", 10 }, true);
+        b.Documentation.ShouldBe("A b");
+        b.Type.ShouldBe("type b");
+
+        var bar = fromHierarchy.GetNodeFromPath("foo.bar");
+        bar.ShouldNotBeNull();
+        bar.Members.Count.ShouldBe(1);
+
+        var c = bar.Members.First(m => m.Name == "c");
+        c.ShouldNotBeNull();
+        c.Attributes.ShouldBeEmpty();
+        c.Documentation.ShouldBe("A c");
+        c.Type.ShouldBe("type c");
     }
 
     [InlineData("a")]
