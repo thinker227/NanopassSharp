@@ -64,8 +64,17 @@ public static class PassExtensions
     /// Gets the path to an <see cref="AstNode"/> from its root.
     /// </summary>
     /// <param name="node">The node to get the path to.</param>
-    public static NodePath GetPath(this AstNode node) =>
-        NodePath.Create(node, n => (n.Parent, n.Parent is not null), n => n.Name);
+    public static NodePath GetPath(this AstNode node)
+    {
+        List<string> pathNodes = new();
+
+        for (var current = node; current is not null; current = current.Parent)
+        {
+            pathNodes.Insert(0, current.Name);
+        }
+
+        return new NodePath(pathNodes);
+    }
 
     /// <summary>
     /// Gets a node in a <see cref="AstNodeHierarchy"/> from a path.
