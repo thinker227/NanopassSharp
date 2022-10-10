@@ -182,6 +182,15 @@ public sealed class AstNodeHierarchyBuilder
             : null;
 
     /// <summary>
+    /// Gets a <see cref="AstNodeBuilder"/> from a specified path to a node.
+    /// </summary>
+    /// <param name="path">The path to get the builder from.</param>
+    /// <returns>The builder for the node that <paramref name="path"/> specified,
+    /// or <see langword="null"/> if there is no builder for the path.</returns>
+    public AstNodeBuilder? GetNodeFromPath(string path) =>
+        GetNodeFromPath(NodePath.ParseUnsafe(path));
+
+    /// <summary>
     /// Builds an <see cref="AstNodeHierarchy"/> from the builder.
     /// </summary>
     /// <param name="missingChildBehavior">The behavior if a node is missing.</param>
