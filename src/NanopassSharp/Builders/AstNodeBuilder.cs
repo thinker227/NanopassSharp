@@ -87,6 +87,17 @@ public sealed class AstNodeBuilder
     }
 
     /// <summary>
+    /// Removes an attribute from the node.
+    /// </summary>
+    /// <param name="attribute">The attribute to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeBuilder RemoveAttribute(object attribute)
+    {
+        Attributes.Remove(attribute);
+        return this;
+    }
+
+    /// <summary>
     /// Sets the attributes of the node.
     /// </summary>
     /// <param name="attributes"><inheritdoc cref="Attributes" path="/summary"/></param>
@@ -107,6 +118,19 @@ public sealed class AstNodeBuilder
         var builder = Hierarchy.CreateNode(name, Path);
         Children.Add(builder.Name);
         return builder;
+    }
+
+    /// <summary>
+    /// Removes a child from the node.
+    /// </summary>
+    /// <param name="name">The name of the child to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeBuilder RemoveChild(string name)
+    {
+        Hierarchy.RemoveNode(Path);
+        Children.Remove(name);
+
+        return this;
     }
 
     /// <summary>

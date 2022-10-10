@@ -49,6 +49,32 @@ public class AstNodeBuilderTests
     }
 
     [Fact]
+    public void RemoveAttribute_RemovesAttribute()
+    {
+        var node = new TreeBuilder()
+            .CreateNode("foo");
+        node.AddAttribute("attribute");
+        node.AddAttribute(27);
+        node.AddAttribute(true);
+
+        node.RemoveAttribute("attribute");
+        node.RemoveAttribute(true);
+
+        object[] expected = new object[] { 27 };
+        node.Attributes.ShouldBe(expected);
+    }
+
+    [Fact]
+    public void RemoveAttribute_ReturnsSelf()
+    {
+        var node = new TreeBuilder()
+            .CreateNode("foo");
+        node.AddAttribute(27);
+
+        node.RemoveAttribute(27).ShouldBeSameAs(node);
+    }
+
+    [Fact]
     public void WithAttributes_SetsAttributes()
     {
         var node = new TreeBuilder()
@@ -91,6 +117,28 @@ public class AstNodeBuilderTests
         var expectedPath = NodePath.ParseUnsafe("a.b");
         child.Path.ShouldBe(expectedPath);
         child.Parent.ShouldBe("a");
+    }
+
+    [Fact]
+    public void RemoveChild_RemovesChild()
+    {
+        var node = new TreeBuilder()
+            .CreateNode("a");
+        node.AddChild("b");
+
+        node.RemoveChild("b");
+
+        node.Children.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void RemoveChild_ReturnsSelf()
+    {
+        var node = new TreeBuilder()
+            .CreateNode("a");
+        node.AddChild("b");
+
+        node.RemoveChild("a").ShouldBeSameAs(node);
     }
 
     [Fact]

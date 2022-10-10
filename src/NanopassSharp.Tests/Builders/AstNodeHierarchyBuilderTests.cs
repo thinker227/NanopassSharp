@@ -32,6 +32,31 @@ public class AstNodeHierarchyBuilderTests
     }
 
     [Fact]
+    public void RemoveChild_RemovesChild()
+    {
+        TreeBuilder builder = new();
+        var path = NodePath.ParseUnsafe("a.b.c");
+        builder.CreateNode(path);
+
+        builder.RemoveNode(path);
+
+        builder.GetNodeFromPath(path).ShouldBeNull();
+    }
+
+    [Fact]
+    public void RemoveChild_RemovesRoot()
+    {
+        TreeBuilder builder = new();
+        var path = NodePath.ParseUnsafe("a");
+        builder.CreateNode(path);
+
+        builder.RemoveNode(path);
+
+        builder.GetNodeFromPath(path).ShouldBeNull();
+        builder.Roots.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void AddRoot_ReturnsCorrectNode()
     {
         TreeBuilder builder = new();

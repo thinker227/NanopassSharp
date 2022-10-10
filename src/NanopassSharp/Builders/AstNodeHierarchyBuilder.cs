@@ -129,6 +129,31 @@ public sealed class AstNodeHierarchyBuilder
     }
 
     /// <summary>
+    /// Removes a node from the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path of the node to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder RemoveNode(string fullPath) =>
+        RemoveNode(NodePath.ParseUnsafe(fullPath));
+
+    /// <summary>
+    /// Removes a node from the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path of the node to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder RemoveNode(NodePath fullPath)
+    {
+        builders.Remove(fullPath);
+
+        if (fullPath.IsRoot)
+        {
+            Roots.Remove(fullPath.Leaf);
+        }
+
+        return this;
+    }
+
+    /// <summary>
     /// Adds a root node to the hierarchy.
     /// </summary>
     /// <param name="name">The name of the new node.</param>
