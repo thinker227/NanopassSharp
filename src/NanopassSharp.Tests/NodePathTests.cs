@@ -303,12 +303,12 @@ public class NodePathTests
     [InlineData(new object[] { new[] { "foo", "bar", "baz" } })]
     [InlineData(new object[] { new[] { "foo", "bar", "baz", "boo", "far", "zaz" } })]
     [Theory]
-    public void GetNodes_ReturnsNodesInReverseOrder(string[] pathValues)
+    public void GetNodes_ReturnsNodesInOrder(string[] pathValues)
     {
         NodePath path = new(pathValues);
         var nodes = path.GetNodes();
 
-        var expected = pathValues.Reverse();
+        string[] expected = pathValues;
         nodes.ShouldBe(expected);
     }
 }

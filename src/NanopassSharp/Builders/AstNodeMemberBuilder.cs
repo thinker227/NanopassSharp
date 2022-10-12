@@ -102,6 +102,17 @@ public sealed class AstNodeMemberBuilder
     }
 
     /// <summary>
+    /// Removes an attribute from the member.
+    /// </summary>
+    /// <param name="attribute">The attribute to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeMemberBuilder RemoveAttribute(object attribute)
+    {
+        Attributes.Remove(attribute);
+        return this;
+    }
+
+    /// <summary>
     /// Sets the attributes of the member.
     /// </summary>
     /// <param name="attributes"><inheritdoc cref="Attributes" path="/summary"/></param>

@@ -65,6 +65,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
 
         return builder;
     }
+
     /// <summary>
     /// Adds a pass to the sequence.
     /// </summary>
@@ -77,6 +78,25 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
         .WithNext(pass.Next);
 
     /// <summary>
+    /// Removes a pass from the sequence.
+    /// </summary>
+    /// <param name="name">The name of the pass to remove.</param>
+    /// <returns>The current builder.</returns>
+    public PassSequenceBuilder RemovePass(string name)
+    {
+        builders.Remove(name);
+        return this;
+    }
+
+    /// <summary>
+    /// Removes a pass from the sequence.
+    /// </summary>
+    /// <param name="pass">The pass to remove.</param>
+    /// <returns>The current builder.</returns>
+    public PassSequenceBuilder RemovePass(CompilerPassBuilder pass) =>
+        RemovePass(pass.Name);
+
+    /// <summary>
     /// Sets the root of the sequence.
     /// </summary>
     /// <param name="name">The name of the root.</param>
@@ -87,6 +107,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
         Root = builder.Name;
         return builder;
     }
+
     /// <summary>
     /// Sets the root of the sequence.
     /// </summary>
@@ -111,6 +132,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
     {
         return builders.Values.GetEnumerator();
     }
+
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
@@ -130,8 +152,10 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
 
         return PassSequence.Create(passes);
     }
+
     private static bool IsValidRoot(string root) =>
         root is not (null or "") && !IsReservedPassName(root);
+
     private IEnumerable<CompilerPassBuilder> EnumerateBuilders()
     {
         string targetName = Root;
@@ -180,6 +204,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
             previous = current;
         }
     }
+
     private CompilerPass BuildPass(CompilerPassBuilder builder) => new(
         builder.Name,
         builder.Documentation,
@@ -187,6 +212,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
         builder.Previous ?? empty,
         builder.Next
     );
+
     private static CompilerPass GetEmptyPass(string root) => new(
         empty,
         null,

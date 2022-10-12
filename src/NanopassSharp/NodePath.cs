@@ -69,6 +69,27 @@ public readonly struct NodePath : IEquatable<NodePath>
     /// </summary>
     public bool IsRoot => Depth == 0;
 
+    /// <summary>
+    /// Gets the node at the specified index from the root.
+    /// </summary>
+    /// <param name="index">The index, where 0 is the root node.</param>
+    public string this[int index] =>
+        nodes[index];
+
+    /// <summary>
+    /// Gets the node at the specified index from the root.
+    /// </summary>
+    /// <param name="index">The index, where 0 is the root node.</param>
+    public string this[Index index] =>
+        nodes[index];
+
+    /// <summary>
+    /// Gets a node path from a range of nodes in the current path.
+    /// </summary>
+    /// <param name="range">A range of nodes in the current path.</param>
+    public NodePath this[Range range] =>
+        new(nodes[range]);
+
 
 
     /// <summary>
@@ -280,11 +301,8 @@ public readonly struct NodePath : IEquatable<NodePath>
     public IEnumerable<NodePath> GetParentPathsAndSelf() =>
         GetParentPaths(true);
 
-    /// <summary>
-    /// Gets the nodes in the path, in order from the current leaf to the root.
-    /// </summary>
     public IEnumerable<string> GetNodes() =>
-        nodes.Reverse();
+        nodes;
 
     public static bool operator ==(NodePath a, NodePath b) =>
         a.Equals(b);
