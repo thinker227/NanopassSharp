@@ -36,7 +36,29 @@ public sealed class AstNodeHierarchyBuilder
     /// <param name="hierarchy">The source hierarchy.</param>
     public static AstNodeHierarchyBuilder FromHierarchy(AstNodeHierarchy hierarchy)
     {
-        throw new NotImplementedException();
+        AstNodeHierarchyBuilder builder = new();
+
+        foreach (var root in hierarchy.Roots)
+        {
+            AddNodeAndChildren(builder, root);
+            builder.Roots = hierarchy.Roots
+                .Select(n => n.Name)
+                .ToArray();
+        }
+
+        return builder;
+    }
+
+    private static void AddNodeAndChildren(AstNodeHierarchyBuilder builder, AstNode node)
+    {
+        var nodeBuilder = builder.CreateNode(node)
+            .WithDocumentation(node.Documentation)
+            .WithAttributes(new HashSet<object>(node.Attributes));
+
+        foreach (var child in node.Children.Values)
+        {
+            AddNodeAndChildren(builder, child);
+        }
     }
 
     /// <summary>
@@ -129,6 +151,31 @@ public sealed class AstNodeHierarchyBuilder
     }
 
     /// <summary>
+    /// Removes a node from the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path of the node to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder RemoveNode(string fullPath) =>
+        RemoveNode(NodePath.ParseUnsafe(fullPath));
+
+    /// <summary>
+    /// Removes a node from the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path of the node to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder RemoveNode(NodePath fullPath)
+    {
+        builders.Remove(fullPath);
+
+        if (fullPath.IsRoot)
+        {
+            Roots.Remove(fullPath.Leaf);
+        }
+
+        return this;
+    }
+
+    /// <summary>
     /// Adds a root node to the hierarchy.
     /// </summary>
     /// <param name="name">The name of the new node.</param>
@@ -155,6 +202,15 @@ public sealed class AstNodeHierarchyBuilder
         builders.TryGetValue(path, out var builder)
             ? builder
             : null;
+
+    /// <summary>
+    /// Gets a <see cref="AstNodeBuilder"/> from a specified path to a node.
+    /// </summary>
+    /// <param name="path">The path to get the builder from.</param>
+    /// <returns>The builder for the node that <paramref name="path"/> specified,
+    /// or <see langword="null"/> if there is no builder for the path.</returns>
+    public AstNodeBuilder? GetNodeFromPath(string path) =>
+        GetNodeFromPath(NodePath.ParseUnsafe(path));
 
     /// <summary>
     /// Builds an <see cref="AstNodeHierarchy"/> from the builder.
@@ -226,21 +282,9 @@ public sealed class AstNodeHierarchyBuilder
 
         var rootNode = BuildNode(null, rootBuilder, missingChildBehavior);
 
-        var pathNodesEnumerator = path.GetNodes().GetEnumerator();
-        pathNodesEnumerator.MoveNext();
-        var node = rootNode;
-        while (pathNodesEnumerator.MoveNext())
-        {
-            node = getNode(pathNodesEnumerator.Current);
-        }
+        return rootNode.GetDecendantNodeFromPath(path, true)
+            ?? throw nodeDoesNotExist(path);
 
-        return node;
-
-        AstNode getNode(string name)
-        {
-            if (node!.Children.TryGetValue(name, out var n)) return n;
-            throw nodeDoesNotExist(node.GetPath().CreateLeafPath(name));
-        }
         static InvalidOperationException nodeDoesNotExist(NodePath path) =>
             new($"The node '{path}' does not exist in the hierarchy");
     }

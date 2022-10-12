@@ -67,6 +67,17 @@ public class PassSequenceBuilderTests
     }
 
     [Fact]
+    public void RemovePass_RemovesPass()
+    {
+        PassSequenceBuilder builder = new();
+        builder.AddPass("a");
+
+        builder.RemovePass("a");
+
+        builder.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void SetRoot_ReturnsCorrectPass()
     {
         PassSequenceBuilder builder = new();

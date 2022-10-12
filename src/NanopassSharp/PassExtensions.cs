@@ -1,21 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace NanopassSharp;
 
 public static class PassExtensions
 {
+    /// <summary>
+    /// Gets all nodes of a <see cref="AstNodeHierarchy"/>.
+    /// </summary>
+    /// <param name="tree">The hierarchy to get the nodes of.</param>
+    /// <returns>A collection of nodes.</returns>
     public static IEnumerable<AstNode> GetNodes(this AstNodeHierarchy tree) =>
-        tree.Roots.SelectMany(r => r.GetDecendantNodesAndSelf());
+        tree.Roots.SelectMany(r => GetDecendantNodes(r, true));
 
+    /// <summary>
+    /// Gets the decendant nodes of a node, excluding itself.
+    /// </summary>
+    /// <param name="node">The node to get the decendants of.</param>
+    /// <returns>A collection of decendant nodes.</returns>
     public static IEnumerable<AstNode> GetDecendantNodes(this AstNode node) =>
-        node.Children.Values.SelectMany(n => n.GetDecendantNodes());
+        GetDecendantNodes(node, false);
 
+    /// <summary>
+    /// Gets the decendant nodes of a node, including itself.
+    /// </summary>
+    /// <param name="node">The node to get the decendants of.</param>
+    /// <returns>A collection of decendant nodes and the current node.</returns>
     public static IEnumerable<AstNode> GetDecendantNodesAndSelf(this AstNode node) =>
-        node.GetDecendantNodes().Prepend(node);
+        GetDecendantNodes(node, true);
 
+    private static IEnumerable<AstNode> GetDecendantNodes(AstNode node, bool includeSelf)
+    {
+        List<AstNode> nodes = new();
+
+        if (includeSelf)
+        {
+            nodes.Add(node);
+        }
+
+        AddDecendantNodes(node, nodes);
+
+        return nodes;
+    }
+
+    private static void AddDecendantNodes(AstNode node, List<AstNode> nodes)
+    {
+        foreach (var child in node.Children.Values)
+        {
+            nodes.Add(child);
+            AddDecendantNodes(child, nodes);
+        }
+    }
+
+    /// <summary>
+    /// Gets the root of an <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The node to get the root of.</param>
     public static AstNode GetRoot(this AstNode node) =>
         node.Parent?.GetRoot() ?? node;
 
@@ -23,19 +64,52 @@ public static class PassExtensions
     /// Gets the path to an <see cref="AstNode"/> from its root.
     /// </summary>
     /// <param name="node">The node to get the path to.</param>
-    public static NodePath GetPath(this AstNode node) =>
-        NodePath.Create(node, n => (n.Parent, n.Parent is not null), n => n.Name);
+    public static NodePath GetPath(this AstNode node)
+    {
+        List<string> pathNodes = new();
 
+        for (var current = node; current is not null; current = current.Parent)
+        {
+            pathNodes.Insert(0, current.Name);
+        }
+
+        return new NodePath(pathNodes);
+    }
+
+    /// <summary>
+    /// Gets a node in a <see cref="AstNodeHierarchy"/> from a path.
+    /// </summary>
+    /// <param name="hierarchy">The source hierarchy.</param>
+    /// <param name="path">The path to get the node from.</param>
+    /// <returns>The node with the specified path,
+    /// or <see langword="null"/> if the node does not exist.</returns>
     public static AstNode? GetNodeFromPath(this AstNodeHierarchy hierarchy, NodePath path)
     {
-        var nodesEnumerator = path.GetNodes().Reverse().GetEnumerator();
-
-        nodesEnumerator.MoveNext();
-        string rootName = nodesEnumerator.Current;
-        var root = hierarchy.Roots.FirstOrDefault(r => r.Name == rootName);
+        var root = hierarchy.Roots.FirstOrDefault(n => n.Name == path.Root);
         if (root is null) return null;
 
-        var currentNode = root;
+        return root.GetDecendantNodeFromPath(path, true);
+    }
+
+    /// <summary>
+    /// Gets a decendant node of a node from a path.
+    /// </summary>
+    /// <param name="node">The node to get the decendant node of.</param>
+    /// <param name="path">The path of the decendant node to get.</param>
+    /// <param name="selfAsRoot">Whether the current node should be counted as the root of the path.</param>
+    /// <returns>The decendant node at <paramref name="path"/>,
+    /// or <see langword="null"/> if the node does not exist.</returns>
+    public static AstNode? GetDecendantNodeFromPath(this AstNode node, NodePath path, bool selfAsRoot = false)
+    {
+        var nodesEnumerator = path.GetNodes().GetEnumerator();
+
+        if (selfAsRoot)
+        {
+            nodesEnumerator.MoveNext();
+            if (nodesEnumerator.Current != node.Name) return null;
+        }
+
+        var currentNode = node;
         while (nodesEnumerator.MoveNext())
         {
             string nodeName = nodesEnumerator.Current;
@@ -44,73 +118,5 @@ public static class PassExtensions
         }
 
         return currentNode;
-    }
-
-    public static AstNodeHierarchy ReplaceNode(this AstNodeHierarchy tree, AstNode oldNode, AstNode newNode)
-    {
-        var root = oldNode.GetRoot();
-        if (!tree.Roots.Contains(root)) throw new ArgumentException("Node does not exist in the tree", nameof(oldNode));
-
-        var parent = oldNode.Parent;
-        if (parent is null) return tree with
-        {
-            Roots = tree.Roots.ToImmutableArray().Replace(oldNode, newNode)
-        };
-
-        string name = oldNode.Name;
-        var node = newNode with
-        {
-            Name = name
-        };
-        var newParent = parent with
-        {
-            Children = parent.Children.ToImmutableDictionary().SetItem(name, node)
-        };
-        return tree.ReplaceNode(parent, newParent);
-    }
-
-    public static AstNodeHierarchy RemoveNode(this AstNodeHierarchy tree, AstNode node)
-    {
-        var root = node.GetRoot();
-        if (!tree.Roots.Contains(root)) throw new ArgumentException("Node does not exist in the tree", nameof(node));
-
-        var parent = node.Parent;
-        if (parent is null) return tree with
-        {
-            Roots = tree.Roots.ToImmutableArray().Remove(node)
-        };
-
-        string name = node.Name;
-        var newParent = parent with
-        {
-            Children = parent.Children.ToImmutableDictionary().Remove(name)
-        };
-        return tree.ReplaceNode(parent, newParent);
-    }
-    
-    public static AstNode ReplaceMember(this AstNode node, AstNodeMember oldMember, AstNodeMember newMember)
-    {
-        string name = oldMember.Name;
-        if (!node.Members.ContainsKey(name)) throw new ArgumentException("Member does not exist in the node", nameof(oldMember));
-
-        var member = newMember with
-        {
-            Name = name
-        };
-        return node with
-        {
-            Members = node.Members.ToImmutableDictionary().SetItem(name, member)
-        };
-    }
-
-    public static AstNode RemoveMember(this AstNode node, AstNodeMember member)
-    {
-        string name = member.Name;
-        if (!node.Members.ContainsKey(name)) throw new ArgumentException("Member does not exist in the node", nameof(member));
-
-        return node with
-        {
-            Members = node.Members.ToImmutableDictionary().Remove(name)
-        };
     }
 }
