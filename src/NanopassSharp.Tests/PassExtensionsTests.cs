@@ -271,4 +271,112 @@ public class PassExtensionsTests
             node.Name.ShouldBe(expectedName);
         }
     }
+
+    private static IEnumerable<object?[]> GetDecendantNodeFromPath_ReturnsDecendantNode_Data()
+    {
+        {
+            AstNodeHierarchyBuilder builder = new();
+            var foo = builder.AddRoot("foo");
+
+            yield return new object[]
+            {
+                foo.Build(),
+                NodePath.ParseUnsafe("foo"),
+                true,
+                "foo"
+            };
+        }
+
+        {
+            AstNodeHierarchyBuilder builder = new();
+            var foo = builder.AddRoot("foo");
+
+            yield return new object?[]
+            {
+                foo.Build(),
+                NodePath.ParseUnsafe("foo"),
+                false,
+                null
+            };
+        }
+
+        {
+            AstNodeHierarchyBuilder builder = new();
+            var a = builder.AddRoot("a");
+            var b = a.AddChild("b");
+            var c = b.AddChild("c");
+            var d = c.AddChild("d");
+            d.AddChild("e");
+
+            yield return new object[]
+            {
+                a.Build(),
+                NodePath.ParseUnsafe("b.c.d.e"),
+                false,
+                "e"
+            };
+        }
+
+        {
+            AstNodeHierarchyBuilder builder = new();
+            var a = builder.AddRoot("a");
+            var b = a.AddChild("b");
+            var c = b.AddChild("c");
+            var d = c.AddChild("d");
+            d.AddChild("e");
+
+            yield return new object[]
+            {
+                a.Build(),
+                NodePath.ParseUnsafe("a.b.c.d.e"),
+                true,
+                "e"
+            };
+        }
+
+        {
+            AstNodeHierarchyBuilder builder = new();
+            var a = builder.AddRoot("a");
+            var b = a.AddChild("b");
+            b.AddChild("c");
+
+            yield return new object?[]
+            {
+                a.Build(),
+                NodePath.ParseUnsafe("a.b.d.e"),
+                true,
+                null
+            };
+        }
+
+        {
+            AstNodeHierarchyBuilder builder = new();
+            var a = builder.AddRoot("a");
+
+            yield return new object?[]
+            {
+                a.Build(),
+                NodePath.ParseUnsafe("b"),
+                false,
+                null
+            };
+        }
+    }
+
+    [MemberData(nameof(GetDecendantNodeFromPath_ReturnsDecendantNode_Data))]
+    [Theory]
+    public void GetDecendantNodeFromPath_ReturnsDecendantNode(AstNode node, NodePath path, bool selfAsRoot, string? expectedName)
+    {
+        var decendant = node.GetDecendantNodeFromPath(path, selfAsRoot);
+
+        if (expectedName is null)
+        {
+            decendant.ShouldBeNull();
+        }
+        else
+        {
+            decendant.ShouldNotBeNull();
+            decendant.Name.ShouldBe(expectedName);
+        }
+    }
 }

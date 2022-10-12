@@ -85,14 +85,31 @@ public static class PassExtensions
     /// or <see langword="null"/> if the node does not exist.</returns>
     public static AstNode? GetNodeFromPath(this AstNodeHierarchy hierarchy, NodePath path)
     {
-        var nodesEnumerator = path.GetNodes().Reverse().GetEnumerator();
-
-        nodesEnumerator.MoveNext();
-        string rootName = nodesEnumerator.Current;
-        var root = hierarchy.Roots.FirstOrDefault(r => r.Name == rootName);
+        var root = hierarchy.Roots.FirstOrDefault(n => n.Name == path.Root);
         if (root is null) return null;
 
-        var currentNode = root;
+        return root.GetDecendantNodeFromPath(path, true);
+    }
+
+    /// <summary>
+    /// Gets a decendant node of a node from a path.
+    /// </summary>
+    /// <param name="node">The node to get the decendant node of.</param>
+    /// <param name="path">The path of the decendant node to get.</param>
+    /// <param name="selfAsRoot">Whether the current node should be counted as the root of the path.</param>
+    /// <returns>The decendant node at <paramref name="path"/>,
+    /// or <see langword="null"/> if the node does not exist.</returns>
+    public static AstNode? GetDecendantNodeFromPath(this AstNode node, NodePath path, bool selfAsRoot = false)
+    {
+        var nodesEnumerator = path.GetNodes().GetEnumerator();
+
+        if (selfAsRoot)
+        {
+            nodesEnumerator.MoveNext();
+            if (nodesEnumerator.Current != node.Name) return null;
+        }
+
+        var currentNode = node;
         while (nodesEnumerator.MoveNext())
         {
             string nodeName = nodesEnumerator.Current;
