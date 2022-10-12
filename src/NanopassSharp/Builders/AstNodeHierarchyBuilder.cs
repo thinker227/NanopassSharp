@@ -282,21 +282,9 @@ public sealed class AstNodeHierarchyBuilder
 
         var rootNode = BuildNode(null, rootBuilder, missingChildBehavior);
 
-        var pathNodesEnumerator = path.GetNodes().Reverse().GetEnumerator();
-        pathNodesEnumerator.MoveNext();
-        var node = rootNode;
-        while (pathNodesEnumerator.MoveNext())
-        {
-            node = getNode(pathNodesEnumerator.Current);
-        }
+        return rootNode.GetDecendantNodeFromPath(path, true)
+            ?? throw nodeDoesNotExist(path);
 
-        return node;
-
-        AstNode getNode(string name)
-        {
-            if (node!.Children.TryGetValue(name, out var n)) return n;
-            throw nodeDoesNotExist(node.GetPath().CreateLeafPath(name));
-        }
         static InvalidOperationException nodeDoesNotExist(NodePath path) =>
             new($"The node '{path}' does not exist in the hierarchy");
     }
