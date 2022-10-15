@@ -197,10 +197,20 @@ public static class PassTransformer
     /// </summary>
     /// <param name="builder">The builder to update.</param>
     /// <param name="transformedNode">The node to update the builder with.</param>
-    private static void UpdateNode(AstNodeBuilder builder, AstNode transformedNode) => builder
-        .WithAttributes(new HashSet<object>(transformedNode.Attributes))
-        .WithDocumentation(transformedNode.Documentation)
-        .WithChildren(transformedNode.Children.Keys);
+    private static void UpdateNode(AstNodeBuilder builder, AstNode transformedNode)
+    {
+        builder
+            .WithAttributes(new HashSet<object>(transformedNode.Attributes))
+            .WithDocumentation(transformedNode.Documentation)
+            .WithChildren(transformedNode.Children.Keys);
+
+        // Remove all preexisting members then add them back again.
+        // This is kinda terrible, but it's the only way to ensure
+        // that all members are updated properly since members could
+        // be added, removed, and/or modified by a node transformation.
+        foreach (var member in builder.Members) builder.RemoveMember(member);
+        foreach (var member in transformedNode.Members) builder.AddMember(member.Value);
+    }
 
     /// <summary>
     /// Updates a <see cref="AstNodeMemberBuilder"/> with the contents of an <see cref="AstNodeMember"/>.
