@@ -96,7 +96,7 @@ public sealed class PassSequence : IReadOnlyList<CompilerPass>
         else
         {
             var previousTree = GetTree(previousPass);
-            tree = PassTransformer.ApplyTransformations(previousTree, pass.Transformations);
+            tree = PassTransformer.ApplyTransformations(previousTree, pass.Transformations.Transformations);
         }
 
         trees.Add(pass, tree);

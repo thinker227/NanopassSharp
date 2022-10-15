@@ -18,20 +18,18 @@ public static class PassTransformer
     /// <param name="transformations">The transformations to apply.</param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public static AstNodeHierarchy ApplyTransformations(AstNodeHierarchy tree, PassTransformations transformations)
+    public static AstNodeHierarchy ApplyTransformations(AstNodeHierarchy tree, ITransformations transformations)
     {
-        var tfs = transformations.Transformations;
-
-        if (tfs.Count == 0)
+        if (transformations.Count == 0)
         {
             return tree;
         }
 
-        tree = ApplyTransformationsToTree(tree, tfs);
+        tree = ApplyTransformationsToTree(tree, transformations);
 
         var builder = AstNodeHierarchyBuilder.FromHierarchy(tree);
 
-        TraverseRoots(builder, tree, transformations.Transformations);
+        TraverseRoots(builder, tree, transformations);
 
         return builder.Build();
     }

@@ -22,7 +22,7 @@ public class PassTransformerTests
         var trans = new MockTransformation()
             .ApplyToTreeReturns(replacementTree);
         MockTransformationDescription desc = new() { Transformation = trans };
-        PassTransformations transformations = new(new[] { desc });
+        var transformations = new[] { desc };
 
         var transformedTree = PassTransformer.ApplyTransformations(originalTree, transformations);
 
