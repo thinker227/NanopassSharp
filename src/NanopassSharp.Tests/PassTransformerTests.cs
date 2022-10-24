@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NanopassSharp.Builders;
 
 namespace NanopassSharp.Tests;
@@ -117,6 +118,79 @@ public class PassTransformerTests
         var expected = expectedBuilder.Build();
 
         var transformedTree = PassTransformer.ApplyTransformations(originalTree, transformations);
+
+        transformedTree.ShouldBe(expected);
+    }
+
+    [Fact]
+    public void TransformsNodes()
+    {
+        AstNodeHierarchyBuilder originalBuilder = new();
+        {
+            var foo = originalBuilder.AddRoot("foo")
+                .WithDocumentation("A foo")
+                .AddAttribute(true);
+            foo.AddChild("bar")
+                .WithDocumentation("A bar")
+                .AddAttribute(10);
+        }
+        var originalTree = originalBuilder.Build();
+
+        List<ITransformationDescription> descriptions = new();
+        {
+            var fooPattern = new MockTransformationPattern()
+                .IsMatchTreeReturns(false)
+                .IsMatchNodeReturns((_, node) => node.Name == "foo")
+                .IsMatchMemberReturns(false);
+            var fooTransform = new MockTransformation()
+                .ApplyToNodeReturns((_, node) =>
+                {
+                    var builder = new AstNodeHierarchyBuilder()
+                        .CreateNode(node);
+                    builder.Documentation = "A glorious foo";
+                    builder.Attributes = new HashSet<object>(new object[] { false });
+                    return builder.Build();
+                });
+            descriptions.Add(new MockTransformationDescription()
+            {
+                Pattern = fooPattern,
+                Transformation = fooTransform
+            });
+        }
+        {
+            var barPattern = new MockTransformationPattern()
+                .IsMatchTreeReturns(false)
+                .IsMatchNodeReturns((_, node) => node.Name == "bar")
+                .IsMatchMemberReturns(false);
+            var barTransform = new MockTransformation()
+                .ApplyToNodeReturns((_, node) =>
+                {
+                    var builder = new AstNodeHierarchyBuilder()
+                        .CreateNode(node);
+                    builder.Documentation = "A cool bar";
+                    builder.Attributes = new HashSet<object>(new object[] { 20, "attribute" });
+                    return builder.Build();
+                });
+            descriptions.Add(new MockTransformationDescription()
+            {
+                Pattern = barPattern,
+                Transformation = barTransform
+            });
+        }
+
+        AstNodeHierarchyBuilder expectedBuilder = new();
+        {
+            var foo = originalBuilder.AddRoot("foo")
+                .WithDocumentation("A glorious foo")
+                .AddAttribute(false);
+            foo.AddChild("bar")
+                .WithDocumentation("A cool bar")
+                .AddAttribute(20)
+                .AddAttribute("attribute");
+        }
+        var expected = expectedBuilder.Build();
+
+        var transformedTree = PassTransformer.ApplyTransformations(originalTree, descriptions);
 
         transformedTree.ShouldBe(expected);
     }
