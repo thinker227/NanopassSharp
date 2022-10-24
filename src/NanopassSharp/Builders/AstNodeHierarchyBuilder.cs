@@ -40,25 +40,10 @@ public sealed class AstNodeHierarchyBuilder
 
         foreach (var root in hierarchy.Roots)
         {
-            AddNodeAndChildren(builder, root);
-            builder.Roots = hierarchy.Roots
-                .Select(n => n.Name)
-                .ToArray();
+            builder.CreateNode(root, CreateNodeBehavior.CreateFromRoot);
         }
 
         return builder;
-    }
-
-    private static void AddNodeAndChildren(AstNodeHierarchyBuilder builder, AstNode node)
-    {
-        var nodeBuilder = builder.CreateNode(node)
-            .WithDocumentation(node.Documentation)
-            .WithAttributes(new HashSet<object>(node.Attributes));
-
-        foreach (var child in node.Children.Values)
-        {
-            AddNodeAndChildren(builder, child);
-        }
     }
 
     /// <summary>
@@ -129,22 +114,45 @@ public sealed class AstNodeHierarchyBuilder
     /// Creates a new node in the hierarchy from an existing <see cref="AstNode"/>.
     /// </summary>
     /// <param name="node">The node to create the new node from.</param>
+    /// <param name="behavior">The behavior for how to create the node.</param>
     /// <returns>A builder for the new node.</returns>
     /// <remarks>
     /// If a builder for a node with the same path already exists,
     /// then the already existing builder will be overwritten with the data from the node.
     /// </remarks>
-    public AstNodeBuilder CreateNode(AstNode node)
+    public AstNodeBuilder CreateNode(AstNode node, CreateNodeBehavior behavior = CreateNodeBehavior.CreateFromRoot)
     {
         var path = node.GetPath();
+
+        if (behavior == CreateNodeBehavior.CreateFromRoot)
+        {
+            // Create the root and all children, then return the requested node
+            var root = node.GetRoot();
+            CreateNode(root, CreateNodeBehavior.CreateInPlaceWithChildren);
+            return GetNodeFromPath(path)!;
+        }
 
         var builder = CreateNode(path);
         builder.Documentation = node.Documentation;
         builder.Children = node.Children.Keys.ToList();
         builder.Attributes = new HashSet<object>(node.Attributes);
+
+        if (behavior == CreateNodeBehavior.CreateInPlaceWithChildren)
+        {
+            foreach (var child in node.Children.Values)
+            {
+                CreateNode(child, behavior);
+            }
+        }
+
         foreach (var member in node.Members.Values)
         {
             builder.AddMember(member);
+        }
+
+        if (path.IsRoot)
+        {
+            AddRoot(path.Root);
         }
 
         return builder;
