@@ -40,25 +40,10 @@ public sealed class AstNodeHierarchyBuilder
 
         foreach (var root in hierarchy.Roots)
         {
-            AddNodeAndChildren(builder, root);
-            builder.Roots = hierarchy.Roots
-                .Select(n => n.Name)
-                .ToArray();
+            builder.CreateNode(root, CreateNodeBehavior.CreateFromRoot);
         }
 
         return builder;
-    }
-
-    private static void AddNodeAndChildren(AstNodeHierarchyBuilder builder, AstNode node)
-    {
-        var nodeBuilder = builder.CreateNode(node)
-            .WithDocumentation(node.Documentation)
-            .WithAttributes(new HashSet<object>(node.Attributes));
-
-        foreach (var child in node.Children.Values)
-        {
-            AddNodeAndChildren(builder, child);
-        }
     }
 
     /// <summary>
