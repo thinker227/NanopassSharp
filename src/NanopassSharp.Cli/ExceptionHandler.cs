@@ -12,7 +12,7 @@ internal static class ExceptionHandler
 
         if (exception is CommandRuntimeException)
         {
-            console.MarkupLine($"[white]Command error:[/] [deeppink3]{exception.Message}[/]");
+            console.MarkupLine($"[deeppink3]{exception.Message}[/]");
             return;
         }
 
