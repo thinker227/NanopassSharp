@@ -32,6 +32,9 @@ internal sealed class RunSettings : CommandSettings
     }
     private string? inputLanguage;
 
+    [CommandOption("--print-options", IsHidden = true)]
+    public bool PrintOptions { get; init; }
+
 
 
     public override ValidationResult Validate()
