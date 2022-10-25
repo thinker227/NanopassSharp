@@ -208,7 +208,8 @@ public static class PassTransformer
         // This is kinda terrible, but it's the only way to ensure
         // that all members are updated properly since members could
         // be added, removed, and/or modified by a node transformation.
-        foreach (var member in builder.Members) builder.RemoveMember(member);
+        var members = builder.Members.ToArray(); // Avoid "collection was modified" exception.
+        foreach (var member in members) builder.RemoveMember(member);
         foreach (var member in transformedNode.Members) builder.AddMember(member.Value);
     }
 
