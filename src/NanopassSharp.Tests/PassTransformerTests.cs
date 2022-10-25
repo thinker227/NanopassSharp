@@ -180,7 +180,7 @@ public class PassTransformerTests
 
         AstNodeHierarchyBuilder expectedBuilder = new();
         {
-            var foo = originalBuilder.AddRoot("foo")
+            var foo = expectedBuilder.AddRoot("foo")
                 .WithDocumentation("A glorious foo")
                 .AddAttribute(false);
             foo.AddChild("bar")
