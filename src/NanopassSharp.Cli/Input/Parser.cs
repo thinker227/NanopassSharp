@@ -8,7 +8,7 @@ internal sealed class Parser
     private readonly Token[] tokens;
     private readonly List<IndexString> arguments;
     private readonly Dictionary<OptionSignature, Option> options;
-    private readonly List<Error> errors;
+    private readonly List<InputError> errors;
 
 
 
@@ -154,7 +154,7 @@ internal sealed class Parser
 internal readonly record struct ParseResult(
     IndexString[] Arguments,
     IReadOnlyDictionary<OptionSignature, Option> Options,
-    IReadOnlyCollection<Error> Errors);
+    IReadOnlyCollection<InputError> Errors);
 
 internal enum OptionKind
 {
@@ -181,4 +181,4 @@ internal readonly record struct IndexString(int Index, string Value)
     public override string ToString() => Value;
 }
 
-internal readonly record struct Error(int Index, string Message);
+internal readonly record struct InputError(int? Index, string Message);
