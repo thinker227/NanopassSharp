@@ -39,15 +39,15 @@ internal abstract record class Command
         handler.HandleOption("input-language", "i", (args, inputLanguage, _) =>
             args.InputLanguage = inputLanguage.Value);
 
-        handler.HandleOption("output-location", "o", (args, outputLanguage, errors) =>
+        handler.HandleOption("output-location", "o", (args, outputLocation, errors) =>
         {
-            if (!Directory.Exists(outputLanguage.Value))
+            if (!Directory.Exists(outputLocation.Value))
             {
-                errors.Add(new(outputLanguage.Index, $"Directory path '{outputLanguage.Value}' does not exist"));
+                errors.Add(new(outputLocation.Index, $"Directory path '{outputLocation.Value}' does not exist"));
                 return;
             }
 
-            args.OutputLanguage = outputLanguage.Value;
+            args.OutputLocation = new(outputLocation.Value);
         });
 
         handler.HandleBoolOption("print-options", null, (args, printOptions, _) =>
