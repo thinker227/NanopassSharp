@@ -1,20 +1,14 @@
 ﻿using NanopassSharp.Cli;
-using Spectre.Console;
-using Spectre.Console.Cli;
+using NanopassSharp.Cli.Input;
 
-CommandApp<RunCommand> app = new();
+var parseResult = Parser.Parse(args);
+var command = Command.Create(parseResult);
 
-app.Configure(config =>
+return command switch
 {
-    config.SetApplicationName("nanopass-sharp");
-    config.SetApplicationVersion("1.0.0");
-
-    config.AddExample(new[] { "csharp", "./passes.yaml" });
-    config.AddExample(new[] { "csharp", "./src/passes.txt", "-o ./src/MyProject", "-i json" });
-
-    config.CaseSensitivity(CaseSensitivity.None);
-
-    config.SetExceptionHandler(ExceptionHandler.Handle);
-});
-
-return await app.RunAsync(args);
+    Command.Run run => await new RunCommand(run.Arguments).ExecuteAsync(),
+    Command.Help => new HelpCommand().Execute(),
+    Command.Version => new VersionCommand().Execute(),
+    Command.Error error => new ErrorReporter(error.Errors).Report(),
+    _ => 1
+};

@@ -22,5 +22,5 @@ internal sealed class Settings
 
     public bool PrintOptions { get; set; }
 
-    public IReadOnlyDictionary<string, string>? AdditionalOptions { get; set; }
+    public IReadOnlyDictionary<string, string> AdditionalOptions { get; set; } = null!;
 }

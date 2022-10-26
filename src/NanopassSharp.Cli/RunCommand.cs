@@ -1,17 +1,25 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Spectre.Console;
-using Spectre.Console.Cli;
 
 namespace NanopassSharp.Cli;
 
-internal sealed class RunCommand : AsyncCommand<RunSettings>
+internal sealed class RunCommand
 {
-    private RunSettings settings = null!;
+    private Settings settings = null!;
 
-    public override Task<int> ExecuteAsync(CommandContext context, RunSettings settings)
+
+
+    public RunCommand(Settings settings)
     {
         this.settings = settings;
+    }
 
+
+
+    public Task<int> ExecuteAsync()
+    {
         if (settings.PrintOptions)
         {
             PrintOptions();
@@ -28,5 +36,15 @@ internal sealed class RunCommand : AsyncCommand<RunSettings>
         AnsiConsole.MarkupLine($"[gray]Pass file path:[/] [white]{settings.PassFile.FullName}[/]");
         AnsiConsole.MarkupLine($"[gray]Output path:[/] [white]{settings.OutputLocation.FullName}[/]");
         AnsiConsole.MarkupLine($"[gray]Print options:[/] [white]{settings.PrintOptions}[/]");
+
+        if (settings.AdditionalOptions.Count > 0)
+        {
+            AnsiConsole.MarkupLine("\n[gray]Additional options:[/]");
+            foreach (var (name, value) in settings.AdditionalOptions)
+            {
+                AnsiConsole.MarkupLine($"[white]--{name} {value}[/]");
+            }
+        }
+        
     }
 }
