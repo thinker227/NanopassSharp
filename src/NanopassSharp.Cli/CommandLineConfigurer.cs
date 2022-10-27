@@ -22,6 +22,16 @@ internal static class CommandLineConfigurer
         Argument<FileInfo> passFileArg = new(
             name: "pass-file",
             description: "The path to the file containing the pass definitions");
+        passFileArg.AddValidator(result =>
+        {
+            var file = result.GetValueOrDefault<FileInfo>();
+
+            if (!file.Exists)
+            {
+                result.ErrorMessage = $"File '{file.FullName}' does not exist";
+                return;
+            }
+        });
         rootCommand.AddArgument(passFileArg);
 
         Option<string?> inputLanguageOption = new(
@@ -34,6 +44,16 @@ internal static class CommandLineConfigurer
             name: "--output-location",
             description: "The path to the output location. Defaults to the current directory");
         outputLocationOption.AddAlias("-o");
+        outputLocationOption.AddValidator(result =>
+        {
+            var directory = result.GetValueOrDefault<DirectoryInfo>();
+
+            if (!directory!.Exists)
+            {
+                result.ErrorMessage = $"Directory '{directory.FullName}' does not exist";
+                return;
+            }
+        });
         rootCommand.AddOption(outputLocationOption);
         
         rootCommand.SetHandler(async (outputLanguage, passFile, inputLanguage, outputLocation) =>
