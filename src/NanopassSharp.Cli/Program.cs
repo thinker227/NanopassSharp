@@ -1,14 +1,7 @@
-﻿using NanopassSharp.Cli;
-using NanopassSharp.Cli.Input;
+﻿using System.CommandLine.Parsing;
+using NanopassSharp.Cli;
 
-var parseResult = Parser.Parse(args);
-var command = Command.Create(parseResult);
+var builder = CommandLineConfigurer.GetRootBuilder();
+var parser = builder.Build();
 
-return command switch
-{
-    Command.Run run => await new RunCommand(run.Arguments).ExecuteAsync(),
-    Command.Help => new HelpCommand().Execute(),
-    Command.Version => new VersionCommand().Execute(),
-    Command.Error error => new ErrorReporter(error.Errors).Report(),
-    _ => 1
-};
+return await parser.InvokeAsync(args);
