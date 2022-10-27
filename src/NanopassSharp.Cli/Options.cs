@@ -3,7 +3,7 @@ using System.IO;
 
 namespace NanopassSharp.Cli;
 
-public readonly struct Options
+internal readonly struct Options
 {
     public string OutputLanguage { get; }
 
