@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+	<EnablePreviewFeatures>true</EnablePreviewFeatures>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="template.sbncs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="template.sbncs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\NanopassSharp.LanguageHelpers\NanopassSharp.LanguageHelpers.csproj" />
+  </ItemGroup>
+
+</Project>

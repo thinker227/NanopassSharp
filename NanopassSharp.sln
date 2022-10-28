@@ -1,23 +1,24 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp", "src\NanopassSharp\NanopassSharp.csproj", "{0BE57320-A330-47A0-AAD8-69A6CCB510E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp", "src\NanopassSharp\NanopassSharp.csproj", "{0BE57320-A330-47A0-AAD8-69A6CCB510E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp.Cli", "src\NanopassSharp.Cli\NanopassSharp.Cli.csproj", "{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp.Cli", "src\NanopassSharp.Cli\NanopassSharp.Cli.csproj", "{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanopassSharp.Tests", "src\NanopassSharp.Tests\NanopassSharp.Tests.csproj", "{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp.Tests", "src\NanopassSharp.Tests\NanopassSharp.Tests.csproj", "{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp.LanguageHelpers", "src\NanopassSharp.LanguageHelpers\NanopassSharp.LanguageHelpers.csproj", "{1806EEB5-4753-482B-A22A-F36B94E3C36E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp.Languages.CSharp", "src\Languages\NanopassSharp.Languages.CSharp\NanopassSharp.Languages.CSharp.csproj", "{63001C8C-3EA0-4585-AB62-B06B3B551F2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0BE57320-A330-47A0-AAD8-69A6CCB510E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -32,10 +33,25 @@ Global
 		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1806EEB5-4753-482B-A22A-F36B94E3C36E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1806EEB5-4753-482B-A22A-F36B94E3C36E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1806EEB5-4753-482B-A22A-F36B94E3C36E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1806EEB5-4753-482B-A22A-F36B94E3C36E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63001C8C-3EA0-4585-AB62-B06B3B551F2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63001C8C-3EA0-4585-AB62-B06B3B551F2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63001C8C-3EA0-4585-AB62-B06B3B551F2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63001C8C-3EA0-4585-AB62-B06B3B551F2C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0BE57320-A330-47A0-AAD8-69A6CCB510E8} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
 		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
 		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
+		{1806EEB5-4753-482B-A22A-F36B94E3C36E} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC95B518-D4B3-41A7-AB7D-0605D0079480}
 	EndGlobalSection
 EndGlobal
