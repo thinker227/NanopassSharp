@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 
-namespace NanopassSharp.Languages.CSharp;
+namespace NanopassSharp.LanguageHelpers;
 
 /// <summary>
 /// Helper methods for handling manifest resources.
