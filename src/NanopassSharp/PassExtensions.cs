@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NanopassSharp.Patterns;
+using NanopassSharp.Transformations;
 
 namespace NanopassSharp;
 
@@ -118,5 +120,41 @@ public static class PassExtensions
         }
 
         return currentNode;
+    }
+
+    /// <summary>
+    /// Returns an <see cref="ITransformationDescription"/> which
+    /// removes an <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The node to remove.</param>
+    public static ITransformationDescription Remove(this AstNode node)
+    {
+        PathPattern pattern = new(node.GetPath());
+        RemoveTransformation transformation = new();
+
+        return pattern.WithTransformation(transformation);
+    }
+
+    /// <summary>
+    /// Returns an <see cref="ITransformationDescription"/> which
+    /// removes a member from an <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The node containing the member to remove.</param>
+    /// <param name="member">The member to remove.</param>
+    public static ITransformationDescription RemoveMember(this AstNode node, AstNodeMember member) =>
+        node.RemoveMember(member.Name);
+
+    /// <summary>
+    /// Returns an <see cref="ITransformationDescription"/> which
+    /// removes a member from an <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The node containing the member to remove.</param>
+    /// <param name="member">The name of the member to remove.</param>
+    public static ITransformationDescription RemoveMember(this AstNode node, string member)
+    {
+        PathPattern pattern = new(node.GetPath().CreateLeafPath(member));
+        RemoveTransformation transformation = new();
+
+        return pattern.WithTransformation(transformation);
     }
 }
