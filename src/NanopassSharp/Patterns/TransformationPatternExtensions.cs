@@ -1,4 +1,7 @@
-﻿using NanopassSharp.Descriptions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using NanopassSharp.Descriptions;
 
 namespace NanopassSharp.Patterns;
 
@@ -38,6 +41,20 @@ public static class TransformationPatternExtensions
     /// <param name="operand">The operand.</param>
     public static ITransformationPattern Not(this ITransformationPattern operand) =>
         new UnaryPattern(operand, x => !x);
+
+    /// <summary>
+    /// Returns a new <see cref="ITransformationPattern"/> which returns true
+    /// if any of the patterns in the collection return true.
+    /// </summary>
+    public static ITransformationPattern AnyPattern(this IEnumerable<ITransformationPattern> patterns) =>
+        new EnumerablePattern(patterns, xs => xs.Any(x => x));
+
+    /// <summary>
+    /// Returns a new <see cref="ITransformationPattern"/> which returns true
+    /// if all of the patterns in the collection return true.
+    /// </summary>
+    public static ITransformationPattern AllPattern(this IEnumerable<ITransformationPattern> patterns) =>
+        new EnumerablePattern(patterns, xs => xs.All(x => x));
 
     /// <summary>
     /// Creates an <see cref="ITransformationDescription"/> from a pattern and a transformation.
