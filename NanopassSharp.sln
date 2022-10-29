@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp.LanguageHelpe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp.Languages.CSharp", "src\Languages\NanopassSharp.Languages.CSharp\NanopassSharp.Languages.CSharp.csproj", "{63001C8C-3EA0-4585-AB62-B06B3B551F2C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Languages", "Languages", "{78013FDD-1FB7-43D2-8AEB-18D26DFB69FD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NanopassSharp.Languages.Yaml", "src\Languages\NanopassSharp.Languages.Yaml\NanopassSharp.Languages.Yaml.csproj", "{152C91EA-F3A0-4540-AF03-BCABD4E49BCB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,10 @@ Global
 		{63001C8C-3EA0-4585-AB62-B06B3B551F2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63001C8C-3EA0-4585-AB62-B06B3B551F2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63001C8C-3EA0-4585-AB62-B06B3B551F2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{152C91EA-F3A0-4540-AF03-BCABD4E49BCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{152C91EA-F3A0-4540-AF03-BCABD4E49BCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{152C91EA-F3A0-4540-AF03-BCABD4E49BCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{152C91EA-F3A0-4540-AF03-BCABD4E49BCB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,6 +58,9 @@ Global
 		{1DD4EDE2-0EFA-43DC-A5E0-783BCD71C640} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
 		{A8FA1FA4-A615-49EA-86EF-1161DD2EEEFD} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
 		{1806EEB5-4753-482B-A22A-F36B94E3C36E} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
+		{63001C8C-3EA0-4585-AB62-B06B3B551F2C} = {78013FDD-1FB7-43D2-8AEB-18D26DFB69FD}
+		{78013FDD-1FB7-43D2-8AEB-18D26DFB69FD} = {03E3E870-D9B1-4C1F-9D07-625E3E77B3EA}
+		{152C91EA-F3A0-4540-AF03-BCABD4E49BCB} = {78013FDD-1FB7-43D2-8AEB-18D26DFB69FD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC95B518-D4B3-41A7-AB7D-0605D0079480}
