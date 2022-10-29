@@ -9,12 +9,12 @@ public abstract class BaseTransformation : ITransformation
     /// <remarks>
     /// Unless overwritten, returns <paramref name="member"/>.
     /// </remarks>
-    public virtual AstNodeMember ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member) => member;
+    public virtual AstNodeMember? ApplyToMember(AstNodeHierarchy tree, AstNode node, AstNodeMember member) => member;
     /// <inheritdoc/>
     /// <remarks>
     /// Unless overwritten, returns <paramref name="node"/>.
     /// </remarks>
-    public virtual AstNode ApplyToNode(AstNodeHierarchy tree, AstNode node) => node;
+    public virtual AstNode? ApplyToNode(AstNodeHierarchy tree, AstNode node) => node;
     /// <inheritdoc/>
     /// <remarks>
     /// Unless overwritten, returns <paramref name="tree"/>.
