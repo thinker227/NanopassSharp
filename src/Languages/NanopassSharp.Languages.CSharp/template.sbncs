@@ -19,9 +19,11 @@
 {{- func render_documentation -}}
 {{- obj = $0 -}}
 
+{{- if obj.documentation != null -}}
 /// <summary>
 /// {{ obj.documentation }}
 /// </summary>
+{{- end -}}
 
 {{- end -}}
 
