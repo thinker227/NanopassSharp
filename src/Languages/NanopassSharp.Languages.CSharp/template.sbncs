@@ -7,6 +7,15 @@
 
 
 
+{{- func render_inherit -}}
+{{- type = $0 -}}
+
+{{ if type.parent != null }}: {{ type.parent.name }} {{ end }}
+
+{{- end -}}
+
+
+
 {{- func render_documentation -}}
 {{- obj = $0 -}}
 
@@ -32,7 +41,7 @@ public {{ member.type }} {{ member.name }} { get; init; }
 {{- type = $0 -}}
 
 {{ render_documentation type }}
-public {{ render_type_modifier type }} class {{ type.name }}
+public {{ render_type_modifier type }} class {{ type.name }} {{ render_inherit type }}
 {
 {{~ for m in type.members ~}}
 {{ render_member m.value }}
