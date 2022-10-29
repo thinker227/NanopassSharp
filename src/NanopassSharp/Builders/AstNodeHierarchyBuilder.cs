@@ -36,7 +36,14 @@ public sealed class AstNodeHierarchyBuilder
     /// <param name="hierarchy">The source hierarchy.</param>
     public static AstNodeHierarchyBuilder FromHierarchy(AstNodeHierarchy hierarchy)
     {
-        throw new NotImplementedException();
+        AstNodeHierarchyBuilder builder = new();
+
+        foreach (var root in hierarchy.Roots)
+        {
+            builder.CreateNode(root, CreateNodeBehavior.CreateFromRoot);
+        }
+
+        return builder;
     }
 
     /// <summary>
@@ -107,25 +114,73 @@ public sealed class AstNodeHierarchyBuilder
     /// Creates a new node in the hierarchy from an existing <see cref="AstNode"/>.
     /// </summary>
     /// <param name="node">The node to create the new node from.</param>
+    /// <param name="behavior">The behavior for how to create the node.</param>
     /// <returns>A builder for the new node.</returns>
     /// <remarks>
     /// If a builder for a node with the same path already exists,
     /// then the already existing builder will be overwritten with the data from the node.
     /// </remarks>
-    public AstNodeBuilder CreateNode(AstNode node)
+    public AstNodeBuilder CreateNode(AstNode node, CreateNodeBehavior behavior = CreateNodeBehavior.CreateFromRoot)
     {
         var path = node.GetPath();
+
+        if (behavior == CreateNodeBehavior.CreateFromRoot)
+        {
+            // Create the root and all children, then return the requested node
+            var root = node.GetRoot();
+            CreateNode(root, CreateNodeBehavior.CreateInPlaceWithChildren);
+            return GetNodeFromPath(path)!;
+        }
 
         var builder = CreateNode(path);
         builder.Documentation = node.Documentation;
         builder.Children = node.Children.Keys.ToList();
         builder.Attributes = new HashSet<object>(node.Attributes);
+
+        if (behavior == CreateNodeBehavior.CreateInPlaceWithChildren)
+        {
+            foreach (var child in node.Children.Values)
+            {
+                CreateNode(child, behavior);
+            }
+        }
+
         foreach (var member in node.Members.Values)
         {
             builder.AddMember(member);
         }
 
+        if (path.IsRoot)
+        {
+            AddRoot(path.Root);
+        }
+
         return builder;
+    }
+
+    /// <summary>
+    /// Removes a node from the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path of the node to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder RemoveNode(string fullPath) =>
+        RemoveNode(NodePath.ParseUnsafe(fullPath));
+
+    /// <summary>
+    /// Removes a node from the hierarchy.
+    /// </summary>
+    /// <param name="fullPath">The full path of the node to remove.</param>
+    /// <returns>The current builder.</returns>
+    public AstNodeHierarchyBuilder RemoveNode(NodePath fullPath)
+    {
+        builders.Remove(fullPath);
+
+        if (fullPath.IsRoot)
+        {
+            Roots.Remove(fullPath.Leaf);
+        }
+
+        return this;
     }
 
     /// <summary>
@@ -155,6 +210,15 @@ public sealed class AstNodeHierarchyBuilder
         builders.TryGetValue(path, out var builder)
             ? builder
             : null;
+
+    /// <summary>
+    /// Gets a <see cref="AstNodeBuilder"/> from a specified path to a node.
+    /// </summary>
+    /// <param name="path">The path to get the builder from.</param>
+    /// <returns>The builder for the node that <paramref name="path"/> specified,
+    /// or <see langword="null"/> if there is no builder for the path.</returns>
+    public AstNodeBuilder? GetNodeFromPath(string path) =>
+        GetNodeFromPath(NodePath.ParseUnsafe(path));
 
     /// <summary>
     /// Builds an <see cref="AstNodeHierarchy"/> from the builder.
@@ -226,21 +290,9 @@ public sealed class AstNodeHierarchyBuilder
 
         var rootNode = BuildNode(null, rootBuilder, missingChildBehavior);
 
-        var pathNodesEnumerator = path.GetNodes().GetEnumerator();
-        pathNodesEnumerator.MoveNext();
-        var node = rootNode;
-        while (pathNodesEnumerator.MoveNext())
-        {
-            node = getNode(pathNodesEnumerator.Current);
-        }
+        return rootNode.GetDecendantNodeFromPath(path, true)
+            ?? throw nodeDoesNotExist(path);
 
-        return node;
-
-        AstNode getNode(string name)
-        {
-            if (node!.Children.TryGetValue(name, out var n)) return n;
-            throw nodeDoesNotExist(node.GetPath().CreateLeafPath(name));
-        }
         static InvalidOperationException nodeDoesNotExist(NodePath path) =>
             new($"The node '{path}' does not exist in the hierarchy");
     }

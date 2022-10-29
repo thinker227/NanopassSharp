@@ -65,6 +65,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
 
         return builder;
     }
+
     /// <summary>
     /// Adds a pass to the sequence.
     /// </summary>
@@ -77,6 +78,25 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
         .WithNext(pass.Next);
 
     /// <summary>
+    /// Removes a pass from the sequence.
+    /// </summary>
+    /// <param name="name">The name of the pass to remove.</param>
+    /// <returns>The current builder.</returns>
+    public PassSequenceBuilder RemovePass(string name)
+    {
+        builders.Remove(name);
+        return this;
+    }
+
+    /// <summary>
+    /// Removes a pass from the sequence.
+    /// </summary>
+    /// <param name="pass">The pass to remove.</param>
+    /// <returns>The current builder.</returns>
+    public PassSequenceBuilder RemovePass(CompilerPassBuilder pass) =>
+        RemovePass(pass.Name);
+
+    /// <summary>
     /// Sets the root of the sequence.
     /// </summary>
     /// <param name="name">The name of the root.</param>
@@ -87,6 +107,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
         Root = builder.Name;
         return builder;
     }
+
     /// <summary>
     /// Sets the root of the sequence.
     /// </summary>
@@ -111,6 +132,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
     {
         return builders.Values.GetEnumerator();
     }
+
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
@@ -130,18 +152,39 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
 
         return PassSequence.Create(passes);
     }
+
     private static bool IsValidRoot(string root) =>
         root is not (null or "") && !IsReservedPassName(root);
+
     private IEnumerable<CompilerPassBuilder> EnumerateBuilders()
     {
         string targetName = Root;
         CompilerPassBuilder? previous = null;
+        HashSet<string> built = new();
 
         while (true)
         {
             if (!builders.TryGetValue(targetName, out var current))
             {
                 throw new InvalidOperationException($"Pass '{targetName}' does not exist");
+            }
+
+            if (built.Contains(targetName))
+            {
+                // An exception is going to be thrown anyway
+                // so it doesn't matter that this isn't very efficient
+                string[] refs = builders.Values
+                    .Where(p => p.Next == targetName)
+                    .Select(p => $"'{p.Name}'")
+                    .ToArray();
+                string refsMessage = refs.Length switch
+                {
+                    0 => "",
+                    1 => $"{refs[0]}", // Wouldn't make sense if this happened, but for completeness' sake
+                    2 => $"{refs[0]} and {refs[1]}",
+                    _ => $"{string.Join(", ", refs[..^1])}, and {refs[^1]}"
+                };
+                throw new InvalidOperationException($"Circular reference in pass lineage: pass '{targetName}' is specified as the next pass for multiple passes ({refsMessage})");
             }
 
             if (current.Previous is not null && current.Previous != previous?.Name)
@@ -156,10 +199,12 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
 
             if (current.Next is null) break;
 
+            built.Add(targetName);
             targetName = current.Next;
             previous = current;
         }
     }
+
     private CompilerPass BuildPass(CompilerPassBuilder builder) => new(
         builder.Name,
         builder.Documentation,
@@ -167,6 +212,7 @@ public sealed class PassSequenceBuilder : IEnumerable<CompilerPassBuilder>
         builder.Previous ?? empty,
         builder.Next
     );
+
     private static CompilerPass GetEmptyPass(string root) => new(
         empty,
         null,

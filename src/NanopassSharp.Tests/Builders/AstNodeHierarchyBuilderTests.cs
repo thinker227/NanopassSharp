@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TreeBuilder = NanopassSharp.Builders.AstNodeHierarchyBuilder;
 
 namespace NanopassSharp.Builders.Tests;
@@ -12,6 +13,124 @@ public class AstNodeHierarchyBuilderTests
         TreeBuilder builder = new();
 
         builder.Roots.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void FromHierarchy_DecsendsNode()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("a")
+            .WithChildren(new[] { "b", "d" });
+        builder.CreateNode("a.b")
+            .WithChildren(new[] { "c" });
+        builder.CreateNode("a.b.c");
+        builder.CreateNode("a.d");
+        builder.AddRoot("e");
+        var tree = builder.Build();
+
+        var fromHierarchy = TreeBuilder.FromHierarchy(tree);
+
+        fromHierarchy.Roots.Count.ShouldBe(2);
+        fromHierarchy.Roots.ShouldBe(new[] { "a", "e" }, true);
+
+        var a = fromHierarchy.GetNodeFromPath("a");
+        a.ShouldNotBeNull();
+        a.Children.ShouldBe(new[] { "b", "d" });
+
+        var ab = fromHierarchy.GetNodeFromPath("a.b");
+        ab.ShouldNotBeNull();
+        ab.Children.ShouldBe(new[] { "c" });
+
+        var abc = fromHierarchy.GetNodeFromPath("a.b.c");
+        abc.ShouldNotBeNull();
+        abc.Children.ShouldBeEmpty();
+
+        var ad = fromHierarchy.GetNodeFromPath("a.d");
+        ad.ShouldNotBeNull();
+        ad.Children.ShouldBeEmpty();
+
+        var e = fromHierarchy.GetNodeFromPath("e");
+        e.ShouldNotBeNull();
+        e.Children.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void FromHierarchy_SetsAttributesAndDocumentation()
+    {
+        TreeBuilder builder = new();
+        builder.AddRoot("foo")
+            .AddAttribute(true)
+            .AddAttribute(27)
+            .WithDocumentation("A glorious foo")
+            .WithChildren(new[] { "bar" });
+        builder.CreateNode("foo.bar")
+            .AddAttribute(false)
+            .AddAttribute(10)
+            .WithDocumentation("A fantastic bar");
+        var tree = builder.Build();
+
+        var fromHierarchy = TreeBuilder.FromHierarchy(tree);
+
+        var foo = fromHierarchy.GetNodeFromPath("foo");
+        foo.ShouldNotBeNull();
+        foo.Attributes.ShouldBe(new object[] { true, 27 }, true);
+        foo.Documentation.ShouldBe("A glorious foo");
+
+        var bar = fromHierarchy.GetNodeFromPath("foo.bar");
+        bar.ShouldNotBeNull();
+        bar.Attributes.ShouldBe(new object[] { false, 10 });
+        bar.Documentation.ShouldBe("A fantastic bar");
+    }
+
+    [Fact]
+    public void FromHierarchy_SetsMembers()
+    {
+        TreeBuilder builder = new();
+        var fooBuilder = builder.AddRoot("foo")
+            .WithChildren(new[] { "bar" });
+        var barBuilder = builder.CreateNode("foo.bar");
+        fooBuilder.AddMember("a")
+            .AddAttribute("attribute")
+            .AddAttribute(27)
+            .WithDocumentation("An a")
+            .WithType("type a");
+        fooBuilder.AddMember("b")
+            .AddAttribute("far")
+            .AddAttribute(10)
+            .WithDocumentation("A b")
+            .WithType("type b");
+        barBuilder.AddMember("c")
+            .WithDocumentation("A c")
+            .WithType("type c");
+        var tree = builder.Build();
+
+        var fromHierarchy = TreeBuilder.FromHierarchy(tree);
+
+        var foo = fromHierarchy.GetNodeFromPath("foo");
+        foo.ShouldNotBeNull();
+        foo.Members.Count.ShouldBe(2);
+
+        var a = foo.Members.First(m => m.Name == "a");
+        a.ShouldNotBeNull();
+        a.Attributes.ShouldBe(new object[] { "attribute", 27 }, true);
+        a.Documentation.ShouldBe("An a");
+        a.Type.ShouldBe("type a");
+
+        var b = foo.Members.First(m => m.Name == "b");
+        b.ShouldNotBeNull();
+        b.Attributes.ShouldBe(new object[] { "far", 10 }, true);
+        b.Documentation.ShouldBe("A b");
+        b.Type.ShouldBe("type b");
+
+        var bar = fromHierarchy.GetNodeFromPath("foo.bar");
+        bar.ShouldNotBeNull();
+        bar.Members.Count.ShouldBe(1);
+
+        var c = bar.Members.First(m => m.Name == "c");
+        c.ShouldNotBeNull();
+        c.Attributes.ShouldBeEmpty();
+        c.Documentation.ShouldBe("A c");
+        c.Type.ShouldBe("type c");
     }
 
     [InlineData("a")]
@@ -29,6 +148,104 @@ public class AstNodeHierarchyBuilderTests
         node.Children.ShouldBeEmpty();
         node.Members.ShouldBeEmpty();
         node.Attributes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void CreateNode_FromOtherNode_CreatesNode()
+    {
+        HashSet<object> attributes = new(new object[] { true, 10 });
+        var node = new TreeBuilder()
+            .AddRoot("foo")
+            .WithDocumentation("A foo")
+            .WithAttributes(attributes);
+        node.AddMember("a");
+
+        var newNode = new TreeBuilder().CreateNode(node.Build(), CreateNodeBehavior.CreateInPlace);
+
+        newNode.Name.ShouldBe("foo");
+        newNode.Documentation.ShouldBe("A foo");
+        newNode.Attributes.ShouldBe(attributes);
+        newNode.Members.Count.ShouldBe(1);
+        newNode.Members.First().Name.ShouldBe("a");
+    }
+
+    [Fact]
+    public void CreateNode_FromOtherNode_CreatesRoot()
+    {
+        var node = new TreeBuilder()
+            .AddRoot("foo")
+            .Build();
+
+        TreeBuilder newTree = new();
+        var newNode = newTree.CreateNode(node, CreateNodeBehavior.CreateInPlace);
+
+        newNode.Name.ShouldBe("foo");
+        newTree.Roots.ShouldBe(new[] { "foo" });
+    }
+
+    [Fact]
+    public void CreateNode_FromOtherNode_CreatesChildren()
+    {
+        TreeBuilder builder = new();
+        var a = builder.AddRoot("a");
+        var b = a.AddChild("b");
+        b.AddChild("c");
+        a.AddChild("d");
+
+        TreeBuilder newTree = new();
+        var node = newTree.CreateNode(a.Build(), CreateNodeBehavior.CreateInPlaceWithChildren);
+
+        node.Name.ShouldBe("a");
+        newTree.Roots.ShouldBe(new[] { "a" });
+        newTree.GetNodeFromPath("a").ShouldNotBeNull();
+        newTree.GetNodeFromPath("a.b").ShouldNotBeNull();
+        newTree.GetNodeFromPath("a.b.c").ShouldNotBeNull();
+        newTree.GetNodeFromPath("a.d").ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void CreateNode_FromOtherNode_CreatesHierarchy()
+    {
+        TreeBuilder builder = new();
+        var a = builder.AddRoot("a");
+        var b = a.AddChild("b");
+        b.AddChild("c");
+        var d = a.AddChild("d");
+
+        TreeBuilder newTree = new();
+        var node = newTree.CreateNode(d.Build(), CreateNodeBehavior.CreateFromRoot);
+
+        node.Name.ShouldBe("d");
+        newTree.Roots.ShouldBe(new[] { "a" });
+        newTree.GetNodeFromPath("a").ShouldNotBeNull();
+        newTree.GetNodeFromPath("a.b").ShouldNotBeNull();
+        newTree.GetNodeFromPath("a.b.c").ShouldNotBeNull();
+        newTree.GetNodeFromPath("a.d").ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void RemoveChild_RemovesChild()
+    {
+        TreeBuilder builder = new();
+        var path = NodePath.ParseUnsafe("a.b.c");
+        builder.CreateNode(path);
+
+        builder.RemoveNode(path);
+
+        builder.GetNodeFromPath(path).ShouldBeNull();
+    }
+
+    [Fact]
+    public void RemoveChild_RemovesRoot()
+    {
+        TreeBuilder builder = new();
+        var path = NodePath.ParseUnsafe("a");
+        builder.CreateNode(path);
+
+        builder.RemoveNode(path);
+
+        builder.GetNodeFromPath(path).ShouldBeNull();
+        builder.Roots.ShouldBeEmpty();
     }
 
     [Fact]
@@ -277,5 +494,69 @@ public class AstNodeHierarchyBuilderTests
                 c.Attributes.ShouldBe(new object[] { "attribute c", 2, true });
             }
         }
+    }
+
+    private static IEnumerable<object[]> BuildNode_BuildsNode_Data()
+    {
+        {
+            TreeBuilder builder = new();
+            var foo = builder.AddRoot("foo");
+
+            yield return new object[]
+            {
+                builder,
+                foo,
+                "foo"
+            };
+        }
+
+        {
+            TreeBuilder builder = new();
+            var a = builder.AddRoot("a");
+            var b = a.AddChild("b");
+            var c = b.AddChild("c");
+            var d = c.AddChild("d");
+            var e = d.AddChild("e");
+            var f = e.AddChild("f");
+
+            yield return new object[]
+            {
+                builder,
+                f,
+                "f"
+            };
+        }
+    }
+
+    [MemberData(nameof(BuildNode_BuildsNode_Data))]
+    [Theory]
+    public void BuildNode_BuildsNode(TreeBuilder treeBuilder, AstNodeBuilder nodeBuilder, string expectedName)
+    {
+        var node = treeBuilder.BuildNode(nodeBuilder, MissingChildBehavior.Throw);
+
+        node.Name.ShouldBe(expectedName);
+    }
+
+    [Fact]
+    public void BuildNode_BuildsChildren()
+    {
+        TreeBuilder builder = new();
+        var a = builder.AddRoot("a");
+        var b = a.AddChild("b");
+        b.AddChild("c");
+        a.AddChild("d");
+
+        var aBuilt = builder.BuildNode(a, MissingChildBehavior.Throw);
+
+        aBuilt.Name.ShouldBe("a");
+
+        aBuilt.Children.TryGetValue("b", out var bBuilt).ShouldBeTrue();
+        bBuilt.Name.ShouldBe("b");
+
+        bBuilt.Children.TryGetValue("c", out var cBuilt).ShouldBeTrue();
+        cBuilt.Name.ShouldBe("c");
+
+        aBuilt.Children.TryGetValue("d", out var dBuilt).ShouldBeTrue();
+        dBuilt.Name.ShouldBe("d");
     }
 }

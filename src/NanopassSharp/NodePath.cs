@@ -10,9 +10,9 @@ namespace NanopassSharp;
 /// </summary>
 public readonly struct NodePath : IEquatable<NodePath>
 {
-    private readonly string[] nodes;
+    private readonly ArraySegment<string> nodes;
 
-    private bool IsEmpty => nodes.Length <= 0;
+    private bool IsEmpty => nodes.Count <= 0;
 
     /// <summary>
     /// Gets the path to the parent node of the current outer-most leaf node.
@@ -60,14 +60,35 @@ public readonly struct NodePath : IEquatable<NodePath>
     /// <summary>
     /// The depth of the node the path leads to. 0 for the root node, 1 for the root's children, etc.
     /// </summary>
-    public int Depth => nodes.Length >= 1
-        ? nodes.Length - 1
+    public int Depth => nodes.Count >= 1
+        ? nodes.Count - 1
         : throw NoNodes();
 
     /// <summary>
     /// Whether the path is only a root node.
     /// </summary>
     public bool IsRoot => Depth == 0;
+
+    /// <summary>
+    /// Gets the node at the specified index from the root.
+    /// </summary>
+    /// <param name="index">The index, where 0 is the root node.</param>
+    public string this[int index] =>
+        nodes[index];
+
+    /// <summary>
+    /// Gets the node at the specified index from the root.
+    /// </summary>
+    /// <param name="index">The index, where 0 is the root node.</param>
+    public string this[Index index] =>
+        nodes[index];
+
+    /// <summary>
+    /// Gets a node path from a range of nodes in the current path.
+    /// </summary>
+    /// <param name="range">A range of nodes in the current path.</param>
+    public NodePath this[Range range] =>
+        new(nodes[range]);
 
 
 
@@ -83,21 +104,16 @@ public readonly struct NodePath : IEquatable<NodePath>
         // This is just to avoid non-descript NREs.
         // If this ctor is called, the nodes will be empty and the
         // properties will throw appropriate exceptions when accessed.
-        nodes = Array.Empty<string>();
+        nodes = ArraySegment<string>.Empty;
     }
 
-    /// <summary>
-    /// Initializes a new <see cref="NodePath"/> instance.
-    /// </summary>
-    /// <param name="nodes">The nodes the path consists of,
-    /// in order from the root to the outer-most leaf.</param>
-    public NodePath(IEnumerable<string> nodes)
+    private NodePath(ArraySegment<string> arraySegment)
     {
-        this.nodes = nodes.ToArray();
+        nodes = arraySegment;
 
-        if (this.nodes.Length <= 0)
+        if (nodes.Count <= 0)
         {
-            throw new ArgumentException("Length of nodes has to be greater or equal to 1.", nameof(nodes));
+            throw new ArgumentException("Length of nodes has to be greater or equal to 1.", nameof(arraySegment));
         }
     }
 
@@ -106,7 +122,20 @@ public readonly struct NodePath : IEquatable<NodePath>
     /// </summary>
     /// <param name="nodes">The nodes the path consists of,
     /// in order from the root to the outer-most leaf.</param>
-    public NodePath(params string[] nodes) : this((IEnumerable<string>)nodes) { }
+    public NodePath(IEnumerable<string> nodes)
+        : this(new ArraySegment<string>(nodes.ToArray())) { }
+
+    /// <summary>
+    /// Initializes a new <see cref="NodePath"/> instance.
+    /// </summary>
+    /// <param name="nodes">The nodes the path consists of,
+    /// in order from the root to the outer-most leaf.</param>
+    public NodePath(params string[] nodes)
+        // Do not call NodePath(ArraySegment<string>) 
+        // because the underlying array could get modified.
+        // NodePath(IEnumerable<string>) safely creates a copy
+        // of the array.
+        : this((IEnumerable<string>)nodes) { }
 
     /// <summary>
     /// Initializes a new <see cref="NodePath"/> instance.
@@ -129,9 +158,9 @@ public readonly struct NodePath : IEquatable<NodePath>
 
     public bool Equals(NodePath other)
     {
-        if (other.nodes.Length != nodes.Length) return false;
+        if (other.nodes.Count != nodes.Count) return false;
 
-        for (int i = 0; i < nodes.Length; i++)
+        for (int i = 0; i < nodes.Count; i++)
         {
             if (other.nodes[i] != nodes[i]) return false;
         }
@@ -244,34 +273,36 @@ public readonly struct NodePath : IEquatable<NodePath>
     public NodePath CreateLeafPath(string leafNode) =>
         new(nodes.Append(leafNode));
 
-    /// <summary>
-    /// Gets the paths to all parent nodes of the current path,
-    /// in order from the parent of the current outer-most leaf to the root node.
-    /// </summary>
-    public IEnumerable<NodePath> GetParentPaths()
+    private IEnumerable<NodePath> GetParentPaths(bool includeSelf)
     {
         ThrowIfNoNodes();
 
-        if (IsRoot) yield break;
+        int start = includeSelf
+            ? nodes.Count
+            : nodes.Count - 1;
 
-        for (int i = nodes.Length - 1; i > 0; i--)
+        for (int i = start; i > 0; i--)
         {
             yield return new NodePath(nodes[0..i]);
         }
     }
 
     /// <summary>
+    /// Gets the paths to all parent nodes of the current path,
+    /// in order from the parent of the current outer-most leaf to the root node.
+    /// </summary>
+    public IEnumerable<NodePath> GetParentPaths() =>
+        GetParentPaths(false);
+
+    /// <summary>
     /// Gets the paths to all parent nodes of the current path including the current path,
     /// in order from the current path to the root node.
     /// </summary>
     public IEnumerable<NodePath> GetParentPathsAndSelf() =>
-        GetParentPaths().Prepend(this);
+        GetParentPaths(true);
 
-    /// <summary>
-    /// Gets the nodes in the path, in order from the current leaf to the root.
-    /// </summary>
     public IEnumerable<string> GetNodes() =>
-        nodes.Reverse();
+        nodes;
 
     public static bool operator ==(NodePath a, NodePath b) =>
         a.Equals(b);
