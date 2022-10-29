@@ -23,6 +23,12 @@ public sealed class PathPattern : ITransformationPattern
         Path = path;
     }
 
+    /// <summary>
+    /// Initializes a new <see cref="PathPattern"/> instance.
+    /// </summary>
+    /// <param name="path"><inheritdoc cref="Path" path="/summary"/></param>
+    public PathPattern(string path) : this(NodePath.ParseUnsafe(path)) { }
+
 
 
     /// <inheritdoc/>
