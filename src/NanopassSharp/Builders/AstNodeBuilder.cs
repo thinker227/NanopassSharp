@@ -121,6 +121,18 @@ public sealed class AstNodeBuilder
     }
 
     /// <summary>
+    /// Adds an already existing node as a child to the node.
+    /// </summary>
+    /// <param name="node">The child node to add.</param>
+    /// <returns>A builder for the child node.</returns>
+    public AstNodeBuilder AddChild(AstNode node)
+    {
+        var builder = Hierarchy.CreateNodeWithParent(node, Path);
+        Children.Add(builder.Name);
+        return builder;
+    }
+
+    /// <summary>
     /// Removes a child from the node.
     /// </summary>
     /// <param name="name">The name of the child to remove.</param>
