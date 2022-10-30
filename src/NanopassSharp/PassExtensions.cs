@@ -123,13 +123,20 @@ public static class PassExtensions
     }
 
     /// <summary>
+    /// Returns an <see cref="ITransformationPattern"/> which matches a node's path.
+    /// </summary>
+    /// <param name="node">The node to match the path of.</param>
+    public static ITransformationPattern PathAsPattern(this AstNode node) =>
+        new PathPattern(node.GetPath());
+
+    /// <summary>
     /// Returns an <see cref="ITransformationDescription"/> which
     /// removes an <see cref="AstNode"/>.
     /// </summary>
     /// <param name="node">The node to remove.</param>
     public static ITransformationDescription Remove(this AstNode node)
     {
-        PathPattern pattern = new(node.GetPath());
+        var pattern = node.PathAsPattern();
         RemoveTransformation transformation = new();
 
         return pattern.WithTransformation(transformation);
@@ -154,6 +161,34 @@ public static class PassExtensions
     {
         PathPattern pattern = new(node.GetPath().CreateLeafPath(member));
         RemoveTransformation transformation = new();
+
+        return pattern.WithTransformation(transformation);
+    }
+
+    /// <summary>
+    /// Returns an <see cref="ITransformationDescription"/> which
+    /// adds a child to an <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The node to add the child to.</param>
+    /// <param name="child">The child node to add.</param>
+    public static ITransformationDescription AddChild(this AstNode node, AstNode child)
+    {
+        var pattern = node.PathAsPattern();
+        AddNodeTransformation transformation = new(child);
+
+        return pattern.WithTransformation(transformation);
+    }
+
+    /// <summary>
+    /// Returns an <see cref="ITransformationDescription"/> which
+    /// adds a member to an <see cref="AstNode"/>.
+    /// </summary>
+    /// <param name="node">The node to add the member to.</param>
+    /// <param name="member">The member to add.</param>
+    public static ITransformationDescription AddMember(this AstNode node, AstNodeMember member)
+    {
+        PathPattern pattern = new(node.GetPath());
+        AddMemberTransformation transformation = new(member);
 
         return pattern.WithTransformation(transformation);
     }
