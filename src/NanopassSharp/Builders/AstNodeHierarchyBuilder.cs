@@ -132,10 +132,7 @@ public sealed class AstNodeHierarchyBuilder
             return GetNodeFromPath(path)!;
         }
 
-        var builder = CreateNode(path);
-        builder.Documentation = node.Documentation;
-        builder.Children = node.Children.Keys.ToList();
-        builder.Attributes = new HashSet<object>(node.Attributes);
+        var builder = CreateAndOverrideNode(node, path);
 
         if (behavior == CreateNodeBehavior.CreateInPlaceWithChildren)
         {
@@ -154,6 +151,48 @@ public sealed class AstNodeHierarchyBuilder
         {
             AddRoot(path.Root);
         }
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Creates a new node in the hierarchy from an existing <see cref="AstNode"/>
+    /// with a specified parent.
+    /// </summary>
+    /// <param name="node">The node to create the new from.</param>
+    /// <param name="parentPath">The full path to the parent,
+    /// or <see langword="null"/> if the node should be a root.</param>
+    /// <returns>A builder for the new node.</returns>
+    public AstNodeBuilder CreateNodeWithParent(AstNode node, NodePath? parentPath)
+    {
+        var path = parentPath?.CreateLeafPath(node.Name) ?? new(node.Name);
+
+        var builder = CreateAndOverrideNode(node, path);
+
+        foreach (var child in node.Children.Values)
+        {
+            CreateNodeWithParent(child, path);
+        }
+
+        foreach (var member in node.Members.Values)
+        {
+            builder.AddMember(member);
+        }
+
+        if (path.IsRoot)
+        {
+            AddRoot(path.Root);
+        }
+
+        return builder;
+    }
+
+    private AstNodeBuilder CreateAndOverrideNode(AstNode original, NodePath path)
+    {
+        var builder = CreateNode(path);
+        builder.Documentation = original.Documentation;
+        builder.Children = original.Children.Keys.ToList();
+        builder.Attributes = new HashSet<object>(original.Attributes);
 
         return builder;
     }
