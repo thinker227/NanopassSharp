@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NanopassSharp.Descriptions;
 using NanopassSharp.Patterns;
 using NanopassSharp.Transformations;
 
@@ -127,7 +128,7 @@ public static class PassExtensions
     /// </summary>
     /// <param name="node">The node to match the path of.</param>
     public static ITransformationPattern PathAsPattern(this AstNode node) =>
-        new PathPattern(node.GetPath());
+        Pattern.Path(node.GetPath());
 
     /// <summary>
     /// Returns an <see cref="ITransformationDescription"/> which
@@ -137,9 +138,9 @@ public static class PassExtensions
     public static ITransformationDescription Remove(this AstNode node)
     {
         var pattern = node.PathAsPattern();
-        RemoveTransformation transformation = new();
+        var transform = Transform.Remove;
 
-        return pattern.WithTransformation(transformation);
+        return new SimpleDescription(pattern, transform);
     }
 
     /// <summary>
@@ -159,10 +160,10 @@ public static class PassExtensions
     /// <param name="member">The name of the member to remove.</param>
     public static ITransformationDescription RemoveMember(this AstNode node, string member)
     {
-        PathPattern pattern = new(node.GetPath().CreateLeafPath(member));
-        RemoveTransformation transformation = new();
+        var pattern = Pattern.Path(node.GetPath().CreateLeafPath(member));
+        var transform = Transform.Remove;
 
-        return pattern.WithTransformation(transformation);
+        return new SimpleDescription(pattern, transform);
     }
 
     /// <summary>
@@ -174,9 +175,9 @@ public static class PassExtensions
     public static ITransformationDescription AddChild(this AstNode node, AstNode child)
     {
         var pattern = node.PathAsPattern();
-        AddNodeTransformation transformation = new(child);
+        var transform = Transform.AddChild(child);
 
-        return pattern.WithTransformation(transformation);
+        return new SimpleDescription(pattern, transform);
     }
 
     /// <summary>
@@ -187,9 +188,9 @@ public static class PassExtensions
     /// <param name="member">The member to add.</param>
     public static ITransformationDescription AddMember(this AstNode node, AstNodeMember member)
     {
-        PathPattern pattern = new(node.GetPath());
-        AddMemberTransformation transformation = new(member);
+        var pattern = node.PathAsPattern();
+        var transform = Transform.AddMember(member);
 
-        return pattern.WithTransformation(transformation);
+        return new SimpleDescription(pattern, transform);
     }
 }
