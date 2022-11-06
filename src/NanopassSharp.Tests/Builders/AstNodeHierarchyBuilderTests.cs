@@ -224,6 +224,43 @@ public class AstNodeHierarchyBuilderTests
     }
 
     [Fact]
+    public void CreateNodeWithParent_ReparentsNode()
+    {
+        var a = new TreeBuilder()
+            .CreateNode("a");
+        a.AddChild("b");
+        var c = a.AddChild("c");
+        c.AddChild("d");
+        var node = a.Build();
+
+        TreeBuilder builder = new();
+        builder.CreateNodeWithParent(node, NodePath.ParseUnsafe("e.f"));
+
+        builder.GetNodeFromPath("e.f.a").ShouldNotBeNull();
+        builder.GetNodeFromPath("e.f.a.b").ShouldNotBeNull();
+        builder.GetNodeFromPath("e.f.a.c").ShouldNotBeNull();
+        builder.GetNodeFromPath("e.f.a.c.d").ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void CreateNodeWithParent_ReparentsNodeAsRoot()
+    {
+        var c = new TreeBuilder()
+            .AddRoot("a")
+            .AddChild("b")
+            .AddChild("c");
+        c.AddChild("d");
+        var node = c.Build();
+
+        TreeBuilder builder = new();
+        builder.CreateNodeWithParent(node, null);
+
+        builder.Roots.ShouldBe(new[] { "c" });
+        builder.GetNodeFromPath("c").ShouldNotBeNull();
+        builder.GetNodeFromPath("c.d").ShouldNotBeNull();
+    }
+
+    [Fact]
     public void RemoveChild_RemovesChild()
     {
         TreeBuilder builder = new();
