@@ -1,4 +1,6 @@
-﻿namespace NanopassSharp.Languages.Yaml.Models;
+﻿using System.Collections.Generic;
+
+namespace NanopassSharp.Languages.Yaml.Models;
 
 internal sealed class MemberModel
 {
@@ -8,5 +10,5 @@ internal sealed class MemberModel
 
     public string? Type { get; init; }
 
-    // TODO: Attributes
+    public List<AttributeModel>? Attributes { get; init; }
 }

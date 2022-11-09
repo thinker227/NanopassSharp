@@ -6,5 +6,5 @@ internal sealed class TransformationRemoveModel
 
     public string? Member { get; init; }
 
-    // TODO: Allowing removing an attribute
+    public AttributeModel? Attribute { get; init; }
 }

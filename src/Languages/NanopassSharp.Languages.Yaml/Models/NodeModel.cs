@@ -12,5 +12,5 @@ internal sealed class NodeModel
 
     public List<MemberModel>? Members { get; init; }
 
-    // TODO: Attributes
+    public List<AttributeModel>? Attributes { get; init; }
 }

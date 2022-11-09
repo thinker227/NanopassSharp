@@ -6,5 +6,5 @@ internal sealed class TransformationAddModel
 
     public NodeModel? Node { get; init; }
 
-    // TODO: Allowing adding an attribute
+    public AttributeModel Attribute { get; init; }
 }
