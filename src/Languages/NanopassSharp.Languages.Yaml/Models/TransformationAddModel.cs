@@ -6,5 +6,5 @@ internal sealed class TransformationAddModel
 
     public NodeModel? Node { get; init; }
 
-    public AttributeModel Attribute { get; init; }
+    public AttributeModel? Attribute { get; init; }
 }
