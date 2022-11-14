@@ -25,6 +25,16 @@ public static class Pattern
         };
 
     /// <summary>
+    /// A pattern which always returns true.
+    /// </summary>
+    public static ITransformationPattern True { get; } = new LambdaPattern()
+    {
+        MemberMatch = (_, _, _) => true,
+        NodeMatch = (_, _) => true,
+        TreeMatch = _ => true
+    };
+
+    /// <summary>
     /// Returns an <see cref="ITransformationPattern"/>
     /// which is triggered as a binary operation between two patterns.
     /// </summary>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+	<LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="template.sbncs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="template.sbncs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\NanopassSharp.LanguageHelpers\NanopassSharp.LanguageHelpers.csproj" />
+  </ItemGroup>
+
+</Project>
