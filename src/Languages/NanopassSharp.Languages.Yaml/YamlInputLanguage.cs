@@ -10,6 +10,7 @@ using NanopassSharp.Patterns;
 using NanopassSharp.Transformations;
 using NanopassSharp.Descriptions;
 using NanopassSharp.LanguageHelpers;
+using System;
 
 namespace NanopassSharp.Languages.Yaml;
 
@@ -18,16 +19,13 @@ public sealed class YamlInputLanguage : IInputLanguage
     public Task<PassSequence> GeneratePassSequenceAsync(InputContext context, CancellationToken cancellationToken)
     {
         var deserializer = GetDeserializer();
-        var passes = deserializer.Deserialize<List<PassModel>>(context.Text);
+        var rootElement = deserializer.Deserialize<RootElementModel>(context.Text);
 
-        var sequenceBuilder = new PassSequenceBuilder()
-        {
-            Root = passes[0].Name
-        };
+        PassSequenceBuilder sequenceBuilder = new();
 
-        //var rootPass = passes[0].Transformations.Select(transform => transform.Add)
+        AddRoot(sequenceBuilder, rootElement.Root);
 
-        foreach (var passModel in passes)
+        foreach (var passModel in rootElement.Passes)
         {
             AddPass(sequenceBuilder, passModel);
         }
@@ -39,12 +37,32 @@ public sealed class YamlInputLanguage : IInputLanguage
         .WithNamingConvention(HyphenatedNamingConvention.Instance)
         .Build();
 
+    private static void AddRoot(PassSequenceBuilder sequence, NodeModel model)
+    {
+        AstNodeHierarchyBuilder hierarchyBuilder = new();
+        var rootBuilder = hierarchyBuilder.AddRoot(model.Name);
+        UpdateNodeToModel(rootBuilder, model);
+        var hierarchy = hierarchyBuilder.Build();
+
+        var transform = Transform.ReplaceTree(hierarchy);
+        var pattern = Pattern.True;
+
+        var pass = sequence.AddPass(model.Name);
+        pass.AddTransformation(new SimpleDescription(pattern, transform));
+        sequence.Root = pass.Name;
+    }
+
     private static void AddPass(PassSequenceBuilder sequence, PassModel model)
     {
+        var previous = sequence.Last();
+
         var pass = sequence.AddPass(model.Name)
             .WithDocumentation(model.Documentation)
             .WithNext(model.Next)
             .WithPrevious(model.Previous);
+
+        pass.Previous = previous.Name;
+        previous.Next = pass.Name;
 
         foreach (var transform in model.Transformations)
         {
